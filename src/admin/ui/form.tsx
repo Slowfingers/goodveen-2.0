@@ -93,9 +93,11 @@ export function Toggle({
   label?: string;
 }) {
   return (
-    <label className="inline-flex items-center gap-3 cursor-pointer select-none">
+    <label
+      className="inline-flex items-center gap-3 cursor-pointer select-none"
+      onClick={() => onChange(!checked)}
+    >
       <span
-        onClick={() => onChange(!checked)}
         className={`relative w-10 h-5 rounded-full transition-colors ${checked ? 'bg-[#303030]' : 'bg-[#D0D0D0]'}`}
       >
         <span

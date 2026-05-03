@@ -52,7 +52,15 @@ const updateSchema = z.object({
 ordersRouter.patch('/:id', requireAdmin, async (req, res) => {
   const parsed = updateSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  const order = await prisma.order.update({ where: { id: req.params.id }, data: parsed.data });
+  const order = await prisma.order.update({
+    where: { id: req.params.id },
+    data: parsed.data,
+    include: {
+      items: true,
+      user: { select: { id: true, email: true, name: true, phone: true } },
+      payments: true,
+    },
+  });
   res.json(order);
 });
 
