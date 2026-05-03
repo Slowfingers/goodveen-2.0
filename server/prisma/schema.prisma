@@ -1,0 +1,335 @@
+// Goodveen — Prisma schema (SQLite for development).
+// For production migration: change provider to "postgresql" and DATABASE_URL.
+// String[] arrays are stored as JSON-encoded TEXT (helpers in src/lib/json.ts).
+// Enums are validated as plain strings (constants in src/lib/enums.ts).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== USERS ====================
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  phone     String?
+  role      String   @default("CUSTOMER") // CUSTOMER | ADMIN
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  addresses           Address[]
+  orders              Order[]
+  cartItems           CartItem[]
+  passwordResetTokens PasswordResetToken[]
+
+  @@index([role])
+  @@index([createdAt])
+  @@map("users")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("password_reset_tokens")
+}
+
+// ==================== ADDRESSES ====================
+model Address {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  street    String
+  city      String
+  district  String?
+  zipCode   String?
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("addresses")
+}
+
+// ==================== CATEGORIES ====================
+model Category {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  image       String?
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products Product[]
+
+  @@index([isActive, sortOrder])
+  @@map("categories")
+}
+
+// ==================== PRODUCTS ====================
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  categoryId  String
+  isActive    Boolean  @default(true)
+  isFeatured  Boolean  @default(false)
+  // JSON-encoded String[] fields
+  composition String   @default("[]")
+  careTips    String   @default("[]")
+  colors      String   @default("[]")
+  flowerTypes String   @default("[]")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  category   Category       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  sizes      ProductSize[]
+  images     ProductImage[]
+  cartItems  CartItem[]
+  orderItems OrderItem[]
+
+  @@index([categoryId])
+  @@index([isActive])
+  @@index([isFeatured])
+  @@index([createdAt])
+  @@index([categoryId, isActive])
+  @@map("products")
+}
+
+model ProductSize {
+  id          String   @id @default(cuid())
+  productId   String
+  name        String
+  price       Int
+  height      String?
+  isAvailable Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  product    Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  cartItems  CartItem[]
+  orderItems OrderItem[]
+
+  @@index([productId])
+  @@map("product_sizes")
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  productId String
+  url       String
+  alt       String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@map("product_images")
+}
+
+// ==================== CART ====================
+model CartItem {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  sizeId    String
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  size    ProductSize @relation(fields: [sizeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId, sizeId])
+  @@index([userId])
+  @@map("cart_items")
+}
+
+// ==================== ORDERS ====================
+model Order {
+  id             String   @id @default(cuid())
+  orderNumber    String   @unique
+  userId         String
+  status         String   @default("PENDING") // PENDING/CONFIRMED/PROCESSING/DELIVERING/DELIVERED/CANCELLED
+  paymentStatus  String   @default("PENDING") // see enums.ts
+  deliveryType   String   @default("STANDARD") // STANDARD/EXPRESS/SAME_DAY
+  deliveryPrice  Int      @default(0)
+  deliveryDate   DateTime?
+  deliveryTime   String?
+  address        String
+  city           String   @default("Tashkent")
+  phone          String
+  recipientName  String?
+  notes          String?
+  subtotal       Int
+  discount       Int      @default(0)
+  total          Int
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user     User        @relation(fields: [userId], references: [id], onDelete: Restrict)
+  items    OrderItem[]
+  payments Payment[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([paymentStatus])
+  @@index([createdAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id          String   @id @default(cuid())
+  orderId     String
+  productId   String
+  sizeId      String
+  productName String
+  sizeName    String
+  price       Int
+  quantity    Int
+  createdAt   DateTime @default(now())
+
+  order   Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product     @relation(fields: [productId], references: [id], onDelete: Restrict)
+  size    ProductSize @relation(fields: [sizeId], references: [id], onDelete: Restrict)
+
+  @@index([orderId])
+  @@map("order_items")
+}
+
+model Payment {
+  id           String   @id @default(cuid())
+  orderId      String
+  method       String   // CLICK | PAYME | UZUM | CARD | CASH
+  amount       Int
+  currency     String   @default("UZS")
+  status       String   @default("PENDING")
+  externalId   String?
+  providerData String?  // JSON
+  errorCode    String?
+  errorMessage String?
+  paidAt       DateTime?
+  expiresAt    DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  order Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  logs  PaymentLog[]
+
+  @@index([orderId])
+  @@index([externalId])
+  @@index([status])
+  @@map("payments")
+}
+
+model PaymentLog {
+  id           String   @id @default(cuid())
+  paymentId    String
+  action       String
+  status       String
+  requestData  String?  // JSON
+  responseData String?  // JSON
+  ipAddress    String?
+  userAgent    String?
+  createdAt    DateTime @default(now())
+
+  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
+  @@index([paymentId])
+  @@map("payment_logs")
+}
+
+// ==================== EVENTS ====================
+model Event {
+  id            String    @id @default(cuid())
+  title         String
+  slug          String    @unique
+  description   String?
+  content       String?
+  image         String?
+  contentImages String    @default("[]") // JSON-encoded String[]
+  tag           String
+  size          String    @default("half") // half | full
+  isPublished   Boolean   @default(false)
+  publishedAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([isPublished])
+  @@index([tag])
+  @@index([publishedAt])
+  @@index([isPublished, publishedAt])
+  @@map("events")
+}
+
+// ==================== ABOUT ====================
+model AboutPage {
+  id             String   @id @default("about")
+  spaceImages    String   @default("[]") // JSON-encoded String[]
+  workshopPhotos String   @default("[]") // JSON-encoded String[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("about_page")
+}
+
+// ==================== FILTERS ====================
+model FilterColor {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  hex       String
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("filter_colors")
+}
+
+model FilterFlowerType {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("filter_flower_types")
+}
+
+// ==================== PAGE SETTINGS ====================
+model PageSetting {
+  id        String   @id @default(cuid())
+  pageKey   String   @unique
+  heroImage String?
+  heroVideo String?
+  title     String?
+  subtitle  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("page_settings")
+}

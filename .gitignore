@@ -1,0 +1,22 @@
+node_modules
+dist
+build
+.netlify
+.cache
+
+# env files
+.env
+.env.local
+.env.*.local
+
+# server (dev only)
+server/dev.db
+server/dev.db-journal
+server/uploads/**
+!server/uploads/.gitkeep
+
+# editor
+.DS_Store
+.vscode
+.idea
+*.log
