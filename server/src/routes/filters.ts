@@ -1,7 +1,12 @@
 import { Router } from 'express';
 import { z } from 'zod';
+import { Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma.js';
 import { requireAdmin } from '../lib/auth.js';
+
+function isUniqueError(e: unknown) {
+  return e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002';
+}
 
 export const filtersRouter = Router();
 
@@ -30,19 +35,29 @@ filtersRouter.get('/colors', async (req, res) => {
 filtersRouter.post('/colors', requireAdmin, async (req, res) => {
   const parsed = colorSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  const color = await prisma.filterColor.create({ data: parsed.data });
-  res.status(201).json(color);
+  try {
+    const color = await prisma.filterColor.create({ data: parsed.data });
+    res.status(201).json(color);
+  } catch (e) {
+    if (isUniqueError(e)) return res.status(409).json({ error: 'A color with this name already exists' });
+    throw e;
+  }
 });
 
 filtersRouter.put('/colors/:id', requireAdmin, async (req, res) => {
   const parsed = colorSchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  const color = await prisma.filterColor.update({ where: { id: req.params.id }, data: parsed.data });
-  res.json(color);
+  try {
+    const color = await prisma.filterColor.update({ where: { id: req.params.id as string }, data: parsed.data });
+    res.json(color);
+  } catch (e) {
+    if (isUniqueError(e)) return res.status(409).json({ error: 'A color with this name already exists' });
+    throw e;
+  }
 });
 
 filtersRouter.delete('/colors/:id', requireAdmin, async (req, res) => {
-  await prisma.filterColor.delete({ where: { id: req.params.id } });
+  await prisma.filterColor.delete({ where: { id: req.params.id as string } });
   res.status(204).end();
 });
 
@@ -58,18 +73,28 @@ filtersRouter.get('/flower-types', async (req, res) => {
 filtersRouter.post('/flower-types', requireAdmin, async (req, res) => {
   const parsed = flowerTypeSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  const item = await prisma.filterFlowerType.create({ data: parsed.data });
-  res.status(201).json(item);
+  try {
+    const item = await prisma.filterFlowerType.create({ data: parsed.data });
+    res.status(201).json(item);
+  } catch (e) {
+    if (isUniqueError(e)) return res.status(409).json({ error: 'A flower type with this name already exists' });
+    throw e;
+  }
 });
 
 filtersRouter.put('/flower-types/:id', requireAdmin, async (req, res) => {
   const parsed = flowerTypeSchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  const item = await prisma.filterFlowerType.update({ where: { id: req.params.id }, data: parsed.data });
-  res.json(item);
+  try {
+    const item = await prisma.filterFlowerType.update({ where: { id: req.params.id as string }, data: parsed.data });
+    res.json(item);
+  } catch (e) {
+    if (isUniqueError(e)) return res.status(409).json({ error: 'A flower type with this name already exists' });
+    throw e;
+  }
 });
 
 filtersRouter.delete('/flower-types/:id', requireAdmin, async (req, res) => {
-  await prisma.filterFlowerType.delete({ where: { id: req.params.id } });
+  await prisma.filterFlowerType.delete({ where: { id: req.params.id as string } });
   res.status(204).end();
 });

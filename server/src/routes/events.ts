@@ -1,11 +1,16 @@
 import { Router } from 'express';
 import { z } from 'zod';
+import { Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma.js';
 import { encodeArr } from '../lib/json.js';
 import { serializeEvent } from '../lib/serializers.js';
 import { requireAdmin } from '../lib/auth.js';
 
 export const eventsRouter = Router();
+
+function isUniqueError(e: unknown) {
+  return e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002';
+}
 
 eventsRouter.get('/', async (req, res) => {
   const { onlyPublished, tag } = req.query as Record<string, string>;
@@ -48,21 +53,26 @@ eventsRouter.post('/', requireAdmin, async (req, res) => {
   const parsed = schema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const data = parsed.data;
-  const event = await prisma.event.create({
-    data: {
-      title: data.title,
-      slug: data.slug,
-      description: data.description ?? null,
-      content: data.content ?? null,
-      image: data.image ?? null,
-      contentImages: encodeArr(data.contentImages),
-      tag: data.tag,
-      size: data.size ?? 'half',
-      isPublished: data.isPublished ?? false,
-      publishedAt: data.publishedAt ? new Date(data.publishedAt) : null,
-    },
-  });
-  res.status(201).json(serializeEvent(event));
+  try {
+    const event = await prisma.event.create({
+      data: {
+        title: data.title,
+        slug: data.slug,
+        description: data.description ?? null,
+        content: data.content ?? null,
+        image: data.image ?? null,
+        contentImages: encodeArr(data.contentImages),
+        tag: data.tag,
+        size: data.size ?? 'half',
+        isPublished: data.isPublished ?? false,
+        publishedAt: data.publishedAt ? new Date(data.publishedAt) : null,
+      },
+    });
+    res.status(201).json(serializeEvent(event));
+  } catch (e) {
+    if (isUniqueError(e)) return res.status(409).json({ error: 'An event with this slug already exists' });
+    throw e;
+  }
 });
 
 eventsRouter.put('/:id', requireAdmin, async (req, res) => {

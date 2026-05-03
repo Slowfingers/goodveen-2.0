@@ -1,11 +1,16 @@
 import { Router } from 'express';
 import { z } from 'zod';
+import { Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma.js';
 import { encodeArr } from '../lib/json.js';
 import { serializeProduct } from '../lib/serializers.js';
 import { requireAdmin } from '../lib/auth.js';
 
 export const productsRouter = Router();
+
+function isUniqueError(e: unknown) {
+  return e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002';
+}
 
 // Public list
 productsRouter.get('/', async (req, res) => {
@@ -59,22 +64,27 @@ productsRouter.post('/', requireAdmin, async (req, res) => {
   const parsed = productInputSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const data = parsed.data;
-  const product = await prisma.product.create({
-    data: {
-      name: data.name,
-      slug: data.slug,
-      description: data.description ?? null,
-      categoryId: data.categoryId,
-      isActive: data.isActive ?? true,
-      isFeatured: data.isFeatured ?? false,
-      composition: encodeArr(data.composition),
-      careTips: encodeArr(data.careTips),
-      colors: encodeArr(data.colors),
-      flowerTypes: encodeArr(data.flowerTypes),
-    },
-    include: { sizes: true, images: true, category: true },
-  });
-  res.status(201).json(serializeProduct(product));
+  try {
+    const product = await prisma.product.create({
+      data: {
+        name: data.name,
+        slug: data.slug,
+        description: data.description ?? null,
+        categoryId: data.categoryId,
+        isActive: data.isActive ?? true,
+        isFeatured: data.isFeatured ?? false,
+        composition: encodeArr(data.composition),
+        careTips: encodeArr(data.careTips),
+        colors: encodeArr(data.colors),
+        flowerTypes: encodeArr(data.flowerTypes),
+      },
+      include: { sizes: true, images: true, category: true },
+    });
+    res.status(201).json(serializeProduct(product));
+  } catch (e) {
+    if (isUniqueError(e)) return res.status(409).json({ error: 'A product with this slug already exists' });
+    throw e;
+  }
 });
 
 productsRouter.put('/:id', requireAdmin, async (req, res) => {
