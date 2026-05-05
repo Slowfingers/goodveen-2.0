@@ -79,7 +79,7 @@ export function EventEdit() {
           publishedAt: e.publishedAt,
         });
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed');
+        setError(err instanceof Error ? err.message : 'Ошибка загрузки');
       } finally {
         setLoading(false);
       }
@@ -118,7 +118,7 @@ export function EventEdit() {
         setForm((f) => ({ ...f, publishedAt: saved.publishedAt }));
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to save');
+      setError(e instanceof Error ? e.message : 'Ошибка сохранения');
     } finally {
       setSaving(false);
     }
@@ -130,21 +130,21 @@ export function EventEdit() {
   return (
     <div>
       <PageHeader
-        title={isNew ? 'New event' : form.title || 'Edit event'}
+        title={isNew ? 'Новое событие' : form.title || 'Редактирование события'}
         back={
           <Link
             to="/admin/events"
             className="inline-flex items-center gap-1 text-[11px] uppercase tracking-[0.2em] text-[#808080] hover:text-[#303030] mb-2"
           >
-            <ArrowLeft size={12} /> Back to events
+            <ArrowLeft size={12} /> Назад к событиям
           </Link>
         }
       >
         <Button variant="secondary" onClick={() => navigate('/admin/events')}>
-          Cancel
+          Отмена
         </Button>
         <Button onClick={onSave} disabled={saving}>
-          {saving ? 'Saving…' : 'Save'}
+          {saving ? 'Сохранение…' : 'Сохранить'}
         </Button>
       </PageHeader>
 
@@ -157,9 +157,9 @@ export function EventEdit() {
       <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6">
         <div className="space-y-6">
           <Card>
-            <SectionTitle>Basic info</SectionTitle>
+            <SectionTitle>Основная информация</SectionTitle>
             <div className="space-y-5">
-              <Field label="Title" required>
+              <Field label="Заголовок" required>
                 <Input
                   value={form.title}
                   onChange={(e) =>
@@ -171,20 +171,20 @@ export function EventEdit() {
                   }
                 />
               </Field>
-              <Field label="Slug" required>
+              <Field label="Slug" required hint="URL-идентификатор">
                 <Input
                   value={form.slug}
                   onChange={(e) => setForm((f) => ({ ...f, slug: slugify(e.target.value) }))}
                 />
               </Field>
-              <Field label="Short description">
+              <Field label="Описание">
                 <Textarea
                   rows={2}
                   value={form.description}
                   onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
                 />
               </Field>
-              <Field label="Content" hint="Supports plain text or Markdown">
+              <Field label="Контент" hint="Поддерживает обычный текст или Markdown">
                 <Textarea
                   rows={12}
                   value={form.content}
@@ -195,7 +195,7 @@ export function EventEdit() {
           </Card>
 
           <Card>
-            <SectionTitle>Cover image</SectionTitle>
+            <SectionTitle>Изображение обложки</SectionTitle>
             <SingleImageUpload
               value={form.image}
               onChange={(url) => setForm((f) => ({ ...f, image: url }))}
@@ -205,7 +205,7 @@ export function EventEdit() {
           </Card>
 
           <Card>
-            <SectionTitle>Content gallery</SectionTitle>
+            <SectionTitle>Галерея контента</SectionTitle>
             <GalleryUpload
               value={form.contentImages}
               onChange={(v) => setForm((f) => ({ ...f, contentImages: v }))}
@@ -216,14 +216,14 @@ export function EventEdit() {
 
         <div className="space-y-6">
           <Card>
-            <SectionTitle>Publishing</SectionTitle>
+            <SectionTitle>Публикация</SectionTitle>
             <div className="space-y-5">
               <Toggle
                 checked={form.isPublished}
                 onChange={(v) => setForm((f) => ({ ...f, isPublished: v }))}
-                label="Published"
+                label="Опубликовано"
               />
-              <Field label="Publish date">
+              <Field label="Дата публикации">
                 <Input
                   type="datetime-local"
                   value={form.publishedAt ? form.publishedAt.slice(0, 16) : ''}
@@ -239,9 +239,9 @@ export function EventEdit() {
           </Card>
 
           <Card>
-            <SectionTitle>Categorisation</SectionTitle>
+            <SectionTitle>Категоризация</SectionTitle>
             <div className="space-y-5">
-              <Field label="Tag">
+              <Field label="Тег">
                 <Select
                   value={form.tag}
                   onChange={(e) => setForm((f) => ({ ...f, tag: e.target.value }))}

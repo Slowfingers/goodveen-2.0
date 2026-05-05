@@ -20,7 +20,7 @@ export function OrderDetails() {
         const o = await ordersApi.getById(id);
         if (active) setOrder(o);
       } catch (e) {
-        if (active) setError(e instanceof Error ? e.message : 'Failed');
+        if (active) setError(e instanceof Error ? e.message : 'Ошибка загрузки');
       } finally {
         if (active) setLoading(false);
       }
@@ -36,25 +36,25 @@ export function OrderDetails() {
       const updated = await ordersApi.update(order.id, patch);
       setOrder(updated);
     } catch (e) {
-      alert(e instanceof Error ? e.message : 'Failed');
+      alert(e instanceof Error ? e.message : 'Ошибка');
     }
   };
 
   if (loading)
-    return <div className="text-[12px] uppercase tracking-[0.2em] text-[#808080]">Loading…</div>;
+    return <div className="text-[12px] uppercase tracking-[0.2em] text-[#808080]">Загрузка…</div>;
   if (error || !order)
-    return <div className="text-[12px] text-red-700">{error ?? 'Order not found'}</div>;
+    return <div className="text-[12px] text-red-700">{error ?? 'Заказ не найден'}</div>;
 
   return (
     <div>
       <PageHeader
-        title={`Order #${order.orderNumber}`}
+        title={`Заказ #${order.orderNumber}`}
         back={
           <Link
             to="/admin/orders"
             className="inline-flex items-center gap-1 text-[11px] uppercase tracking-[0.2em] text-[#808080] hover:text-[#303030] mb-2"
           >
-            <ArrowLeft size={12} /> Back to orders
+            <ArrowLeft size={12} /> Назад к заказам
           </Link>
         }
       />
@@ -62,7 +62,7 @@ export function OrderDetails() {
       <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6">
         <div className="space-y-6">
           <Card>
-            <SectionTitle>Items</SectionTitle>
+            <SectionTitle>Товары</SectionTitle>
             <div className="divide-y divide-[#EEE]">
               {order.items?.map((it) => (
                 <div key={it.id} className="flex items-center justify-between py-3 text-[14px]">
@@ -77,31 +77,31 @@ export function OrderDetails() {
               ))}
             </div>
             <div className="mt-4 pt-4 border-t border-[#EEE] space-y-1 text-[14px]">
-              <Row label="Subtotal" value={formatPrice(order.subtotal)} />
-              <Row label="Delivery" value={formatPrice(order.deliveryPrice)} />
-              {order.discount > 0 && <Row label="Discount" value={`-${formatPrice(order.discount)}`} />}
-              <Row label="Total" value={formatPrice(order.total)} bold />
+              <Row label="Промежуточный итог" value={formatPrice(order.subtotal)} />
+              <Row label="Доставка" value={formatPrice(order.deliveryPrice)} />
+              {order.discount > 0 && <Row label="Скидка" value={`-${formatPrice(order.discount)}`} />}
+              <Row label="Итого" value={formatPrice(order.total)} bold />
             </div>
           </Card>
 
           <Card>
-            <SectionTitle>Delivery</SectionTitle>
+            <SectionTitle>Доставка</SectionTitle>
             <div className="space-y-2 text-[14px]">
-              <Row label="Address" value={order.address} />
-              <Row label="City" value={order.city} />
-              <Row label="Phone" value={order.phone} />
-              <Row label="Recipient" value={order.recipientName ?? '—'} />
-              <Row label="Type" value={order.deliveryType} />
-              <Row label="Date" value={formatDate(order.deliveryDate)} />
-              <Row label="Time" value={order.deliveryTime ?? '—'} />
-              {order.notes && <Row label="Notes" value={order.notes} />}
+              <Row label="Адрес" value={order.address} />
+              <Row label="Город" value={order.city} />
+              <Row label="Телефон" value={order.phone} />
+              <Row label="Получатель" value={order.recipientName ?? '—'} />
+              <Row label="Тип" value={order.deliveryType} />
+              <Row label="Дата" value={formatDate(order.deliveryDate)} />
+              <Row label="Время" value={order.deliveryTime ?? '—'} />
+              {order.notes && <Row label="Примечания" value={order.notes} />}
             </div>
           </Card>
         </div>
 
         <div className="space-y-6">
           <Card>
-            <SectionTitle>Customer</SectionTitle>
+            <SectionTitle>Клиент</SectionTitle>
             <div className="space-y-1 text-[14px]">
               <div className="text-[#303030]">{order.user?.name ?? '—'}</div>
               <div className="text-[#808080]">{order.user?.email}</div>
@@ -110,18 +110,18 @@ export function OrderDetails() {
           </Card>
 
           <Card>
-            <SectionTitle>Status</SectionTitle>
+            <SectionTitle>Статус</SectionTitle>
             <div className="space-y-4">
               <Select
                 value={order.status}
                 onChange={(e) => updateField({ status: e.target.value as Order['status'] })}
               >
-                <option value="PENDING">Pending</option>
-                <option value="CONFIRMED">Confirmed</option>
-                <option value="PROCESSING">Processing</option>
-                <option value="DELIVERING">Delivering</option>
-                <option value="DELIVERED">Delivered</option>
-                <option value="CANCELLED">Cancelled</option>
+                <option value="PENDING">Ожидает</option>
+                <option value="CONFIRMED">Подтверждён</option>
+                <option value="PROCESSING">В обработке</option>
+                <option value="DELIVERING">Доставляется</option>
+                <option value="DELIVERED">Доставлен</option>
+                <option value="CANCELLED">Отменён</option>
               </Select>
               <Select
                 value={order.paymentStatus}
@@ -129,22 +129,21 @@ export function OrderDetails() {
                   updateField({ paymentStatus: e.target.value as Order['paymentStatus'] })
                 }
               >
-                <option value="PENDING">Payment pending</option>
-                <option value="PROCESSING">Payment processing</option>
-                <option value="COMPLETED">Paid</option>
-                <option value="FAILED">Failed</option>
-                <option value="CANCELLED">Cancelled</option>
-                <option value="REFUNDED">Refunded</option>
-                <option value="EXPIRED">Expired</option>
+                <option value="PENDING">Ожидает оплаты</option>
+                <option value="PAID">Оплачено</option>
+                <option value="FAILED">Ошибка оплаты</option>
+                <option value="CANCELLED">Отменено</option>
+                <option value="REFUNDED">Возвращено</option>
+                <option value="EXPIRED">Истекло</option>
               </Select>
             </div>
           </Card>
 
           <Card>
-            <SectionTitle>Dates</SectionTitle>
+            <SectionTitle>Даты</SectionTitle>
             <div className="space-y-1 text-[14px]">
-              <Row label="Created" value={formatDate(order.createdAt)} />
-              <Row label="Updated" value={formatDate(order.updatedAt)} />
+              <Row label="Создан" value={formatDate(order.createdAt)} />
+              <Row label="Обновлён" value={formatDate(order.updatedAt)} />
             </div>
           </Card>
         </div>

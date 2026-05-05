@@ -22,36 +22,36 @@ export function UsersList() {
       const updated = await usersApi.updateRole(id, role);
       setItems((s) => s.map((u) => (u.id === id ? updated : u)));
     } catch (e) {
-      alert(e instanceof Error ? e.message : 'Failed');
+      alert(e instanceof Error ? e.message : 'Ошибка');
     }
   };
 
   return (
     <div>
-      <PageHeader title="Users" />
+      <PageHeader title="Пользователи" />
 
       <Card className="p-0 overflow-hidden">
         <table className="w-full text-[14px]">
           <thead>
             <tr className="bg-[#F7F4EF] text-left text-[11px] uppercase tracking-[0.2em] text-[#808080]">
-              <th className="px-6 py-3">User</th>
-              <th className="px-6 py-3">Phone</th>
-              <th className="px-6 py-3 w-32">Joined</th>
-              <th className="px-6 py-3 w-40">Role</th>
+              <th className="px-6 py-3">Пользователь</th>
+              <th className="px-6 py-3">Телефон</th>
+              <th className="px-6 py-3 w-32">Регистрация</th>
+              <th className="px-6 py-3 w-40">Роль</th>
             </tr>
           </thead>
           <tbody>
             {loading && (
               <tr>
                 <td className="px-6 py-12 text-center text-[#808080]" colSpan={4}>
-                  Loading…
+                  Загрузка…
                 </td>
               </tr>
             )}
             {!loading && items.length === 0 && (
               <tr>
                 <td className="px-6 py-12 text-center text-[#808080]" colSpan={4}>
-                  No users yet.
+                  Пока нет пользователей.
                 </td>
               </tr>
             )}
@@ -68,8 +68,8 @@ export function UsersList() {
                     value={u.role}
                     onChange={(e) => setRole(u.id, e.target.value as User['role'])}
                   >
-                    <option value="CUSTOMER">Customer</option>
-                    <option value="ADMIN">Admin</option>
+                    <option value="CUSTOMER">Клиент</option>
+                    <option value="ADMIN">Администратор</option>
                   </Select>
                 </td>
               </tr>
