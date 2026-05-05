@@ -59,14 +59,14 @@ export function Cabinet() {
           </div>
 
           {/* Tabs */}
-          <div className="flex border-b border-[#EEEEEE] self-start gap-6 md:gap-10 overflow-x-auto">
+          <div className="flex border-b border-[#EEEEEE] self-start gap-6 md:gap-10 overflow-x-auto w-full md:w-auto">
             {(
               [
-                { key: 'personal' as Tab, label: 'Personal information' },
-                { key: 'delivery' as Tab, label: 'Payment and delivery' },
-                { key: 'orders' as Tab, label: 'Order history' },
+                { key: 'personal' as Tab, label: 'Personal information', mobileLabel: 'Personal' },
+                { key: 'delivery' as Tab, label: 'Payment and delivery', mobileLabel: 'Delivery' },
+                { key: 'orders' as Tab, label: 'Order history', mobileLabel: 'Orders' },
               ] as const
-            ).map(({ key, label }) => (
+            ).map(({ key, label, mobileLabel }) => (
               <button
                 key={key}
                 onClick={() => setTab(key)}
@@ -76,7 +76,8 @@ export function Cabinet() {
                     : 'border-transparent text-[#808080] hover:text-[#303030]'
                 }`}
               >
-                {label}
+                <span className="md:hidden">{mobileLabel}</span>
+                <span className="hidden md:inline">{label}</span>
               </button>
             ))}
           </div>
@@ -206,18 +207,18 @@ function DeliveryTab() {
 
   return (
     <div className="max-w-[800px]">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-[24px] leading-[32px] tracking-[0.02em] text-[#303030]">Saved addresses</h2>
-        <button className="h-10 px-6 border border-[#303030] text-[12px] tracking-[0.2em] uppercase text-[#303030] hover:bg-[#303030] hover:text-white transition-colors">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <h2 className="text-[20px] md:text-[24px] leading-[28px] md:leading-[32px] tracking-[0.02em] text-[#303030]">Saved addresses</h2>
+        <button className="h-10 px-6 border border-[#303030] text-[12px] tracking-[0.2em] uppercase text-[#303030] hover:bg-[#303030] hover:text-white transition-colors self-start sm:self-auto">
           Add new
         </button>
       </div>
 
       <div className="flex flex-col gap-4">
         {addresses.map((addr) => (
-          <div key={addr.id} className="p-5 border border-[#EEEEEE] flex items-start justify-between gap-4">
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-3">
+          <div key={addr.id} className="p-4 md:p-5 border border-[#EEEEEE] flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+            <div className="flex flex-col gap-2 flex-1">
+              <div className="flex items-center gap-3 flex-wrap">
                 <span className="text-[14px] font-medium text-[#303030]">{addr.label}</span>
                 {addr.isDefault && (
                   <span className="px-2 py-1 bg-[#F6F6F6] text-[10px] tracking-[0.15em] uppercase text-[#808080]">
@@ -225,9 +226,9 @@ function DeliveryTab() {
                   </span>
                 )}
               </div>
-              <p className="text-[14px] text-[#808080]">{addr.address}</p>
+              <p className="text-[13px] md:text-[14px] text-[#808080] leading-[18px] md:leading-[20px]">{addr.address}</p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-4 md:gap-2 md:flex-col lg:flex-row">
               <button className="text-[12px] tracking-[0.15em] uppercase text-[#808080] hover:text-[#303030] transition-colors">
                 Edit
               </button>
@@ -294,37 +295,39 @@ function OrdersTab() {
 
   return (
     <div className="max-w-[1000px]">
-      <h2 className="text-[24px] leading-[32px] tracking-[0.02em] text-[#303030] mb-6">Your orders</h2>
+      <h2 className="text-[20px] md:text-[24px] leading-[28px] md:leading-[32px] tracking-[0.02em] text-[#303030] mb-6">Your orders</h2>
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-3 md:gap-4">
         {orders.map((order) => (
           <div key={order.id} className="border border-[#EEEEEE]">
             {/* Order header */}
             <button
               onClick={() => setExpandedOrder(expandedOrder === order.id ? null : order.id)}
-              className="w-full p-5 flex items-center justify-between gap-4 hover:bg-[#F6F6F6] transition-colors"
+              className="w-full p-4 md:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 hover:bg-[#F6F6F6] transition-colors text-left"
             >
-              <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6 text-left">
-                <span className="text-[14px] font-medium text-[#303030]">{order.id}</span>
-                <span className="text-[12px] text-[#808080]">{order.date}</span>
-                <span
-                  className={`text-[12px] tracking-[0.15em] uppercase ${
-                    order.status === 'On the way'
-                      ? 'text-blue-600'
-                      : order.status === 'Delivered'
-                      ? 'text-green-600'
-                      : 'text-red-600'
-                  }`}
-                >
-                  {order.status}
-                </span>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-3 flex-wrap">
+                  <span className="text-[14px] font-medium text-[#303030]">{order.id}</span>
+                  <span
+                    className={`text-[11px] md:text-[12px] tracking-[0.15em] uppercase ${
+                      order.status === 'On the way'
+                        ? 'text-blue-600'
+                        : order.status === 'Delivered'
+                        ? 'text-green-600'
+                        : 'text-red-600'
+                    }`}
+                  >
+                    {order.status}
+                  </span>
+                </div>
+                <span className="text-[11px] md:text-[12px] text-[#808080]">{order.date}</span>
               </div>
-              <div className="flex items-center gap-4">
-                <span className="text-[16px] font-medium text-[#303030]">{order.total} UZS</span>
+              <div className="flex items-center justify-between sm:justify-end gap-4">
+                <span className="text-[15px] md:text-[16px] font-medium text-[#303030]">{order.total} UZS</span>
                 <ChevronDown
-                  size={20}
+                  size={18}
                   strokeWidth={1.25}
-                  className={`text-[#808080] transition-transform ${
+                  className={`text-[#808080] transition-transform sm:ml-2 ${
                     expandedOrder === order.id ? 'rotate-180' : ''
                   }`}
                 />
@@ -333,22 +336,22 @@ function OrdersTab() {
 
             {/* Order details */}
             {expandedOrder === order.id && order.items.length > 0 && (
-              <div className="border-t border-[#EEEEEE] p-5 bg-[#FAFAFA]">
-                <div className="flex flex-col gap-4">
+              <div className="border-t border-[#EEEEEE] p-4 md:p-5 bg-[#FAFAFA]">
+                <div className="flex flex-col gap-3 md:gap-4">
                   {order.items.map((item, idx) => (
-                    <div key={idx} className="flex items-center gap-4">
+                    <div key={idx} className="flex items-center gap-3 md:gap-4">
                       <img
                         src={item.img}
                         alt={item.name}
-                        className="w-16 h-16 object-cover bg-[#F6F6F6]"
+                        className="w-14 h-14 md:w-16 md:h-16 object-cover bg-[#F6F6F6] flex-shrink-0"
                       />
-                      <div className="flex-1">
-                        <p className="text-[14px] text-[#303030]">{item.name}</p>
-                        <p className="text-[12px] text-[#808080]">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[13px] md:text-[14px] text-[#303030] truncate">{item.name}</p>
+                        <p className="text-[11px] md:text-[12px] text-[#808080]">
                           Size: {item.size} · Qty: {item.qty}
                         </p>
                       </div>
-                      <span className="text-[14px] text-[#303030]">{item.price * item.qty} UZS</span>
+                      <span className="text-[13px] md:text-[14px] text-[#303030] whitespace-nowrap">{item.price * item.qty} UZS</span>
                     </div>
                   ))}
                 </div>
