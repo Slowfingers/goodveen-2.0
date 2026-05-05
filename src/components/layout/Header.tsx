@@ -1,9 +1,9 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { User, ShoppingBag, Menu, X, ChevronDown } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import { useState, useEffect } from 'react';
 import { useCartUI } from '../cart/CartContext';
-import { useAuthUI } from '../auth/AuthContext';
+import { useAuthUI, useAuth } from '../auth/AuthContext';
 import { categoriesApi } from '@/src/lib/api';
 import type { Category } from '@/src/lib/api/types';
 
@@ -21,8 +21,10 @@ export function Header() {
   const [catalogOpen, setCatalogOpen] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const location = useLocation();
+  const navigate = useNavigate();
   const cartUI = useCartUI();
   const authUI = useAuthUI();
+  const { user } = useAuth();
   const heroRoutes = ['/', '/catalog'];
   const isHero = heroRoutes.includes(location.pathname);
 
@@ -132,7 +134,13 @@ export function Header() {
           </button>
           <div className="w-px self-stretch bg-current opacity-20" />
           <button
-            onClick={() => authUI.open('login')}
+            onClick={() => {
+              if (user) {
+                navigate('/cabinet');
+              } else {
+                authUI.open('login');
+              }
+            }}
             className={cn(
               'w-[60px] h-full flex items-center justify-center transition-colors',
               onLight ? 'hover:bg-brand-border' : 'hover:bg-white/10'
@@ -169,7 +177,13 @@ export function Header() {
           </button>
           <div className="w-px self-stretch bg-current opacity-20" />
           <button
-            onClick={() => authUI.open('login')}
+            onClick={() => {
+              if (user) {
+                navigate('/cabinet');
+              } else {
+                authUI.open('login');
+              }
+            }}
             className={cn(
               'w-[56px] h-full flex items-center justify-center',
               onLight ? 'hover:bg-brand-border' : 'hover:bg-white/10'
