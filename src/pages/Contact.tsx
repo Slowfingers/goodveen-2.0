@@ -278,7 +278,7 @@ export function Contact() {
               </h2>
             </div>
             <a
-              href="https://maps.google.com/?q=Tashkent+Mirobod"
+              href="https://maps.google.com/?q=41.3111,69.2797"
               target="_blank"
               rel="noopener noreferrer"
               className="hidden md:flex items-center gap-3 text-[12px] tracking-[0.2em] uppercase text-brand-gray hover:text-brand-taupe transition-colors"
@@ -287,21 +287,36 @@ export function Contact() {
               <ArrowRight size={16} strokeWidth={1.25} />
             </a>
           </div>
-          <div className="relative w-full h-[320px] md:h-[560px] overflow-hidden border border-brand-border bg-brand-border/30">
-            <img
-              src="https://images.unsplash.com/photo-1473093226795-af9932fe5856?q=80&w=2400&auto=format&fit=crop"
-              alt="Studio location"
-              className="absolute inset-0 w-full h-full object-cover"
+          <div className="relative w-full h-[320px] md:h-[560px] overflow-hidden bg-[#F5F3EF]">
+            {/* Yandex Maps iframe */}
+            <iframe
+              src="https://yandex.com/map-widget/v1/?ll=69.279700%2C41.311100&z=16&l=map&pt=69.279700,41.311100,pm2rdm"
+              width="100%"
+              height="100%"
+              frameBorder="0"
+              allowFullScreen
+              style={{ position: 'relative' }}
+              title="Goodveen Studio Location"
             />
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-3">
+            {/* Overlay with studio marker */}
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-3 pointer-events-none">
               <span className="w-12 h-12 rounded-full bg-brand-gray flex items-center justify-center text-white shadow-[0_10px_30px_rgba(0,0,0,0.4)]">
                 <MapPin size={20} strokeWidth={1.25} />
               </span>
-              <span className="bg-white text-brand-gray text-[12px] tracking-[0.15em] uppercase px-3 py-1.5">
+              <span className="bg-white text-brand-gray text-[12px] tracking-[0.15em] uppercase px-3 py-1.5 shadow-md">
                 Goodveen Atelier
               </span>
             </div>
           </div>
+          <a
+            href="https://maps.google.com/?q=41.3111,69.2797"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="md:hidden flex items-center justify-center gap-3 text-[12px] tracking-[0.2em] uppercase text-brand-gray hover:text-brand-taupe transition-colors h-12 border border-brand-border"
+          >
+            Open in Maps
+            <ArrowRight size={16} strokeWidth={1.25} />
+          </a>
         </div>
       </section>
     </div>
