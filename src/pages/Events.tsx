@@ -194,8 +194,8 @@ export function Events() {
 
         <div className="h-[84px]" />
         <div className="relative z-10 mt-auto w-full max-w-[1440px] mx-auto px-5 md:px-10 pb-10 md:pb-0 flex flex-col gap-6 md:gap-10">
-          <div className="flex flex-col items-center text-center gap-4 md:gap-6">
-            <h1 className="text-white text-[56px] md:text-[80px] leading-none tracking-[0.02em] font-light">
+          <div className="flex flex-col items-start gap-3 md:gap-4">
+            <h1 className="text-white text-[48px] md:text-[72px] leading-[1.05] tracking-[0.01em] font-light">
               Events
             </h1>
             <p className="text-white/85 text-[12px] md:text-[14px] tracking-[0.25em] uppercase">

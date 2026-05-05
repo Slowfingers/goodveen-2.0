@@ -49,8 +49,8 @@ export function Workshop() {
         <div className="absolute inset-x-0 bottom-0 h-[320px] bg-gradient-to-t from-black/70 to-transparent" />
 
         <div className="h-[84px]" />
-        <div className="relative z-10 mt-auto w-full max-w-[1440px] mx-auto px-5 md:px-10 pb-10 md:pb-16 flex flex-col items-center text-center gap-4 md:gap-6">
-          <h1 className="text-white text-[56px] md:text-[80px] leading-none tracking-[0.02em] font-light">
+        <div className="relative z-10 mt-auto w-full max-w-[1440px] mx-auto px-5 md:px-10 pb-10 md:pb-16 flex flex-col items-start gap-3 md:gap-4">
+          <h1 className="text-white text-[48px] md:text-[72px] leading-[1.05] tracking-[0.01em] font-light">
             {title}
           </h1>
           <p className="text-white/85 text-[14px] md:text-[16px] tracking-[0.04em] max-w-[640px]">

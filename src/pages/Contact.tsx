@@ -37,7 +37,7 @@ export function Contact() {
   return (
     <div className="w-full bg-white">
       {/* ===== HERO ===== */}
-      <section className="relative w-full h-[420px] md:h-[640px] -mt-[60px] flex flex-col">
+      <section className="relative w-full h-[340px] md:h-[420px] -mt-[60px] flex flex-col">
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
@@ -46,27 +46,29 @@ export function Contact() {
           }}
         />
         <div className="absolute inset-x-0 top-0 h-[120px] bg-gradient-to-b from-black/60 to-transparent" />
-        <div className="absolute inset-x-0 bottom-0 h-[320px] bg-gradient-to-t from-black/70 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-[280px] bg-gradient-to-t from-black/70 to-transparent" />
 
         <div className="h-[84px]" />
-        <div className="relative z-10 mt-auto w-full max-w-[1440px] mx-auto px-5 md:px-10 pb-10 md:pb-16 flex flex-col items-center text-center gap-4 md:gap-6">
+        <div className="relative z-10 mt-auto w-full max-w-[1440px] mx-auto px-5 md:px-10 pb-8 md:pb-12 flex flex-col items-start gap-3 md:gap-4">
           <span className="text-white/85 text-[11px] md:text-[12px] tracking-[0.25em] uppercase">
             Get in touch
           </span>
-          <h1 className="text-white text-[48px] md:text-[80px] leading-none tracking-[0.02em] font-light">
+          <h1 className="text-white text-[40px] md:text-[64px] leading-[1.05] tracking-[0.01em] font-light">
             Contact us
           </h1>
-          <p className="text-white/85 text-[14px] md:text-[16px] max-w-[640px]">
+          <p className="text-white/85 text-[14px] md:text-[15px] max-w-[560px]">
             Questions, custom orders, partnerships — we read every message and respond within a day.
           </p>
         </div>
       </section>
 
-      {/* ===== INFO + FORM ===== */}
-      <section className="w-full flex justify-center py-[60px] md:py-[120px] px-5 md:px-10 border-b border-brand-border">
-        <div className="w-full max-w-[1360px] grid grid-cols-1 lg:grid-cols-[1fr_540px] gap-12 lg:gap-20">
-          {/* Info column */}
-          <div className="flex flex-col gap-10 md:gap-12">
+      {/* ===== MAIN CONTENT ===== */}
+      <section className="w-full flex justify-center">
+        <div className="w-full max-w-[1440px] grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-0">
+          {/* Left: Contacts + Form */}
+          <div className="flex flex-col gap-12 md:gap-16 py-[60px] md:py-[80px] px-5 md:px-10 lg:pr-[60px]">
+            {/* Contact Info */}
+            <div className="flex flex-col gap-8">
             <InfoBlock icon={<MapPin size={20} strokeWidth={1.25} />} title="Atelier">
               <p>Tashkent, Uzbekiston Ovozi street 2/1</p>
               <p className="text-brand-gray-light text-[13px] mt-1">
@@ -103,27 +105,27 @@ export function Contact() {
               </p>
             </InfoBlock>
 
-            {/* Social */}
-            <div className="flex flex-col gap-4 pt-4 border-t border-brand-border">
-              <span className="text-[11px] tracking-[0.25em] uppercase text-brand-gray-light">
-                Follow the studio
-              </span>
-              <div className="flex gap-3">
-                <SocialIcon href="#" label="Instagram">
-                  <Instagram size={18} strokeWidth={1.25} />
-                </SocialIcon>
-                <SocialIcon href="#" label="Telegram">
-                  <Send size={18} strokeWidth={1.25} />
-                </SocialIcon>
-                <SocialIcon href="#" label="Facebook">
-                  <Facebook size={18} strokeWidth={1.25} />
-                </SocialIcon>
+              {/* Social */}
+              <div className="flex flex-col gap-4 pt-6 mt-6 border-t border-brand-border">
+                <span className="text-[11px] tracking-[0.25em] uppercase text-brand-gray-light">
+                  Follow the studio
+                </span>
+                <div className="flex gap-3">
+                  <SocialIcon href="#" label="Instagram">
+                    <Instagram size={18} strokeWidth={1.25} />
+                  </SocialIcon>
+                  <SocialIcon href="#" label="Telegram">
+                    <Send size={18} strokeWidth={1.25} />
+                  </SocialIcon>
+                  <SocialIcon href="#" label="Facebook">
+                    <Facebook size={18} strokeWidth={1.25} />
+                  </SocialIcon>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Form column */}
-          <div className="flex flex-col">
+            {/* Form */}
+            <div className="flex flex-col">
             {sent ? (
               <div className="w-full bg-brand-border/30 p-8 md:p-12 flex flex-col gap-6 md:gap-8 border border-brand-border">
                 <div className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-brand-gray flex items-center justify-center self-start">
@@ -156,17 +158,17 @@ export function Contact() {
               </div>
             ) : (
               <form
-                className="w-full bg-brand-border/30 p-6 md:p-10 flex flex-col gap-5 md:gap-6 border border-brand-border"
+                className="w-full bg-white p-0 flex flex-col gap-5 md:gap-6"
                 onSubmit={(e) => {
                   e.preventDefault();
                   submit();
                 }}
               >
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-3">
                   <span className="text-[11px] md:text-[12px] tracking-[0.25em] uppercase text-brand-gray-light">
                     Drop us a line
                   </span>
-                  <h2 className="text-[28px] md:text-[36px] font-light leading-[1.1] tracking-[0.01em] text-brand-gray">
+                  <h2 className="text-[32px] md:text-[42px] font-light leading-[1.05] tracking-[0.01em] text-brand-gray">
                     How can we help?
                   </h2>
                 </div>
@@ -261,62 +263,21 @@ export function Contact() {
                 </button>
               </form>
             )}
-          </div>
-        </div>
-      </section>
-
-      {/* ===== MAP ===== */}
-      <section className="w-full flex justify-center py-[60px] md:py-[120px] px-5 md:px-10">
-        <div className="w-full max-w-[1360px] flex flex-col gap-6 md:gap-10">
-          <div className="flex items-end justify-between gap-4">
-            <div>
-              <span className="text-[11px] md:text-[12px] tracking-[0.25em] uppercase text-brand-gray-light">
-                Visit us
-              </span>
-              <h2 className="text-[32px] md:text-[48px] font-light leading-[1.05] tracking-[0.01em] text-brand-gray mt-2">
-                Find the studio
-              </h2>
             </div>
-            <a
-              href="https://maps.google.com/?q=41.3111,69.2797"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden md:flex items-center gap-3 text-[12px] tracking-[0.2em] uppercase text-brand-gray hover:text-brand-taupe transition-colors"
-            >
-              Open in Maps
-              <ArrowRight size={16} strokeWidth={1.25} />
-            </a>
           </div>
-          <div className="relative w-full h-[320px] md:h-[560px] overflow-hidden bg-[#F5F3EF]">
-            {/* Yandex Maps iframe */}
+
+          {/* Right: Map */}
+          <div className="relative w-full h-[400px] lg:h-auto bg-[#F5F3EF]">
             <iframe
               src="https://yandex.com/map-widget/v1/?ll=69.279700%2C41.311100&z=16&l=map&pt=69.279700,41.311100,pm2rdm"
               width="100%"
               height="100%"
               frameBorder="0"
               allowFullScreen
-              style={{ position: 'relative' }}
+              style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
               title="Goodveen Studio Location"
             />
-            {/* Overlay with studio marker */}
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-3 pointer-events-none">
-              <span className="w-12 h-12 rounded-full bg-brand-gray flex items-center justify-center text-white shadow-[0_10px_30px_rgba(0,0,0,0.4)]">
-                <MapPin size={20} strokeWidth={1.25} />
-              </span>
-              <span className="bg-white text-brand-gray text-[12px] tracking-[0.15em] uppercase px-3 py-1.5 shadow-md">
-                Goodveen Atelier
-              </span>
-            </div>
           </div>
-          <a
-            href="https://maps.google.com/?q=41.3111,69.2797"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="md:hidden flex items-center justify-center gap-3 text-[12px] tracking-[0.2em] uppercase text-brand-gray hover:text-brand-taupe transition-colors h-12 border border-brand-border"
-          >
-            Open in Maps
-            <ArrowRight size={16} strokeWidth={1.25} />
-          </a>
         </div>
       </section>
     </div>
