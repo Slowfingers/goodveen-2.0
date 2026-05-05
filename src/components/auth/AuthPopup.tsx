@@ -57,7 +57,10 @@ function LoginView({ onSwitch }: { onSwitch: (m: 'register' | 'password-reset') 
       await signIn(email, password);
       close();
     } catch (e: any) {
-      if (e.status === 409) {
+      console.log('Login error:', e);
+      console.log('Error status:', e.status);
+      console.log('Error message:', e.message);
+      if (e.status === 401 || e.status === 409) {
         setError('Неверный email или пароль');
       } else {
         setError(e.message || 'Ошибка входа');
@@ -174,6 +177,9 @@ function RegisterView({ onSwitch }: { onSwitch: (m: 'login') => void }) {
       await signIn(email, password);
       close();
     } catch (e: any) {
+      console.log('Register error:', e);
+      console.log('Error status:', e.status);
+      console.log('Error message:', e.message);
       if (e.status === 409) {
         setError('Этот email уже зарегистрирован');
       } else {
