@@ -26,7 +26,7 @@ export function Contact() {
     <div className="w-full bg-white">
       {/* Hero Section */}
       <section className="relative h-[480px] md:h-[680px] -mt-[60px] bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1487530811176-3780de880c2d?q=80&w=2400&auto=format&fit=crop')" }}>
-        <div className="absolute inset-x-0 bottom-0 h-[244px] md:h-[320px] bg-gradient-to-t from-black/40 to-transparent backdrop-blur-[10px]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/60" />
         <div className="absolute inset-x-0 bottom-0 flex flex-col px-5 md:px-10 py-10 md:py-20 gap-2">
           <h1 className="text-[48px] md:text-[80px] leading-[48px] md:leading-[80px] tracking-[0.02em] text-white">Contact us</h1>
           <p className="text-[14px] leading-[16px] tracking-[0.2em] uppercase text-white">Get in touch</p>
