@@ -118,8 +118,12 @@ export function Cabinet() {
   const { user, loading } = useAuth();
   const [params, setParams] = useSearchParams();
 
+  console.log('Cabinet - user:', user);
+  console.log('Cabinet - loading:', loading);
+
   // Redirect to login if not authenticated
   if (!loading && !user) {
+    console.log('Cabinet - redirecting to login');
     return <Navigate to="/login" replace />;
   }
 
