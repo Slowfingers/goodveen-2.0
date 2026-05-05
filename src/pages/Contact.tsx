@@ -1,15 +1,5 @@
-import { useEffect, useState, type ReactNode } from 'react';
-import {
-  ArrowRight,
-  Clock,
-  MapPin,
-  Phone,
-  Mail,
-  Instagram,
-  Send,
-  Facebook,
-  Check,
-} from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Clock, MapPin, Phone, Instagram, Send, Facebook } from 'lucide-react';
 
 export function Contact() {
   useEffect(() => {
@@ -19,9 +9,7 @@ export function Contact() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [topic, setTopic] = useState('General enquiry');
   const [message, setMessage] = useState('');
-  const [agreed, setAgreed] = useState(true);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,319 +17,100 @@ export function Contact() {
     if (name.trim().length < 2) return setError('Enter your name');
     if (!/\S+@\S+\.\S+/.test(email)) return setError('Enter a valid email');
     if (message.trim().length < 5) return setError('Tell us a little more');
-    if (!agreed) return setError('Please accept the terms');
     setError(null);
     setSent(true);
+    setTimeout(() => setSent(false), 3000);
   };
 
   return (
     <div className="w-full bg-white">
-      {/* ===== HERO ===== */}
-      <section className="relative w-full h-[340px] md:h-[420px] -mt-[60px] flex flex-col">
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage:
-              "url('https://images.unsplash.com/photo-1549420078-d4469796bb82?q=80&w=2400&auto=format&fit=crop')",
-          }}
-        />
-        <div className="absolute inset-x-0 top-0 h-[120px] bg-gradient-to-b from-black/60 to-transparent" />
-        <div className="absolute inset-x-0 bottom-0 h-[280px] bg-gradient-to-t from-black/70 to-transparent" />
-
-        <div className="h-[84px]" />
-        <div className="relative z-10 mt-auto w-full max-w-[1440px] mx-auto px-5 md:px-10 pb-8 md:pb-12 flex flex-col items-start gap-3 md:gap-4">
-          <span className="text-white/85 text-[11px] md:text-[12px] tracking-[0.25em] uppercase">
-            Get in touch
-          </span>
-          <h1 className="text-white text-[40px] md:text-[64px] leading-[1.05] tracking-[0.01em] font-light">
-            Contact us
-          </h1>
-          <p className="text-white/85 text-[14px] md:text-[15px] max-w-[560px]">
-            Questions, custom orders, partnerships — we read every message and respond within a day.
-          </p>
+      {/* Hero Section */}
+      <section className="relative h-[480px] md:h-[680px] -mt-[60px] bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1487530811176-3780de880c2d?q=80&w=2400&auto=format&fit=crop')" }}>
+        <div className="absolute inset-x-0 bottom-0 h-[244px] md:h-[320px] bg-gradient-to-t from-black/40 to-transparent backdrop-blur-[10px]" />
+        <div className="absolute inset-x-0 bottom-0 flex flex-col px-5 md:px-10 py-10 md:py-20 gap-2">
+          <h1 className="text-[48px] md:text-[80px] leading-[48px] md:leading-[80px] tracking-[0.02em] text-white">Contact us</h1>
+          <p className="text-[14px] leading-[16px] tracking-[0.2em] uppercase text-white">Get in touch</p>
         </div>
       </section>
 
-      {/* ===== MAIN CONTENT ===== */}
-      <section className="w-full flex justify-center">
-        <div className="w-full max-w-[1440px] grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-0">
-          {/* Left: Contacts + Form */}
-          <div className="flex flex-col gap-12 md:gap-16 py-[60px] md:py-[80px] px-5 md:px-10 lg:pr-[60px]">
+      {/* Main Content */}
+      <section className="bg-white py-10 md:py-20 px-5 md:px-10">
+        <div className="flex flex-col md:flex-row gap-10 md:gap-5">
+          {/* Left Column: Contact Info + Form */}
+          <div className="flex flex-col gap-10 w-full md:w-[560px] md:shrink-0">
             {/* Contact Info */}
-            <div className="flex flex-col gap-8">
-            <InfoBlock icon={<MapPin size={20} strokeWidth={1.25} />} title="Atelier">
-              <p>Tashkent, Uzbekiston Ovozi street 2/1</p>
-              <p className="text-brand-gray-light text-[13px] mt-1">
-                Mirobod, near the Botanical garden entrance
-              </p>
-            </InfoBlock>
+            <div className="flex flex-col gap-5">
+              {/* Address */}
+              <div className="flex items-center gap-4">
+                <MapPin size={32} strokeWidth={1.25} className="text-[#D0D0D0] flex-shrink-0" />
+                <span className="text-[16px] md:text-[20px] leading-[22px] md:leading-[26px] tracking-[0.02em] text-[#303030]">Tashkent, Uzbekiston Ovozi st., 2/1</span>
+              </div>
 
-            <InfoBlock icon={<Phone size={20} strokeWidth={1.25} />} title="Phones">
-              <a href="tel:+998712339780" className="block hover:text-brand-taupe transition-colors">
-                +998 71 233 97 80
-              </a>
-              <a href="tel:+998999559090" className="block hover:text-brand-taupe transition-colors">
-                +998 99 955 90 90
-              </a>
-              <a href="tel:+998711200604" className="block hover:text-brand-taupe transition-colors">
-                +998 71 120 06 04
-              </a>
-            </InfoBlock>
-
-            <InfoBlock icon={<Mail size={20} strokeWidth={1.25} />} title="Email">
-              <a
-                href="mailto:hello@goodveen.uz"
-                className="hover:text-brand-taupe transition-colors"
-              >
-                hello@goodveen.uz
-              </a>
-              <p className="text-brand-gray-light text-[13px] mt-1">For wholesale & press</p>
-            </InfoBlock>
-
-            <InfoBlock icon={<Clock size={20} strokeWidth={1.25} />} title="Open hours">
-              <p>Every day · 09:00 — 21:00</p>
-              <p className="text-brand-gray-light text-[13px] mt-1">
-                Same-day delivery for orders before 14:00
-              </p>
-            </InfoBlock>
-
-              {/* Social */}
-              <div className="flex flex-col gap-4 pt-6 mt-6 border-t border-brand-border">
-                <span className="text-[11px] tracking-[0.25em] uppercase text-brand-gray-light">
-                  Follow the studio
-                </span>
-                <div className="flex gap-3">
-                  <SocialIcon href="#" label="Instagram">
-                    <Instagram size={18} strokeWidth={1.25} />
-                  </SocialIcon>
-                  <SocialIcon href="#" label="Telegram">
-                    <Send size={18} strokeWidth={1.25} />
-                  </SocialIcon>
-                  <SocialIcon href="#" label="Facebook">
-                    <Facebook size={18} strokeWidth={1.25} />
-                  </SocialIcon>
+              {/* Phone Numbers */}
+              <div className="flex items-start gap-4">
+                <Phone size={32} strokeWidth={1.25} className="text-[#D0D0D0] flex-shrink-0" />
+                <div className="flex flex-col gap-3">
+                  <a href="tel:+998712339780" className="text-[16px] md:text-[20px] leading-[22px] md:leading-[26px] tracking-[0.02em] text-[#303030] hover:text-[#F5A5C8] transition-colors">+998 71 233 97 80</a>
+                  <a href="tel:+998999559090" className="text-[16px] md:text-[20px] leading-[22px] md:leading-[26px] tracking-[0.02em] text-[#303030] hover:text-[#F5A5C8] transition-colors">+998 99 955 90 90</a>
+                  <a href="tel:+998711200604" className="text-[16px] md:text-[20px] leading-[22px] md:leading-[26px] tracking-[0.02em] text-[#303030] hover:text-[#F5A5C8] transition-colors">+998 71 120 06 04</a>
                 </div>
+              </div>
+
+              {/* Working Hours */}
+              <div className="flex items-center gap-4">
+                <Clock size={32} strokeWidth={1.25} className="text-[#D0D0D0] flex-shrink-0" />
+                <span className="text-[16px] md:text-[20px] leading-[22px] md:leading-[26px] tracking-[0.02em] text-[#303030]">Every day · 09:00 — 21:00</span>
+              </div>
+
+              {/* Social Links */}
+              <div className="flex items-center gap-5 pl-12">
+                <a href="https://www.instagram.com/goodveen.uz/" target="_blank" rel="noopener noreferrer" className="text-[#303030] hover:text-[#F5A5C8] transition-colors">
+                  <Instagram size={32} strokeWidth={1.25} />
+                </a>
+                <a href="https://t.me/goodveenuz" target="_blank" rel="noopener noreferrer" className="text-[#303030] hover:text-[#F5A5C8] transition-colors">
+                  <Send size={32} strokeWidth={1.25} />
+                </a>
+                <a href="https://www.facebook.com/goodveenflowershouse/?locale=ru_RU" target="_blank" rel="noopener noreferrer" className="text-[#303030] hover:text-[#F5A5C8] transition-colors">
+                  <Facebook size={32} strokeWidth={1.25} />
+                </a>
               </div>
             </div>
 
-            {/* Form */}
-            <div className="flex flex-col">
-            {sent ? (
-              <div className="w-full bg-brand-border/30 p-8 md:p-12 flex flex-col gap-6 md:gap-8 border border-brand-border">
-                <div className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-brand-gray flex items-center justify-center self-start">
-                  <Check size={26} strokeWidth={1.25} className="text-white" />
+            {/* Map (Mobile only) */}
+            <div className="md:hidden w-full h-[400px] bg-[#F6F6F6] relative overflow-hidden">
+              <iframe src="https://yandex.uz/map-widget/v1/?ll=69.285971%2C41.310924&mode=poi&poi%5Bpoint%5D=69.286308%2C41.310684&poi%5Buri%5D=ymapsbm1%3A%2F%2Forg%3Foid%3D25254128497&z=17" width="100%" height="100%" style={{ border: 0 }} allowFullScreen title="Goodveen Location" />
+            </div>
+
+            {/* Contact Form */}
+            <div className="flex flex-col gap-5 p-5 md:p-10 bg-[#F6F6F6]">
+              <h2 className="text-[24px] leading-[32px] tracking-[0.02em] text-[#303030]">Drop us a line</h2>
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-col justify-center px-4 py-2 h-14 bg-white border border-[#EEEEEE]">
+                  <input type="text" value={name} onChange={(e) => { setName(e.target.value); setError(null); }} className="text-[14px] leading-[16px] tracking-[0.02em] text-[#303030] bg-transparent outline-none placeholder:text-[#808080]" placeholder="Your name" />
                 </div>
-                <div className="flex flex-col gap-3">
-                  <span className="text-[11px] md:text-[12px] tracking-[0.25em] uppercase text-brand-gray-light">
-                    Thanks for reaching out
-                  </span>
-                  <h2 className="text-[28px] md:text-[36px] font-light leading-[1.1] tracking-[0.01em] text-brand-gray">
-                    Message received.
-                  </h2>
-                  <p className="text-[14px] text-brand-gray-light leading-[22px]">
-                    We'll get back to you at <span className="text-brand-gray">{email}</span>{' '}
-                    within one business day.
-                  </p>
+                <div className="flex flex-col justify-center px-4 py-2 h-14 bg-white border border-[#EEEEEE]">
+                  <input type="email" value={email} onChange={(e) => { setEmail(e.target.value); setError(null); }} className="text-[14px] leading-[16px] tracking-[0.02em] text-[#303030] bg-transparent outline-none placeholder:text-[#808080]" placeholder="Email" />
                 </div>
-                <button
-                  onClick={() => {
-                    setSent(false);
-                    setName('');
-                    setEmail('');
-                    setPhone('');
-                    setMessage('');
-                  }}
-                  className="self-start h-11 px-5 border border-brand-gray text-brand-gray text-[12px] tracking-[0.2em] uppercase hover:bg-brand-border/40 transition-colors"
-                >
-                  Send another
+                <div className="flex flex-col justify-center px-4 py-2 h-14 bg-white border border-[#EEEEEE]">
+                  <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="text-[14px] leading-[16px] tracking-[0.02em] text-[#303030] bg-transparent outline-none placeholder:text-[#808080]" placeholder="Phone number" />
+                </div>
+                <div className="flex flex-col px-4 py-3 h-[120px] bg-white border border-[#EEEEEE]">
+                  <textarea value={message} onChange={(e) => { setMessage(e.target.value); setError(null); }} className="flex-1 text-[14px] leading-[16px] tracking-[0.02em] text-[#303030] bg-transparent outline-none resize-none placeholder:text-[#808080]" placeholder="Your message" />
+                </div>
+                {error && <p className="text-[12px] text-red-500">{error}</p>}
+                <button onClick={submit} disabled={!name || !email || !message} className="w-full md:w-fit h-14 px-10 bg-[#303030] text-white text-[14px] leading-[16px] tracking-[0.2em] uppercase hover:bg-[#404040] transition-colors disabled:bg-[#D0D0D0] disabled:cursor-not-allowed">
+                  {sent ? 'Message sent!' : 'Send message'}
                 </button>
               </div>
-            ) : (
-              <form
-                className="w-full bg-white p-0 flex flex-col gap-5 md:gap-6"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  submit();
-                }}
-              >
-                <div className="flex flex-col gap-3">
-                  <span className="text-[11px] md:text-[12px] tracking-[0.25em] uppercase text-brand-gray-light">
-                    Drop us a line
-                  </span>
-                  <h2 className="text-[32px] md:text-[42px] font-light leading-[1.05] tracking-[0.01em] text-brand-gray">
-                    How can we help?
-                  </h2>
-                </div>
-
-                {/* Topic chips */}
-                <div className="flex flex-wrap gap-2">
-                  {['General enquiry', 'Custom order', 'Wholesale', 'Press'].map((t) => {
-                    const active = topic === t;
-                    return (
-                      <button
-                        key={t}
-                        type="button"
-                        onClick={() => setTopic(t)}
-                        className={`h-9 px-4 text-[11px] tracking-[0.15em] uppercase border transition-colors ${
-                          active
-                            ? 'bg-brand-gray text-white border-brand-gray'
-                            : 'border-brand-border text-brand-gray-light hover:text-brand-gray'
-                        }`}
-                      >
-                        {t}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <Field
-                  label="Your name"
-                  value={name}
-                  onChange={(v) => {
-                    setName(v);
-                    setError(null);
-                  }}
-                  placeholder="Alexander"
-                />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <Field
-                    label="Email"
-                    value={email}
-                    onChange={(v) => {
-                      setEmail(v);
-                      setError(null);
-                    }}
-                    placeholder="alexander@goodveen.com"
-                    type="email"
-                  />
-                  <Field
-                    label="Phone (optional)"
-                    value={phone}
-                    onChange={setPhone}
-                    placeholder="+998 90 123 45 67"
-                    type="tel"
-                  />
-                </div>
-                <Textarea
-                  label="Your message"
-                  value={message}
-                  onChange={(v) => {
-                    setMessage(v);
-                    setError(null);
-                  }}
-                  placeholder="Tell us a little about your idea, occasion, dates…"
-                />
-
-                {error && <p className="text-[12px] text-brand-taupe">{error}</p>}
-
-                <label className="flex items-start gap-3 cursor-pointer">
-                  <span
-                    onClick={() => setAgreed((v) => !v)}
-                    className={`w-5 h-5 mt-0.5 border flex items-center justify-center shrink-0 ${
-                      agreed ? 'bg-brand-gray border-brand-gray' : 'border-brand-border'
-                    }`}
-                  >
-                    {agreed && <Check size={14} strokeWidth={2} className="text-white" />}
-                  </span>
-                  <input
-                    type="checkbox"
-                    className="sr-only"
-                    checked={agreed}
-                    onChange={(e) => setAgreed(e.target.checked)}
-                  />
-                  <span className="text-[12px] leading-[16px] text-brand-gray-light">
-                    I agree with the personal data processing policy.
-                  </span>
-                </label>
-
-                <button
-                  type="submit"
-                  className="h-12 self-start px-8 bg-brand-gray text-white flex items-center gap-3 uppercase tracking-[0.25em] text-[12px] hover:bg-black transition-colors"
-                >
-                  Send message
-                  <ArrowRight size={16} strokeWidth={1.25} />
-                </button>
-              </form>
-            )}
             </div>
           </div>
 
-          {/* Right: Map */}
-          <div className="relative w-full h-[400px] lg:h-auto bg-[#F5F3EF]">
-            <iframe
-              src="https://yandex.com/map-widget/v1/?ll=69.279700%2C41.311100&z=16&l=map&pt=69.279700,41.311100,pm2rdm"
-              width="100%"
-              height="100%"
-              frameBorder="0"
-              allowFullScreen
-              style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
-              title="Goodveen Studio Location"
-            />
+          {/* Right Column: Map (Desktop only) */}
+          <div className="hidden md:flex flex-1 min-h-[500px] bg-[#F6F6F6] relative overflow-hidden">
+            <iframe src="https://yandex.uz/map-widget/v1/?ll=69.285971%2C41.310924&mode=poi&poi%5Bpoint%5D=69.286308%2C41.310684&poi%5Buri%5D=ymapsbm1%3A%2F%2Forg%3Foid%3D25254128497&z=17" width="100%" height="100%" style={{ border: 0 }} allowFullScreen title="Goodveen Location" className="absolute inset-0" />
           </div>
         </div>
       </section>
     </div>
-  );
-}
-
-interface InfoBlockProps { icon: ReactNode; title: string; children: ReactNode }
-function InfoBlock({ icon, title, children }: InfoBlockProps) {
-  return (
-    <div className="flex gap-4 md:gap-5">
-      <span className="w-10 h-10 md:w-11 md:h-11 border border-brand-border flex items-center justify-center text-brand-gray shrink-0">
-        {icon}
-      </span>
-      <div className="flex flex-col gap-1">
-        <span className="text-[11px] tracking-[0.25em] uppercase text-brand-gray-light">{title}</span>
-        <div className="text-[18px] md:text-[20px] font-light text-brand-gray leading-[1.4] tracking-[0.01em]">
-          {children}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-interface FieldProps { label: string; value: string; onChange: (v: string) => void; placeholder?: string; type?: string }
-function Field({ label, value, onChange, placeholder, type = 'text' }: FieldProps) {
-  return (
-    <label className="w-full px-4 pt-3 pb-3 border border-brand-border bg-white flex flex-col focus-within:border-brand-gray transition-colors">
-      <span className="text-[11px] tracking-[0.15em] uppercase text-brand-gray-light">{label}</span>
-      <input
-        type={type}
-        value={value}
-        placeholder={placeholder}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full outline-none text-[14px] text-brand-gray bg-transparent placeholder:text-brand-gray-light/60"
-      />
-    </label>
-  );
-}
-
-interface TextareaProps { label: string; value: string; onChange: (v: string) => void; placeholder?: string }
-function Textarea({ label, value, onChange, placeholder }: TextareaProps) {
-  return (
-    <label className="w-full px-4 pt-3 pb-3 border border-brand-border bg-white flex flex-col focus-within:border-brand-gray transition-colors">
-      <span className="text-[11px] tracking-[0.15em] uppercase text-brand-gray-light">{label}</span>
-      <textarea
-        value={value}
-        placeholder={placeholder}
-        onChange={(e) => onChange(e.target.value)}
-        rows={4}
-        className="w-full outline-none text-[14px] text-brand-gray bg-transparent placeholder:text-brand-gray-light/60 resize-none"
-      />
-    </label>
-  );
-}
-
-interface SocialIconProps { href: string; label: string; children: ReactNode }
-function SocialIcon({ href, label, children }: SocialIconProps) {
-  return (
-    <a
-      href={href}
-      aria-label={label}
-      className="w-10 h-10 md:w-11 md:h-11 border border-brand-border text-brand-gray hover:bg-brand-gray hover:text-white hover:border-brand-gray transition-colors flex items-center justify-center"
-    >
-      {children}
-    </a>
   );
 }
