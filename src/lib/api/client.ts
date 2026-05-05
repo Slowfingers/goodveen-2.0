@@ -25,6 +25,7 @@ interface RequestOptions {
   body?: unknown;
   query?: Record<string, string | number | boolean | undefined | null>;
   headers?: Record<string, string>;
+  skipAuth?: boolean;
 }
 
 function buildUrl(path: string, query?: RequestOptions['query']): string {
@@ -42,7 +43,7 @@ export async function apiRequest<T = unknown>(
   path: string,
   opts: RequestOptions = {},
 ): Promise<T> {
-  const token = getToken();
+  const token = opts.skipAuth ? null : getToken();
   const init: RequestInit = {
     method: opts.method ?? 'GET',
     headers: {

@@ -22,11 +22,13 @@ export const authApi = {
     apiRequest<{ token: string; user: User }>('/api/auth/login', {
       method: 'POST',
       body: { email, password },
+      skipAuth: true,
     }),
   register: (email: string, password: string, name?: string) =>
     apiRequest<{ token: string; user: User }>('/api/auth/register', {
       method: 'POST',
       body: { email, password, name },
+      skipAuth: true,
     }),
   me: () => apiRequest<{ user: User }>('/api/auth/me'),
 };
