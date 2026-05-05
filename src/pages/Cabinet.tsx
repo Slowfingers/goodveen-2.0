@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, Navigate } from 'react-router-dom';
 import {
   Pencil,
   Trash2,
@@ -16,6 +16,7 @@ import {
   Briefcase,
   Star,
 } from 'lucide-react';
+import { useAuth } from '../components/auth/AuthContext';
 
 type Tab = 'profile' | 'orders' | 'addresses';
 
@@ -114,7 +115,18 @@ const ORDERS = [
 ];
 
 export function Cabinet() {
+  const { user, loading } = useAuth();
   const [params, setParams] = useSearchParams();
+
+  // Redirect to login if not authenticated
+  if (!loading && !user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (loading) {
+    return <div className="w-full bg-white pt-[60px] flex items-center justify-center min-h-[400px]">Loading...</div>;
+  }
+
   const initial: Tab =
     params.get('tab') === 'orders'
       ? 'orders'

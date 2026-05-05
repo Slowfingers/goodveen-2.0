@@ -1,9 +1,8 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, X, Eye, EyeOff, Check, Mail } from 'lucide-react';
-import { useAuthUI } from './AuthContext';
+import { useAuthUI, useAuth } from './AuthContext';
 import { authApi } from '../../lib/api';
-import { setToken } from '../../lib/api/client';
 
 export function AuthPopup() {
   const { mode, close, setMode } = useAuthUI();
@@ -41,6 +40,7 @@ export function AuthPopup() {
 /* ===== LOGIN ===== */
 function LoginView({ onSwitch }: { onSwitch: (m: 'register' | 'password-reset') => void }) {
   const { close } = useAuthUI();
+  const { signIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPwd, setShowPwd] = useState(false);
@@ -54,11 +54,8 @@ function LoginView({ onSwitch }: { onSwitch: (m: 'register' | 'password-reset') 
     setError(null);
     setLoading(true);
     try {
-      const { token, user } = await authApi.login(email, password);
-      setToken(token);
-      localStorage.setItem('user', JSON.stringify(user));
+      await signIn(email, password);
       close();
-      window.location.reload();
     } catch (e: any) {
       setError(e.message || 'Ошибка входа');
     } finally {
@@ -152,6 +149,7 @@ function LoginView({ onSwitch }: { onSwitch: (m: 'register' | 'password-reset') 
 /* ===== REGISTER ===== */
 function RegisterView({ onSwitch }: { onSwitch: (m: 'login') => void }) {
   const { close } = useAuthUI();
+  const { signIn } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -168,11 +166,9 @@ function RegisterView({ onSwitch }: { onSwitch: (m: 'login') => void }) {
     setError(null);
     setLoading(true);
     try {
-      const { token, user } = await authApi.register(email, password, name);
-      setToken(token);
-      localStorage.setItem('user', JSON.stringify(user));
+      await authApi.register(email, password, name);
+      await signIn(email, password);
       close();
-      window.location.reload();
     } catch (e: any) {
       setError(e.message || 'Ошибка регистрации');
     } finally {
