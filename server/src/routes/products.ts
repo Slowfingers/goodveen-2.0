@@ -30,7 +30,7 @@ productsRouter.get('/', async (req, res) => {
 // Public single
 productsRouter.get('/by-slug/:slug', async (req, res) => {
   const product = await prisma.product.findUnique({
-    where: { slug: req.params.slug },
+    where: { slug: req.params.slug as string },
     include: { sizes: { orderBy: { sortOrder: 'asc' } }, images: { orderBy: { sortOrder: 'asc' } }, category: true },
   });
   if (!product) return res.status(404).json({ error: 'Not found' });
@@ -39,7 +39,7 @@ productsRouter.get('/by-slug/:slug', async (req, res) => {
 
 productsRouter.get('/:id', async (req, res) => {
   const product = await prisma.product.findUnique({
-    where: { id: req.params.id },
+    where: { id: req.params.id as string },
     include: { sizes: { orderBy: { sortOrder: 'asc' } }, images: { orderBy: { sortOrder: 'asc' } }, category: true },
   });
   if (!product) return res.status(404).json({ error: 'Not found' });
@@ -92,7 +92,7 @@ productsRouter.put('/:id', requireAdmin, async (req, res) => {
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const data = parsed.data;
   const product = await prisma.product.update({
-    where: { id: req.params.id },
+    where: { id: req.params.id as string },
     data: {
       ...(data.name !== undefined && { name: data.name }),
       ...(data.slug !== undefined && { slug: data.slug }),
@@ -111,36 +111,53 @@ productsRouter.put('/:id', requireAdmin, async (req, res) => {
 });
 
 productsRouter.delete('/:id', requireAdmin, async (req, res) => {
-  await prisma.product.delete({ where: { id: req.params.id } });
+  await prisma.product.delete({ where: { id: req.params.id as string } });
   res.status(204).end();
 });
 
 // ----- Sizes -----
-const sizeSchema = z.object({
-  productId: z.string(),
+const sizeCreateSchema = z.object({
   name: z.string().min(1),
-  price: z.number().int().nonnegative(),
   height: z.string().optional().nullable(),
+  price: z.number().min(0),
+  productId: z.string(),
+  isAvailable: z.boolean().default(true),
+  sortOrder: z.number().int().default(0),
+});
+
+const sizeUpdateSchema = z.object({
+  name: z.string().min(1).optional(),
+  height: z.string().optional().nullable(),
+  price: z.number().min(0).optional(),
   isAvailable: z.boolean().optional(),
   sortOrder: z.number().int().optional(),
 });
 
 productsRouter.post('/:id/sizes', requireAdmin, async (req, res) => {
-  const parsed = sizeSchema.safeParse({ ...req.body, productId: req.params.id });
+  const parsed = sizeCreateSchema.safeParse({ ...req.body, productId: req.params.id as string });
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  const size = await prisma.productSize.create({ data: parsed.data });
+  const size = await prisma.productSize.create({ 
+    data: {
+      name: parsed.data.name,
+      height: parsed.data.height ?? null,
+      price: parsed.data.price,
+      productId: parsed.data.productId,
+      isAvailable: parsed.data.isAvailable ?? true,
+      sortOrder: parsed.data.sortOrder ?? 0,
+    }
+  });
   res.status(201).json(size);
 });
 
 productsRouter.put('/sizes/:sizeId', requireAdmin, async (req, res) => {
-  const parsed = sizeSchema.partial().safeParse(req.body);
+  const parsed = sizeUpdateSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  const size = await prisma.productSize.update({ where: { id: req.params.sizeId }, data: parsed.data });
+  const size = await prisma.productSize.update({ where: { id: req.params.sizeId as string }, data: parsed.data });
   res.json(size);
 });
 
 productsRouter.delete('/sizes/:sizeId', requireAdmin, async (req, res) => {
-  await prisma.productSize.delete({ where: { id: req.params.sizeId } });
+  await prisma.productSize.delete({ where: { id: req.params.sizeId as string } });
   res.status(204).end();
 });
 
@@ -148,19 +165,24 @@ productsRouter.delete('/sizes/:sizeId', requireAdmin, async (req, res) => {
 const imageSchema = z.object({
   url: z.string().url(),
   alt: z.string().optional().nullable(),
-  sortOrder: z.number().int().optional(),
+  sortOrder: z.number().int().default(0),
 });
 
 productsRouter.post('/:id/images', requireAdmin, async (req, res) => {
   const parsed = imageSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const image = await prisma.productImage.create({
-    data: { ...parsed.data, productId: req.params.id },
+    data: { 
+      url: parsed.data.url,
+      alt: parsed.data.alt ?? null,
+      sortOrder: parsed.data.sortOrder ?? 0,
+      productId: req.params.id as string 
+    },
   });
   res.status(201).json(image);
 });
 
 productsRouter.delete('/images/:imageId', requireAdmin, async (req, res) => {
-  await prisma.productImage.delete({ where: { id: req.params.imageId } });
+  await prisma.productImage.delete({ where: { id: req.params.imageId as string } });
   res.status(204).end();
 });

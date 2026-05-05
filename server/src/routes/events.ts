@@ -80,7 +80,7 @@ eventsRouter.put('/:id', requireAdmin, async (req, res) => {
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const data = parsed.data;
   const event = await prisma.event.update({
-    where: { id: req.params.id },
+    where: { id: req.params.id as string },
     data: {
       ...(data.title !== undefined && { title: data.title }),
       ...(data.slug !== undefined && { slug: data.slug }),
@@ -100,6 +100,6 @@ eventsRouter.put('/:id', requireAdmin, async (req, res) => {
 });
 
 eventsRouter.delete('/:id', requireAdmin, async (req, res) => {
-  await prisma.event.delete({ where: { id: req.params.id } });
+  await prisma.event.delete({ where: { id: req.params.id as string } });
   res.status(204).end();
 });

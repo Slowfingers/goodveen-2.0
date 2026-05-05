@@ -26,7 +26,7 @@ ordersRouter.get('/mine', requireAuth, async (req, res) => {
 
 ordersRouter.get('/:id', requireAuth, async (req, res) => {
   const order = await prisma.order.findUnique({
-    where: { id: req.params.id },
+    where: { id: req.params.id as string },
     include: {
       items: true,
       user: { select: { id: true, email: true, name: true, phone: true } },
@@ -53,7 +53,7 @@ ordersRouter.patch('/:id', requireAdmin, async (req, res) => {
   const parsed = updateSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const order = await prisma.order.update({
-    where: { id: req.params.id },
+    where: { id: req.params.id as string },
     data: parsed.data,
     include: {
       items: true,
@@ -65,6 +65,6 @@ ordersRouter.patch('/:id', requireAdmin, async (req, res) => {
 });
 
 ordersRouter.delete('/:id', requireAdmin, async (req, res) => {
-  await prisma.order.delete({ where: { id: req.params.id } });
+  await prisma.order.delete({ where: { id: req.params.id as string } });
   res.status(204).end();
 });

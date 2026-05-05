@@ -15,7 +15,7 @@ usersRouter.patch('/:id/role', requireAdmin, async (req, res) => {
   const parsed = z.object({ role: z.enum(['CUSTOMER', 'ADMIN']) }).safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const user = await prisma.user.update({
-    where: { id: req.params.id },
+    where: { id: req.params.id as string },
     data: { role: parsed.data.role },
   });
   res.json(serializeUser(user));

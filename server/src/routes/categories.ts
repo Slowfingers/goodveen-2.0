@@ -19,9 +19,18 @@ categoriesRouter.get('/', async (req, res) => {
   res.json(cats);
 });
 
-const schema = z.object({
+const createSchema = z.object({
   name: z.string().min(1),
   slug: z.string().min(1),
+  description: z.string().optional().nullable(),
+  image: z.string().optional().nullable(),
+  sortOrder: z.number().int().default(0),
+  isActive: z.boolean().default(true),
+});
+
+const updateSchema = z.object({
+  name: z.string().min(1).optional(),
+  slug: z.string().min(1).optional(),
   description: z.string().optional().nullable(),
   image: z.string().optional().nullable(),
   sortOrder: z.number().int().optional(),
@@ -29,10 +38,19 @@ const schema = z.object({
 });
 
 categoriesRouter.post('/', requireAdmin, async (req, res) => {
-  const parsed = schema.safeParse(req.body);
+  const parsed = createSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   try {
-    const cat = await prisma.category.create({ data: parsed.data });
+    const cat = await prisma.category.create({ 
+      data: {
+        name: parsed.data.name,
+        slug: parsed.data.slug,
+        description: parsed.data.description ?? null,
+        image: parsed.data.image ?? null,
+        sortOrder: parsed.data.sortOrder ?? 0,
+        isActive: parsed.data.isActive ?? true,
+      }
+    });
     res.status(201).json(cat);
   } catch (e) {
     if (isUniqueError(e)) return res.status(409).json({ error: 'A category with this slug already exists' });
@@ -42,7 +60,8 @@ categoriesRouter.post('/', requireAdmin, async (req, res) => {
 
 
 categoriesRouter.put('/:id', requireAdmin, async (req, res) => {
-  const parsed = schema.partial().safeParse(req.body);
+  const id = req.params.id;
+  const parsed = updateSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   try {
     const cat = await prisma.category.update({ where: { id: req.params.id as string }, data: parsed.data });

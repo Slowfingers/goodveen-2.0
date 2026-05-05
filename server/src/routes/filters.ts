@@ -10,15 +10,28 @@ function isUniqueError(e: unknown) {
 
 export const filtersRouter = Router();
 
-const colorSchema = z.object({
+const colorCreateSchema = z.object({
   name: z.string().min(1),
   hex: z.string().regex(/^#[0-9a-fA-F]{6}$/),
+  sortOrder: z.number().int().default(0),
+  isActive: z.boolean().default(true),
+});
+
+const colorUpdateSchema = z.object({
+  name: z.string().min(1).optional(),
+  hex: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(),
   sortOrder: z.number().int().optional(),
   isActive: z.boolean().optional(),
 });
 
-const flowerTypeSchema = z.object({
+const flowerTypeCreateSchema = z.object({
   name: z.string().min(1),
+  sortOrder: z.number().int().default(0),
+  isActive: z.boolean().default(true),
+});
+
+const flowerTypeUpdateSchema = z.object({
+  name: z.string().min(1).optional(),
   sortOrder: z.number().int().optional(),
   isActive: z.boolean().optional(),
 });
@@ -33,10 +46,17 @@ filtersRouter.get('/colors', async (req, res) => {
 });
 
 filtersRouter.post('/colors', requireAdmin, async (req, res) => {
-  const parsed = colorSchema.safeParse(req.body);
+  const parsed = colorCreateSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   try {
-    const color = await prisma.filterColor.create({ data: parsed.data });
+    const color = await prisma.filterColor.create({ 
+      data: {
+        name: parsed.data.name,
+        hex: parsed.data.hex,
+        sortOrder: parsed.data.sortOrder ?? 0,
+        isActive: parsed.data.isActive ?? true,
+      }
+    });
     res.status(201).json(color);
   } catch (e) {
     if (isUniqueError(e)) return res.status(409).json({ error: 'A color with this name already exists' });
@@ -45,7 +65,7 @@ filtersRouter.post('/colors', requireAdmin, async (req, res) => {
 });
 
 filtersRouter.put('/colors/:id', requireAdmin, async (req, res) => {
-  const parsed = colorSchema.partial().safeParse(req.body);
+  const parsed = colorUpdateSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   try {
     const color = await prisma.filterColor.update({ where: { id: req.params.id as string }, data: parsed.data });
@@ -71,10 +91,16 @@ filtersRouter.get('/flower-types', async (req, res) => {
 });
 
 filtersRouter.post('/flower-types', requireAdmin, async (req, res) => {
-  const parsed = flowerTypeSchema.safeParse(req.body);
+  const parsed = flowerTypeCreateSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   try {
-    const item = await prisma.filterFlowerType.create({ data: parsed.data });
+    const item = await prisma.filterFlowerType.create({ 
+      data: {
+        name: parsed.data.name,
+        sortOrder: parsed.data.sortOrder ?? 0,
+        isActive: parsed.data.isActive ?? true,
+      }
+    });
     res.status(201).json(item);
   } catch (e) {
     if (isUniqueError(e)) return res.status(409).json({ error: 'A flower type with this name already exists' });
@@ -83,7 +109,7 @@ filtersRouter.post('/flower-types', requireAdmin, async (req, res) => {
 });
 
 filtersRouter.put('/flower-types/:id', requireAdmin, async (req, res) => {
-  const parsed = flowerTypeSchema.partial().safeParse(req.body);
+  const parsed = flowerTypeUpdateSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   try {
     const item = await prisma.filterFlowerType.update({ where: { id: req.params.id as string }, data: parsed.data });
