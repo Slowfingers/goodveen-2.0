@@ -15,6 +15,7 @@ import { UsersList } from './pages/users/UsersList';
 import { FiltersPage } from './pages/filters/FiltersPage';
 import { PageCoversPage } from './pages/pages/PageCoversPage';
 import { AboutPageEdit } from './pages/about/AboutPageEdit';
+import { ContactEdit } from './pages/contact/ContactEdit';
 
 function AdminRoot() {
   return (
@@ -54,6 +55,7 @@ export function adminRouteTree() {
         <Route path="filters" element={<FiltersPage />} />
         <Route path="pages" element={<PageCoversPage />} />
         <Route path="about" element={<AboutPageEdit />} />
+        <Route path="contact" element={<ContactEdit />} />
       </Route>
     </Route>
   );

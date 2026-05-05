@@ -32,18 +32,18 @@ export function OrdersList() {
 
   return (
     <div>
-      <PageHeader title="Orders">
+      <PageHeader title="Заказы">
         <Select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value as 'all' | Order['status'])}
         >
-          <option value="all">All statuses</option>
-          <option value="PENDING">Pending</option>
-          <option value="CONFIRMED">Confirmed</option>
-          <option value="PROCESSING">Processing</option>
-          <option value="DELIVERING">Delivering</option>
-          <option value="DELIVERED">Delivered</option>
-          <option value="CANCELLED">Cancelled</option>
+          <option value="all">Все статусы</option>
+          <option value="PENDING">Ожидает</option>
+          <option value="CONFIRMED">Подтверждён</option>
+          <option value="PROCESSING">В обработке</option>
+          <option value="DELIVERING">Доставляется</option>
+          <option value="DELIVERED">Доставлен</option>
+          <option value="CANCELLED">Отменён</option>
         </Select>
       </PageHeader>
 
@@ -51,26 +51,26 @@ export function OrdersList() {
         <table className="w-full text-[14px]">
           <thead>
             <tr className="bg-[#F7F4EF] text-left text-[11px] uppercase tracking-[0.2em] text-[#808080]">
-              <th className="px-6 py-3 w-36">Order #</th>
-              <th className="px-6 py-3">Customer</th>
-              <th className="px-6 py-3 w-32">Date</th>
-              <th className="px-6 py-3 w-32">Total</th>
-              <th className="px-6 py-3 w-32">Status</th>
-              <th className="px-6 py-3 w-32">Payment</th>
+              <th className="px-6 py-3 w-36">Заказ #</th>
+              <th className="px-6 py-3">Клиент</th>
+              <th className="px-6 py-3 w-32">Дата</th>
+              <th className="px-6 py-3 w-32">Сумма</th>
+              <th className="px-6 py-3 w-32">Статус</th>
+              <th className="px-6 py-3 w-32">Оплата</th>
             </tr>
           </thead>
           <tbody>
             {loading && (
               <tr>
                 <td className="px-6 py-12 text-center text-[#808080]" colSpan={6}>
-                  Loading…
+                  Загрузка…
                 </td>
               </tr>
             )}
             {!loading && filtered.length === 0 && (
               <tr>
                 <td className="px-6 py-12 text-center text-[#808080]" colSpan={6}>
-                  No orders.
+                  Нет заказов.
                 </td>
               </tr>
             )}

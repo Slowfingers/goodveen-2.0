@@ -7,7 +7,7 @@ import { Button, Card, Input, PageHeader, SectionTitle, Toggle } from '../../ui/
 export function FiltersPage() {
   return (
     <div>
-      <PageHeader title="Filters" />
+      <PageHeader title="Фильтры" />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <ColorsBlock />
@@ -46,44 +46,44 @@ function ColorsBlock() {
       });
       update(item.id, saved);
     } catch (e) {
-      alert(e instanceof Error ? e.message : 'Failed');
+      alert(e instanceof Error ? e.message : 'Ошибка');
     }
   };
 
   const add = async () => {
     try {
       const created = await filtersApi.createColor({
-        name: `Color ${items.length + 1}`,
+        name: `Цвет ${items.length + 1}`,
         hex: '#888888',
         sortOrder: items.length,
         isActive: true,
       });
       setItems((s) => [...s, created]);
     } catch (e) {
-      alert(e instanceof Error ? e.message : 'Failed');
+      alert(e instanceof Error ? e.message : 'Ошибка');
     }
   };
 
   const remove = async (id: string) => {
-    if (!confirm('Remove this color?')) return;
+    if (!confirm('Удалить этот цвет?')) return;
     try {
       await filtersApi.removeColor(id);
       setItems((s) => s.filter((x) => x.id !== id));
     } catch (e) {
-      alert(e instanceof Error ? e.message : 'Failed');
+      alert(e instanceof Error ? e.message : 'Ошибка');
     }
   };
 
   return (
     <Card>
       <div className="flex items-center justify-between mb-4 pb-2 border-b border-[#EEE]">
-        <h3 className="text-[13px] uppercase tracking-[0.2em] text-[#303030]">Colors</h3>
+        <h3 className="text-[13px] uppercase tracking-[0.2em] text-[#303030]">Цвета</h3>
         <Button variant="secondary" onClick={add}>
-          <Plus size={14} /> Add
+          <Plus size={14} /> Добавить
         </Button>
       </div>
 
-      {loading && <div className="text-[12px] text-[#808080]">Loading…</div>}
+      {loading && <div className="text-[12px] text-[#808080]">Загрузка…</div>}
 
       <div className="space-y-2">
         {items.map((c) => (
@@ -158,43 +158,43 @@ function FlowerTypesBlock() {
       });
       update(item.id, saved);
     } catch (e) {
-      alert(e instanceof Error ? e.message : 'Failed');
+      alert(e instanceof Error ? e.message : 'Ошибка');
     }
   };
 
   const add = async () => {
     try {
       const created = await filtersApi.createFlowerType({
-        name: `Type ${items.length + 1}`,
+        name: `Тип ${items.length + 1}`,
         sortOrder: items.length,
         isActive: true,
       });
       setItems((s) => [...s, created]);
     } catch (e) {
-      alert(e instanceof Error ? e.message : 'Failed');
+      alert(e instanceof Error ? e.message : 'Ошибка');
     }
   };
 
   const remove = async (id: string) => {
-    if (!confirm('Remove this type?')) return;
+    if (!confirm('Удалить этот тип?')) return;
     try {
       await filtersApi.removeFlowerType(id);
       setItems((s) => s.filter((x) => x.id !== id));
     } catch (e) {
-      alert(e instanceof Error ? e.message : 'Failed');
+      alert(e instanceof Error ? e.message : 'Ошибка');
     }
   };
 
   return (
     <Card>
       <div className="flex items-center justify-between mb-4 pb-2 border-b border-[#EEE]">
-        <h3 className="text-[13px] uppercase tracking-[0.2em] text-[#303030]">Flower types</h3>
+        <h3 className="text-[13px] uppercase tracking-[0.2em] text-[#303030]">Типы цветов</h3>
         <Button variant="secondary" onClick={add}>
-          <Plus size={14} /> Add
+          <Plus size={14} /> Добавить
         </Button>
       </div>
 
-      {loading && <div className="text-[12px] text-[#808080]">Loading…</div>}
+      {loading && <div className="text-[12px] text-[#808080]">Загрузка…</div>}
 
       <div className="space-y-2">
         {items.map((c) => (
@@ -221,8 +221,6 @@ function FlowerTypesBlock() {
           </div>
         ))}
       </div>
-
-      <SectionTitle>{''}</SectionTitle>
     </Card>
   );
 }

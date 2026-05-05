@@ -2,6 +2,8 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, X, Eye, EyeOff, Check, Mail } from 'lucide-react';
 import { useAuthUI } from './AuthContext';
+import { authApi } from '../../lib/api';
+import { setToken } from '../../lib/api/client';
 
 export function AuthPopup() {
   const { mode, close, setMode } = useAuthUI();
@@ -44,21 +46,32 @@ function LoginView({ onSwitch }: { onSwitch: (m: 'register' | 'password-reset') 
   const [showPwd, setShowPwd] = useState(false);
   const [remember, setRemember] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const submit = () => {
-    if (!/\S+@\S+\.\S+/.test(email)) return setError('Enter a valid email');
-    if (password.length < 4) return setError('Password is too short');
+  const submit = async () => {
+    if (!/\S+@\S+\.\S+/.test(email)) return setError('Введите корректный email');
+    if (password.length < 6) return setError('Пароль должен быть не менее 6 символов');
     setError(null);
-    // mock login
-    close();
+    setLoading(true);
+    try {
+      const { token, user } = await authApi.login(email, password);
+      setToken(token);
+      localStorage.setItem('user', JSON.stringify(user));
+      close();
+      window.location.reload();
+    } catch (e: any) {
+      setError(e.message || 'Ошибка входа');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <>
       <Header
-        eyebrow="Welcome back"
-        title="Sign in"
-        subtitle="Sign in to keep your saved bouquets, addresses and order history close."
+        eyebrow="С возвращением"
+        title="Вход"
+        subtitle="Войдите, чтобы сохранить избранные букеты, адреса и историю заказов."
       />
       <form
         className="flex flex-col gap-3"
@@ -100,35 +113,36 @@ function LoginView({ onSwitch }: { onSwitch: (m: 'register' | 'password-reset') 
         {error && <p className="text-[12px] text-brand-taupe">{error}</p>}
 
         <div className="flex items-center justify-between gap-3 pt-1">
-          <Checkbox checked={remember} onChange={setRemember} label="Remember me" />
+          <Checkbox checked={remember} onChange={setRemember} label="Запомнить меня" />
           <button
             type="button"
             onClick={() => onSwitch('password-reset')}
             className="text-[12px] tracking-[0.2em] uppercase text-brand-gray-light hover:text-brand-gray transition-colors"
           >
-            Forgot?
+            Забыли?
           </button>
         </div>
 
         <button
           type="submit"
-          className="h-12 mt-3 bg-brand-gray text-white flex items-center justify-center gap-3 uppercase tracking-[0.25em] text-[12px] hover:bg-black transition-colors"
+          disabled={loading}
+          className="h-12 mt-3 bg-brand-gray text-white flex items-center justify-center gap-3 uppercase tracking-[0.25em] text-[12px] hover:bg-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Sign in
+          {loading ? 'Вход...' : 'Войти'}
           <ArrowRight size={16} strokeWidth={1.25} />
         </button>
       </form>
 
-      <Divider>or continue with</Divider>
+      <Divider>или продолжить через</Divider>
       <SocialRow />
 
       <Footer>
-        New to Goodveen?{' '}
+        Впервые в Goodveen?{' '}
         <button
           onClick={() => onSwitch('register')}
           className="text-brand-gray underline hover:no-underline"
         >
-          Create an account
+          Создать аккаунт
         </button>
       </Footer>
     </>
@@ -144,22 +158,34 @@ function RegisterView({ onSwitch }: { onSwitch: (m: 'login') => void }) {
   const [showPwd, setShowPwd] = useState(false);
   const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const submit = () => {
-    if (name.trim().length < 2) return setError('Enter your name');
-    if (!/\S+@\S+\.\S+/.test(email)) return setError('Enter a valid email');
-    if (password.length < 6) return setError('Password must be at least 6 characters');
-    if (!agreed) return setError('Please accept the terms');
+  const submit = async () => {
+    if (name.trim().length < 2) return setError('Введите ваше имя');
+    if (!/\S+@\S+\.\S+/.test(email)) return setError('Введите корректный email');
+    if (password.length < 6) return setError('Пароль должен быть не менее 6 символов');
+    if (!agreed) return setError('Примите условия использования');
     setError(null);
-    close();
+    setLoading(true);
+    try {
+      const { token, user } = await authApi.register(email, password, name);
+      setToken(token);
+      localStorage.setItem('user', JSON.stringify(user));
+      close();
+      window.location.reload();
+    } catch (e: any) {
+      setError(e.message || 'Ошибка регистрации');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <>
       <Header
-        eyebrow="Join the studio"
-        title="Create account"
-        subtitle="Save your details, track orders and unlock loyalty rewards from your first bouquet."
+        eyebrow="Присоединяйтесь к студии"
+        title="Создать аккаунт"
+        subtitle="Сохраните свои данные, отслеживайте заказы и получайте бонусы с первого букета."
       />
       <form
         className="flex flex-col gap-3"
@@ -169,13 +195,13 @@ function RegisterView({ onSwitch }: { onSwitch: (m: 'login') => void }) {
         }}
       >
         <Field
-          label="Your name"
+          label="Ваше имя"
           value={name}
           onChange={(v) => {
             setName(v);
             setError(null);
           }}
-          placeholder="Alexander"
+          placeholder="Александр"
         />
         <Field
           label="Email"
@@ -188,13 +214,13 @@ function RegisterView({ onSwitch }: { onSwitch: (m: 'login') => void }) {
           type="email"
         />
         <Field
-          label="Password"
+          label="Пароль"
           value={password}
           onChange={(v) => {
             setPassword(v);
             setError(null);
           }}
-          placeholder="At least 6 characters"
+          placeholder="Минимум 6 символов"
           type={showPwd ? 'text' : 'password'}
           rightIcon={
             <button
@@ -214,13 +240,13 @@ function RegisterView({ onSwitch }: { onSwitch: (m: 'login') => void }) {
           onChange={setAgreed}
           label={
             <span>
-              I agree with the{' '}
+              Я согласен с{' '}
               <Link to="/terms" className="text-brand-gray underline hover:no-underline">
-                terms
+                условиями
               </Link>{' '}
-              and{' '}
+              и{' '}
               <Link to="/privacy" className="text-brand-gray underline hover:no-underline">
-                privacy policy
+                политикой конфиденциальности
               </Link>
               .
             </span>
@@ -229,23 +255,24 @@ function RegisterView({ onSwitch }: { onSwitch: (m: 'login') => void }) {
 
         <button
           type="submit"
-          className="h-12 mt-3 bg-brand-gray text-white flex items-center justify-center gap-3 uppercase tracking-[0.25em] text-[12px] hover:bg-black transition-colors"
+          disabled={loading}
+          className="h-12 mt-3 bg-brand-gray text-white flex items-center justify-center gap-3 uppercase tracking-[0.25em] text-[12px] hover:bg-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Create account
+          {loading ? 'Создание...' : 'Создать аккаунт'}
           <ArrowRight size={16} strokeWidth={1.25} />
         </button>
       </form>
 
-      <Divider>or continue with</Divider>
+      <Divider>или продолжить через</Divider>
       <SocialRow />
 
       <Footer>
-        Already have an account?{' '}
+        Уже есть аккаунт?{' '}
         <button
           onClick={() => onSwitch('login')}
           className="text-brand-gray underline hover:no-underline"
         >
-          Sign in
+          Войти
         </button>
       </Footer>
     </>
@@ -259,7 +286,7 @@ function ResetView({ onSwitch }: { onSwitch: (m: 'login') => void }) {
   const [sent, setSent] = useState(false);
 
   const submit = () => {
-    if (!/\S+@\S+\.\S+/.test(email)) return setError('Enter a valid email');
+    if (!/\S+@\S+\.\S+/.test(email)) return setError('Введите корректный email');
     setError(null);
     setSent(true);
   };
@@ -271,23 +298,23 @@ function ResetView({ onSwitch }: { onSwitch: (m: 'login') => void }) {
           <Mail size={24} strokeWidth={1.25} className="text-white" />
         </div>
         <Header
-          eyebrow="Check your inbox"
-          title="Reset link sent"
-          subtitle={`We've sent a recovery link to ${email}. Follow it within 30 minutes to set a new password.`}
+          eyebrow="Проверьте почту"
+          title="Ссылка отправлена"
+          subtitle={`Мы отправили ссылку для восстановления на ${email}. Перейдите по ней в течение 30 минут, чтобы установить новый пароль.`}
         />
         <button
           onClick={() => onSwitch('login')}
           className="h-12 bg-brand-gray text-white flex items-center justify-center gap-3 uppercase tracking-[0.25em] text-[12px] hover:bg-black transition-colors"
         >
-          Back to sign in
+          Вернуться ко входу
         </button>
         <Footer>
-          Didn't get the email?{' '}
+          Не получили письмо?{' '}
           <button
             onClick={() => setSent(false)}
             className="text-brand-gray underline hover:no-underline"
           >
-            Try another address
+            Попробовать другой адрес
           </button>
         </Footer>
       </>
@@ -297,9 +324,9 @@ function ResetView({ onSwitch }: { onSwitch: (m: 'login') => void }) {
   return (
     <>
       <Header
-        eyebrow="Forgot your password?"
-        title="Reset it"
-        subtitle="Enter the email connected to your Goodveen account and we'll send you a recovery link."
+        eyebrow="Забыли пароль?"
+        title="Восстановить"
+        subtitle="Введите email, привязанный к вашему аккаунту Goodveen, и мы отправим вам ссылку для восстановления."
       />
       <form
         className="flex flex-col gap-3"
@@ -324,18 +351,18 @@ function ResetView({ onSwitch }: { onSwitch: (m: 'login') => void }) {
           type="submit"
           className="h-12 mt-3 bg-brand-gray text-white flex items-center justify-center gap-3 uppercase tracking-[0.25em] text-[12px] hover:bg-black transition-colors"
         >
-          Send reset link
+          Отправить ссылку
           <ArrowRight size={16} strokeWidth={1.25} />
         </button>
       </form>
 
       <Footer>
-        Remembered it?{' '}
+        Вспомнили пароль?{' '}
         <button
           onClick={() => onSwitch('login')}
           className="text-brand-gray underline hover:no-underline"
         >
-          Sign in
+          Войти
         </button>
       </Footer>
     </>

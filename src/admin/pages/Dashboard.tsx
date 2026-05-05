@@ -34,7 +34,7 @@ export function Dashboard() {
         });
       } catch (e) {
         if (!active) return;
-        setError(e instanceof Error ? e.message : 'Failed to load');
+        setError(e instanceof Error ? e.message : 'Ошибка загрузки');
       }
     })();
     return () => {
@@ -44,7 +44,7 @@ export function Dashboard() {
 
   return (
     <div>
-      <h1 className="text-[28px] tracking-[0.04em] text-[#303030] mb-8">Dashboard</h1>
+      <h1 className="text-[28px] tracking-[0.04em] text-[#303030] mb-8">Главная</h1>
 
       {error && (
         <div className="text-[12px] text-red-700 bg-red-50 border border-red-100 px-3 py-2 mb-6">
@@ -53,22 +53,22 @@ export function Dashboard() {
       )}
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        <Stat label="Products" value={counts?.products} to="/admin/products" />
-        <Stat label="Events" value={counts?.events} to="/admin/events" />
-        <Stat label="Orders" value={counts?.orders} to="/admin/orders" />
-        <Stat label="Pending orders" value={counts?.pendingOrders} to="/admin/orders" highlight />
-        <Stat label="Users" value={counts?.users} to="/admin/users" />
+        <Stat label="Товары" value={counts?.products} to="/admin/products" />
+        <Stat label="События" value={counts?.events} to="/admin/events" />
+        <Stat label="Заказы" value={counts?.orders} to="/admin/orders" />
+        <Stat label="Ожидают обработки" value={counts?.pendingOrders} to="/admin/orders" highlight />
+        <Stat label="Пользователи" value={counts?.users} to="/admin/users" />
       </div>
 
       <div className="mt-12 grid md:grid-cols-2 gap-4">
         <QuickAction
-          title="Add new product"
-          description="Create a bouquet, plant or accessory listing."
+          title="Добавить товар"
+          description="Создать букет, растение или аксессуар."
           to="/admin/products/new"
         />
         <QuickAction
-          title="Publish an event"
-          description="Add a story or news item to the journal."
+          title="Опубликовать событие"
+          description="Добавить историю или новость в журнал."
           to="/admin/events/new"
         />
       </div>

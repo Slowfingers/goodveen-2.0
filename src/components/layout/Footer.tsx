@@ -20,10 +20,10 @@ export function Footer() {
           <nav className="flex flex-wrap gap-5 md:gap-10 items-center justify-center md:justify-start">
             {[
               { to: '/', label: 'Goodveen' },
-              { to: '/catalog', label: 'Catalog' },
-              { to: '/events', label: 'Events' },
-              { to: '/workshop', label: 'Workshop' },
-              { to: '/contact', label: 'Contact us' },
+              { to: '/catalog', label: 'Каталог' },
+              { to: '/events', label: 'События' },
+              { to: '/workshop', label: 'Мастерская' },
+              { to: '/contact', label: 'Контакты' },
             ].map((item) => (
               <Link
                 key={item.to}
@@ -49,7 +49,7 @@ export function Footer() {
         </div>
 
         <p className="text-white text-[12px] md:text-[14px] tracking-[0.02em] leading-[16px] max-w-md text-center md:text-left">
-          A creative floral studio where design meets emotion — crafting artistic bouquets and bespoke arrangements with a signature touch of style.
+          Креативная цветочная студия, где дизайн встречается с эмоциями — создаём художественные букеты и индивидуальные композиции с фирменным стилем.
         </p>
 
         <div className="text-white uppercase tracking-[0.2em] text-[12px] md:text-[14px] text-center md:text-left w-full">

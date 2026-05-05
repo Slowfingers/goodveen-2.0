@@ -47,47 +47,47 @@ export function CategoriesList() {
       setEditing(null);
       await refresh();
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed');
+      setError(e instanceof Error ? e.message : 'Ошибка');
     }
   };
 
   const onDelete = async (id: string) => {
-    if (!confirm('Delete this category? Products using it must be reassigned first.')) return;
+    if (!confirm('Удалить эту категорию? Сначала нужно переназначить товары.')) return;
     try {
       await categoriesApi.remove(id);
       await refresh();
     } catch (e) {
-      alert(e instanceof Error ? e.message : 'Failed to delete');
+      alert(e instanceof Error ? e.message : 'Ошибка удаления');
     }
   };
 
   return (
     <div>
-      <PageHeader title="Categories">
+      <PageHeader title="Категории">
         <Button onClick={() => setEditing({ isActive: true, sortOrder: items.length })}>
-          <Plus size={14} /> New category
+          <Plus size={14} /> Новая категория
         </Button>
       </PageHeader>
 
       {loading ? (
-        <div className="text-[12px] uppercase tracking-[0.2em] text-[#808080]">Loading…</div>
+        <div className="text-[12px] uppercase tracking-[0.2em] text-[#808080]">Загрузка…</div>
       ) : (
         <Card className="p-0 overflow-hidden">
           <table className="w-full text-[14px]">
             <thead>
               <tr className="bg-[#F7F4EF] text-left text-[11px] uppercase tracking-[0.2em] text-[#808080]">
                 <th className="px-6 py-3 w-16">#</th>
-                <th className="px-6 py-3">Name</th>
+                <th className="px-6 py-3">Название</th>
                 <th className="px-6 py-3">Slug</th>
-                <th className="px-6 py-3 w-28">Status</th>
-                <th className="px-6 py-3 w-28 text-right">Actions</th>
+                <th className="px-6 py-3 w-28">Статус</th>
+                <th className="px-6 py-3 w-28 text-right">Действия</th>
               </tr>
             </thead>
             <tbody>
               {items.length === 0 && (
                 <tr>
                   <td className="px-6 py-12 text-center text-[#808080]" colSpan={5}>
-                    No categories yet.
+                    Пока нет категорий.
                   </td>
                 </tr>
               )}
@@ -111,7 +111,7 @@ export function CategoriesList() {
                         c.isActive ? 'text-emerald-700' : 'text-[#ABA094]'
                       }`}
                     >
-                      {c.isActive ? 'Active' : 'Hidden'}
+                      {c.isActive ? 'Активна' : 'Скрыта'}
                     </span>
                   </td>
                   <td className="px-6 py-3">
@@ -172,19 +172,19 @@ function CategoryEditor({
       <div className="bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="px-6 py-4 border-b border-[#EEE] flex items-center justify-between">
           <div className="text-[14px] uppercase tracking-[0.2em] text-[#303030]">
-            {value.id ? 'Edit category' : 'New category'}
+            {value.id ? 'Редактирование категории' : 'Новая категория'}
           </div>
           <button
             type="button"
             onClick={onClose}
             className="text-[#808080] hover:text-[#303030] text-[12px] tracking-[0.2em] uppercase"
           >
-            Close
+            Закрыть
           </button>
         </div>
 
         <div className="p-6 space-y-5">
-          <Field label="Name" required>
+          <Field label="Название" required>
             <Input
               value={value.name ?? ''}
               onChange={(e) =>
@@ -196,20 +196,20 @@ function CategoryEditor({
               }
             />
           </Field>
-          <Field label="Slug" required hint="URL-friendly identifier (e.g. bouquets)">
+          <Field label="Slug" required hint="URL-идентификатор (напр. bukety)">
             <Input
               value={value.slug ?? ''}
               onChange={(e) => onChange({ ...value, slug: slugify(e.target.value) })}
             />
           </Field>
-          <Field label="Description">
+          <Field label="Описание">
             <Textarea
               rows={3}
               value={value.description ?? ''}
               onChange={(e) => onChange({ ...value, description: e.target.value })}
             />
           </Field>
-          <Field label="Cover image">
+          <Field label="Изображение обложки">
             <SingleImageUpload
               value={value.image}
               onChange={(url) => onChange({ ...value, image: url })}
@@ -217,7 +217,7 @@ function CategoryEditor({
             />
           </Field>
           <div className="grid grid-cols-2 gap-5">
-            <Field label="Sort order">
+            <Field label="Порядок сортировки">
               <Input
                 type="number"
                 value={value.sortOrder ?? 0}
@@ -230,7 +230,7 @@ function CategoryEditor({
               <Toggle
                 checked={value.isActive ?? true}
                 onChange={(v) => onChange({ ...value, isActive: v })}
-                label="Visible on site"
+                label="Активна (видна на сайте)"
               />
             </div>
           </div>
@@ -244,9 +244,11 @@ function CategoryEditor({
 
         <div className="px-6 py-4 border-t border-[#EEE] flex items-center justify-end gap-2">
           <Button variant="secondary" onClick={onClose}>
-            Cancel
+            Отмена
           </Button>
-          <Button onClick={onSave}>Save</Button>
+          <Button onClick={onSave}>
+            Сохранить
+          </Button>
         </div>
       </div>
     </div>

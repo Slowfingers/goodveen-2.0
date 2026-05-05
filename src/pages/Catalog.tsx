@@ -1,17 +1,17 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { ArrowRight, ArrowLeft, SlidersHorizontal, Check, X } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { filtersApi, productsApi } from '../lib/api';
-import type { Product as ApiProduct } from '../lib/api/types';
+import { Link, useSearchParams } from 'react-router-dom';
+import { filtersApi, productsApi, categoriesApi } from '../lib/api';
+import type { Product as ApiProduct, Category } from '../lib/api/types';
 
 type FilterKey = 'color' | 'flower' | 'price' | 'event';
 type SortValue = 'popular' | 'newest' | 'price-asc' | 'price-desc';
 
 const SORT_OPTIONS: { value: SortValue; label: string }[] = [
-  { value: 'popular', label: 'Popular first' },
-  { value: 'newest', label: 'Newest First' },
-  { value: 'price-asc', label: 'Price: Low to High' },
-  { value: 'price-desc', label: 'Price: High to Low' },
+  { value: 'popular', label: 'Сначала популярные' },
+  { value: 'newest', label: 'Сначала новые' },
+  { value: 'price-asc', label: 'Цена: по возрастанию' },
+  { value: 'price-desc', label: 'Цена: по убыванию' },
 ];
 
 const FALLBACK_COLORS = [
@@ -22,7 +22,7 @@ const FALLBACK_COLORS = [
   { name: 'Coral', hex: '#FF7F61' },
 ];
 const FALLBACK_FLOWERS = ['Roses', 'Peonies', 'Tulips', 'Lilies', 'Orchids'];
-const EVENT_OPTIONS = ['Birthday', 'Wedding', 'Anniversary', 'Sympathy', 'Just Because', 'Corporate'];
+const EVENT_OPTIONS = ['День рождения', 'Свадьба', 'Годовщина', 'Соболезнование', 'Просто так', 'Корпоратив'];
 
 type Product = {
   id: string;
@@ -81,6 +81,9 @@ function buildRows(items: Product[]): Product[][] {
 
 
 export function Catalog() {
+  const [searchParams] = useSearchParams();
+  const categorySlug = searchParams.get('category');
+  
   const [openFilter, setOpenFilter] = useState<FilterKey | null>(null);
   const [sortOpen, setSortOpen] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
@@ -94,16 +97,32 @@ export function Catalog() {
   const [loading, setLoading] = useState(true);
   const [colorOptions, setColorOptions] = useState<{ name: string; hex: string }[]>(FALLBACK_COLORS);
   const [flowerOptions, setFlowerOptions] = useState<string[]>(FALLBACK_FLOWERS);
+  const [currentCategory, setCurrentCategory] = useState<Category | null>(null);
 
   useEffect(() => {
     let active = true;
     (async () => {
       try {
-        const [items, colors, flowers] = await Promise.all([
-          productsApi.list({ onlyActive: true }),
+        setLoading(true);
+        const [categories, colors, flowers] = await Promise.all([
+          categoriesApi.list(true).catch(() => []),
           filtersApi.listColors().catch(() => []),
           filtersApi.listFlowerTypes().catch(() => []),
         ]);
+        
+        let categoryId: string | undefined;
+        if (categorySlug) {
+          const cat = categories.find((c) => c.slug === categorySlug);
+          if (cat) {
+            setCurrentCategory(cat);
+            categoryId = cat.id;
+          }
+        } else {
+          setCurrentCategory(null);
+        }
+        
+        const items = await productsApi.list({ onlyActive: true, categoryId });
+        
         if (!active) return;
         setProducts(items.map(mapApi));
         if (colors.length)
@@ -119,7 +138,7 @@ export function Catalog() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [categorySlug]);
 
   // Apply filters + sort
   const filteredProducts = useMemo(() => {
@@ -189,7 +208,7 @@ export function Catalog() {
   const toggleIn = (arr: string[], val: string) =>
     arr.includes(val) ? arr.filter((v) => v !== val) : [...arr, val];
 
-  const sortLabel = SORT_OPTIONS.find((o) => o.value === sort)?.label ?? 'Sort';
+  const sortLabel = SORT_OPTIONS.find((o) => o.value === sort)?.label ?? 'Сортировка';
 
   return (
     <div className="w-full relative">
@@ -212,10 +231,10 @@ export function Catalog() {
         <div className="relative z-10 mt-auto w-full max-w-[1440px] mx-auto px-5 md:px-10 pb-10 md:pb-0 flex flex-col gap-6 md:gap-10">
           <div className="flex flex-col items-center text-center gap-4 md:gap-6">
             <h1 className="text-white text-[56px] md:text-[80px] leading-none tracking-[0.02em] font-light">
-              Bouquets
+              {currentCategory ? currentCategory.name : 'Каталог'}
             </h1>
-            <p className="text-white/85 text-[12px] md:text-[14px] tracking-[0.25em] uppercase">
-              emotions in bloom
+            <p className="text-white/85 text-[12px] md:text-[14px] tracking-[0.25em] uppercase mt-1">
+              {currentCategory?.description || 'эмоции в цветах'}
             </p>
           </div>
 
@@ -228,10 +247,10 @@ export function Catalog() {
             <div className="hidden md:flex flex-1">
               {(
                 [
-                  { key: 'color' as FilterKey, label: 'Color', count: selectedColors.length },
-                  { key: 'flower' as FilterKey, label: 'Flower type', count: selectedFlowers.length },
-                  { key: 'price' as FilterKey, label: 'Price range', count: priceRange[0] !== 0 || priceRange[1] !== 1500 ? 1 : 0 },
-                  { key: 'event' as FilterKey, label: 'Event', count: selectedEvents.length },
+                  { key: 'color' as FilterKey, label: 'Цвет', count: selectedColors.length },
+                  { key: 'flower' as FilterKey, label: 'Тип цветов', count: selectedFlowers.length },
+                  { key: 'price' as FilterKey, label: 'Цена', count: priceRange[0] !== 0 || priceRange[1] !== 1500 ? 1 : 0 },
+                  { key: 'event' as FilterKey, label: 'Событие', count: selectedEvents.length },
                 ]
               ).map(({ key, label, count }) => (
                 <button
@@ -260,7 +279,7 @@ export function Catalog() {
               className="flex md:hidden flex-1 h-10 items-center justify-center gap-2 border border-white/30 text-white text-[12px] tracking-[0.2em] uppercase"
             >
               <SlidersHorizontal size={16} strokeWidth={1.25} />
-              Filters
+              Фильтры
             </button>
             <button
               onClick={toggleSort}
@@ -378,11 +397,11 @@ export function Catalog() {
         <div className="w-full max-w-[1360px] flex flex-col gap-5 md:gap-10">
           {loading ? (
             <div className="text-center py-20 text-[12px] tracking-[0.2em] uppercase text-brand-gray-light">
-              Loading…
+              Загрузка…
             </div>
           ) : rows.length === 0 ? (
             <div className="text-center py-20 text-[13px] text-brand-gray-light">
-              No products match your filters.
+              Нет товаров, соответствующих фильтрам.
             </div>
           ) : (
             rows.map((row, idx) => <CatalogRow key={idx} row={row} />)
@@ -456,10 +475,10 @@ export function Catalog() {
         <div className="w-full max-w-[1360px] flex flex-col gap-6 md:gap-10 items-center">
           <div className="flex flex-col items-center">
             <h2 className="text-[48px] md:text-[80px] font-normal leading-[1] md:leading-[80px] tracking-[0.02em] text-brand-gray text-center">
-              Highlights
+              Особенное
             </h2>
             <p className="text-[12px] md:text-[14px] tracking-[0.2em] text-brand-gray-light uppercase text-center mt-1">
-              From past and upcoming events
+              Из прошлых и грядущих событий
             </p>
           </div>
 
@@ -527,7 +546,7 @@ export function Catalog() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between px-5 h-14 border-b border-brand-border">
-              <span className="text-[14px] tracking-[0.2em] uppercase">Sort by</span>
+              <span className="text-[14px] tracking-[0.2em] uppercase">Сортировка</span>
               <button onClick={() => setSortOpen(false)} aria-label="Close">
                 <X size={20} strokeWidth={1.25} />
               </button>
@@ -684,13 +703,13 @@ function FilterPopover({ children, anchor, onApply, onReset }: FilterPopoverProp
           onClick={onApply}
           className="h-11 px-6 bg-brand-gray text-white text-[12px] tracking-[0.2em] uppercase hover:bg-black transition-colors"
         >
-          Apply
+          Применить
         </button>
         <button
           onClick={onReset}
           className="text-[12px] tracking-[0.2em] uppercase text-brand-gray-light hover:text-brand-gray transition-colors"
         >
-          Reset
+          Сбросить
         </button>
       </div>
     </div>
@@ -738,7 +757,7 @@ function PriceRangeControl({ value, onChange }: PriceRangeProps) {
     <div className="flex flex-col gap-5">
       <div className="flex items-center gap-3">
         <label className="flex-1 flex flex-col gap-1">
-          <span className="text-[11px] tracking-[0.2em] uppercase text-brand-gray-light">From</span>
+          <span className="text-[11px] tracking-[0.2em] uppercase text-brand-gray-light">От</span>
           <input
             type="number"
             value={min}
@@ -750,7 +769,7 @@ function PriceRangeControl({ value, onChange }: PriceRangeProps) {
         </label>
         <span className="text-brand-gray-light pt-5">—</span>
         <label className="flex-1 flex flex-col gap-1">
-          <span className="text-[11px] tracking-[0.2em] uppercase text-brand-gray-light">To</span>
+          <span className="text-[11px] tracking-[0.2em] uppercase text-brand-gray-light">До</span>
           <input
             type="number"
             value={max}
@@ -808,13 +827,13 @@ function MobileFiltersDrawer({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 h-14 border-b border-brand-border">
-          <span className="text-[14px] tracking-[0.2em] uppercase">Filters</span>
+          <span className="text-[14px] tracking-[0.2em] uppercase">Фильтры</span>
           <button onClick={onClose} aria-label="Close">
             <X size={20} strokeWidth={1.25} />
           </button>
         </div>
         <div className="flex-1 overflow-y-auto px-5 py-5 flex flex-col gap-6">
-          <Section title="Color">
+          <Section title="Цвет">
             <div className="grid grid-cols-2 gap-2">
               {colorOptions.map((c) => {
                 const checked = selectedColors.includes(c.name);
@@ -836,17 +855,17 @@ function MobileFiltersDrawer({
               })}
             </div>
           </Section>
-          <Section title="Flower type">
+          <Section title="Тип цветов">
             <CheckboxList
               options={flowerOptions}
               selected={selectedFlowers}
               onToggle={(v) => setSelectedFlowers(toggle(selectedFlowers, v))}
             />
           </Section>
-          <Section title="Price range">
+          <Section title="Диапазон цен">
             <PriceRangeControl value={priceRange} onChange={setPriceRange} />
           </Section>
-          <Section title="Event">
+          <Section title="Событие">
             <CheckboxList
               options={EVENT_OPTIONS}
               selected={selectedEvents}
@@ -864,13 +883,13 @@ function MobileFiltersDrawer({
             }}
             className="flex-1 h-14 text-[12px] tracking-[0.2em] uppercase text-brand-gray-light"
           >
-            Reset
+            Сбросить
           </button>
           <button
             onClick={onClose}
             className="flex-1 h-14 bg-brand-gray text-white text-[12px] tracking-[0.2em] uppercase"
           >
-            Apply
+            Применить
           </button>
         </div>
       </div>

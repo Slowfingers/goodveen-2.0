@@ -105,7 +105,7 @@ export function ProductEdit() {
           setForm((f) => ({ ...f, categoryId: cats[0].id }));
         }
       } catch (e) {
-        setError(e instanceof Error ? e.message : 'Failed to load');
+        setError(e instanceof Error ? e.message : 'Ошибка загрузки');
       } finally {
         setLoading(false);
       }
@@ -157,7 +157,7 @@ export function ProductEdit() {
   // === Sizes ===
   const addSize = async () => {
     if (isNew) {
-      alert('Save the product first, then you can add sizes.');
+      alert('Сначала сохраните товар, затем можно добавить размеры.');
       return;
     }
     try {
@@ -170,7 +170,7 @@ export function ProductEdit() {
       });
       setSizes((s) => [...s, created]);
     } catch (e) {
-      alert(e instanceof Error ? e.message : 'Failed');
+      alert(e instanceof Error ? e.message : 'Ошибка');
     }
   };
   const updateSizeField = (sizeId: string, patch: Partial<ProductSize>) =>
@@ -190,12 +190,12 @@ export function ProductEdit() {
     }
   };
   const removeSize = async (sizeId: string) => {
-    if (!confirm('Remove this size?')) return;
+    if (!confirm('Удалить этот размер?')) return;
     try {
       await productsApi.removeSize(sizeId);
       setSizes((s) => s.filter((x) => x.id !== sizeId));
     } catch (e) {
-      alert(e instanceof Error ? e.message : 'Failed');
+      alert(e instanceof Error ? e.message : 'Ошибка');
     }
   };
 
@@ -208,7 +208,7 @@ export function ProductEdit() {
     const removed = images.filter((i) => !next.includes(i.url));
 
     if (isNew) {
-      alert('Save the product first, then you can manage images.');
+      alert('Сначала сохраните товар, затем можно добавить изображения.');
       return;
     }
 
@@ -229,7 +229,7 @@ export function ProductEdit() {
         ...additions,
       ]);
     } catch (e) {
-      alert(e instanceof Error ? e.message : 'Image sync failed');
+      alert(e instanceof Error ? e.message : 'Ошибка синхронизации изображений');
     }
   };
 
@@ -242,21 +242,21 @@ export function ProductEdit() {
   return (
     <div>
       <PageHeader
-        title={isNew ? 'New product' : form.name || 'Edit product'}
+        title={isNew ? 'Новый товар' : form.name || 'Редактирование товара'}
         back={
           <Link
             to="/admin/products"
             className="inline-flex items-center gap-1 text-[11px] uppercase tracking-[0.2em] text-[#808080] hover:text-[#303030] mb-2"
           >
-            <ArrowLeft size={12} /> Back to products
+            <ArrowLeft size={12} /> Назад к товарам
           </Link>
         }
       >
         <Button variant="secondary" onClick={() => navigate('/admin/products')}>
-          Cancel
+          Отмена
         </Button>
         <Button onClick={onSave} disabled={saving}>
-          {saving ? 'Saving…' : 'Save'}
+          {saving ? 'Сохранение…' : 'Сохранить'}
         </Button>
       </PageHeader>
 
@@ -270,9 +270,9 @@ export function ProductEdit() {
         <div className="space-y-6">
           {/* Basic */}
           <Card>
-            <SectionTitle>Basic info</SectionTitle>
+            <SectionTitle>Основная информация</SectionTitle>
             <div className="space-y-5">
-              <Field label="Name" required>
+              <Field label="Название" required>
                 <Input
                   value={form.name}
                   onChange={(e) =>
@@ -284,25 +284,25 @@ export function ProductEdit() {
                   }
                 />
               </Field>
-              <Field label="Slug" required hint="URL-friendly identifier">
+              <Field label="Slug" required hint="URL-идентификатор">
                 <Input
                   value={form.slug}
                   onChange={(e) => setForm((f) => ({ ...f, slug: slugify(e.target.value) }))}
                 />
               </Field>
-              <Field label="Description">
+              <Field label="Описание">
                 <Textarea
                   rows={4}
                   value={form.description}
                   onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
                 />
               </Field>
-              <Field label="Category" required>
+              <Field label="Категория" required>
                 <Select
                   value={form.categoryId}
                   onChange={(e) => setForm((f) => ({ ...f, categoryId: e.target.value }))}
                 >
-                  <option value="">Select category…</option>
+                  <option value="">Выберите категорию…</option>
                   {categories.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.name}
@@ -317,15 +317,15 @@ export function ProductEdit() {
           <Card>
             <div className="flex items-center justify-between mb-4 pb-2 border-b border-[#EEE]">
               <h3 className="text-[13px] uppercase tracking-[0.2em] text-[#303030]">
-                Sizes &amp; pricing
+                Размеры и цены
               </h3>
               <Button variant="secondary" onClick={addSize}>
-                <Plus size={14} /> Add size
+                <Plus size={14} /> Добавить размер
               </Button>
             </div>
             {sizes.length === 0 && (
               <div className="text-[13px] text-[#808080] italic">
-                {isNew ? 'Save the product first to add sizes.' : 'No sizes yet — add your first one.'}
+                {isNew ? 'Сначала сохраните товар, чтобы добавить размеры.' : 'Пока нет размеров — добавьте первый.'}
               </div>
             )}
             <div className="space-y-3">
@@ -335,14 +335,14 @@ export function ProductEdit() {
                   className="grid grid-cols-1 md:grid-cols-[1fr_1fr_1fr_auto_auto] gap-3 items-center border border-[#EEE] p-3"
                 >
                   <Input
-                    placeholder="Name (M / L / XL)"
+                    placeholder="Название (M / L / XL)"
                     value={s.name}
                     onChange={(e) => updateSizeField(s.id, { name: e.target.value })}
                     onBlur={() => persistSize(s)}
                   />
                   <Input
                     type="number"
-                    placeholder="Price"
+                    placeholder="Цена"
                     value={s.price}
                     onChange={(e) =>
                       updateSizeField(s.id, { price: Number(e.target.value) || 0 })
@@ -350,7 +350,7 @@ export function ProductEdit() {
                     onBlur={() => persistSize(s)}
                   />
                   <Input
-                    placeholder="Height (35 cm)"
+                    placeholder="Высота (35 см)"
                     value={s.height ?? ''}
                     onChange={(e) => updateSizeField(s.id, { height: e.target.value })}
                     onBlur={() => persistSize(s)}
@@ -378,10 +378,10 @@ export function ProductEdit() {
 
           {/* Images */}
           <Card>
-            <SectionTitle>Gallery</SectionTitle>
+            <SectionTitle>Галерея</SectionTitle>
             {isNew ? (
               <div className="text-[13px] text-[#808080] italic">
-                Save the product first to upload images.
+                Сначала сохраните товар, чтобы загрузить изображения.
               </div>
             ) : (
               <GalleryUpload value={galleryUrls} onChange={onGalleryChange} folder="products" />
@@ -390,20 +390,20 @@ export function ProductEdit() {
 
           {/* Composition + Care */}
           <Card>
-            <SectionTitle>Composition &amp; care</SectionTitle>
+            <SectionTitle>Состав и уход</SectionTitle>
             <div className="space-y-5">
-              <Field label="Composition" hint="Press Enter to add an item">
+              <Field label="Состав" hint="Нажмите Enter для добавления">
                 <TagsInput
                   value={form.composition}
                   onChange={(v) => setForm((f) => ({ ...f, composition: v }))}
-                  placeholder="e.g. Garden roses · 9 stems"
+                  placeholder="напр. Садовые розы · 9 стеблей"
                 />
               </Field>
-              <Field label="Care tips" hint="Press Enter to add a tip">
+              <Field label="Советы по уходу" hint="Нажмите Enter для добавления">
                 <TagsInput
                   value={form.careTips}
                   onChange={(v) => setForm((f) => ({ ...f, careTips: v }))}
-                  placeholder="e.g. Trim stems every 2 days"
+                  placeholder="напр. Подрезайте стебли каждые 2 дня"
                 />
               </Field>
             </div>
@@ -413,23 +413,23 @@ export function ProductEdit() {
         {/* Right column */}
         <div className="space-y-6">
           <Card>
-            <SectionTitle>Visibility</SectionTitle>
+            <SectionTitle>Видимость</SectionTitle>
             <div className="space-y-4">
               <Toggle
                 checked={form.isActive}
                 onChange={(v) => setForm((f) => ({ ...f, isActive: v }))}
-                label="Active (visible on site)"
+                label="Активен (виден на сайте)"
               />
               <Toggle
                 checked={form.isFeatured}
                 onChange={(v) => setForm((f) => ({ ...f, isFeatured: v }))}
-                label="Featured on home page"
+                label="Рекомендуемый на главной"
               />
             </div>
           </Card>
 
           <Card>
-            <SectionTitle>Filters — colors</SectionTitle>
+            <SectionTitle>Фильтры — цвета</SectionTitle>
             <ChipMultiSelect
               options={colorOptions
                 .filter((c) => c.isActive)
@@ -440,7 +440,7 @@ export function ProductEdit() {
           </Card>
 
           <Card>
-            <SectionTitle>Filters — flower types</SectionTitle>
+            <SectionTitle>Фильтры — типы цветов</SectionTitle>
             <ChipMultiSelect
               options={flowerOptions
                 .filter((c) => c.isActive)

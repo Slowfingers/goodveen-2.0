@@ -33,7 +33,7 @@ export function AboutPageEdit() {
         workshopPhotos: data.workshopPhotos,
       });
     } catch (e) {
-      alert(e instanceof Error ? e.message : 'Failed');
+      alert(e instanceof Error ? e.message : 'Ошибка');
     } finally {
       setSaving(false);
     }
@@ -44,15 +44,15 @@ export function AboutPageEdit() {
 
   return (
     <div>
-      <PageHeader title="About page">
+      <PageHeader title="Страница О нас">
         <Button onClick={save} disabled={saving}>
-          {saving ? 'Saving…' : 'Save'}
+          {saving ? 'Сохранение…' : 'Сохранить'}
         </Button>
       </PageHeader>
 
       <div className="space-y-6">
         <Card>
-          <SectionTitle>Our space — slider images</SectionTitle>
+          <SectionTitle>Наше пространство — изображения для слайдера</SectionTitle>
           <GalleryUpload
             value={data.spaceImages}
             onChange={(v) => setData({ ...data, spaceImages: v })}
@@ -61,7 +61,7 @@ export function AboutPageEdit() {
         </Card>
 
         <Card>
-          <SectionTitle>Workshop life — photos</SectionTitle>
+          <SectionTitle>Жизнь мастерской — фотографии</SectionTitle>
           <GalleryUpload
             value={data.workshopPhotos}
             onChange={(v) => setData({ ...data, workshopPhotos: v })}

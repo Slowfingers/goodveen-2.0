@@ -10,20 +10,22 @@ import {
   Tags,
   Sliders,
   Info,
+  Mail,
   LogOut,
 } from 'lucide-react';
 import { useAdminAuth } from './AdminAuthContext';
 
 const NAV: { to: string; label: string; icon: ComponentType<{ size?: number }>; end?: boolean }[] = [
-  { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
-  { to: '/admin/products', label: 'Products', icon: Package },
-  { to: '/admin/categories', label: 'Categories', icon: Tags },
-  { to: '/admin/events', label: 'Events', icon: Calendar },
-  { to: '/admin/orders', label: 'Orders', icon: ShoppingBag },
-  { to: '/admin/users', label: 'Users', icon: Users },
-  { to: '/admin/filters', label: 'Filters', icon: Sliders },
-  { to: '/admin/pages', label: 'Page covers', icon: ImageIcon },
-  { to: '/admin/about', label: 'About page', icon: Info },
+  { to: '/admin', label: 'Главная', icon: LayoutDashboard, end: true },
+  { to: '/admin/products', label: 'Товары', icon: Package },
+  { to: '/admin/categories', label: 'Категории', icon: Tags },
+  { to: '/admin/events', label: 'События', icon: Calendar },
+  { to: '/admin/orders', label: 'Заказы', icon: ShoppingBag },
+  { to: '/admin/users', label: 'Пользователи', icon: Users },
+  { to: '/admin/filters', label: 'Фильтры', icon: Sliders },
+  { to: '/admin/pages', label: 'Обложки страниц', icon: ImageIcon },
+  { to: '/admin/about', label: 'Страница О нас', icon: Info },
+  { to: '/admin/contact', label: 'Контакты', icon: Mail },
 ];
 
 export function AdminLayout() {
@@ -37,7 +39,7 @@ export function AdminLayout() {
         <div className="px-6 py-6 border-b border-[#EEE]">
           <div className="text-[18px] tracking-[0.18em] uppercase text-[#303030]">Goodveen</div>
           <div className="text-[10px] tracking-[0.24em] uppercase text-[#808080] mt-0.5">
-            Admin panel
+            Админ-панель
           </div>
         </div>
 
@@ -74,7 +76,7 @@ export function AdminLayout() {
             }}
             className="mt-3 flex items-center gap-2 text-[11px] tracking-[0.18em] uppercase text-[#808080] hover:text-[#303030]"
           >
-            <LogOut size={14} /> Sign out
+            <LogOut size={14} /> Выйти
           </button>
         </div>
       </aside>

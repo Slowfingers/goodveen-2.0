@@ -37,21 +37,21 @@ export function ProductsList() {
   }, [items, search, categoryId, statusFilter]);
 
   const onDelete = async (id: string) => {
-    if (!confirm('Delete this product? This action cannot be undone.')) return;
+    if (!confirm('Удалить этот товар? Это действие нельзя отменить.')) return;
     try {
       await productsApi.remove(id);
       await refresh();
     } catch (e) {
-      alert(e instanceof Error ? e.message : 'Failed to delete');
+      alert(e instanceof Error ? e.message : 'Ошибка удаления');
     }
   };
 
   return (
     <div>
-      <PageHeader title="Products">
+      <PageHeader title="Товары">
         <Link to="/admin/products/new">
           <Button>
-            <Plus size={14} /> New product
+            <Plus size={14} /> Новый товар
           </Button>
         </Link>
       </PageHeader>
@@ -64,14 +64,14 @@ export function ProductsList() {
               className="absolute left-3 top-1/2 -translate-y-1/2 text-[#808080]"
             />
             <Input
-              placeholder="Search by name…"
+              placeholder="Поиск по названию…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9"
             />
           </div>
           <Select value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
-            <option value="">All categories</option>
+            <option value="">Все категории</option>
             {categories.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
@@ -82,9 +82,9 @@ export function ProductsList() {
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as 'all' | 'active' | 'hidden')}
           >
-            <option value="all">All statuses</option>
-            <option value="active">Active</option>
-            <option value="hidden">Hidden</option>
+            <option value="all">Все статусы</option>
+            <option value="active">Активные</option>
+            <option value="hidden">Скрытые</option>
           </Select>
         </div>
       </Card>
@@ -93,25 +93,25 @@ export function ProductsList() {
         <table className="w-full text-[14px]">
           <thead>
             <tr className="bg-[#F7F4EF] text-left text-[11px] uppercase tracking-[0.2em] text-[#808080]">
-              <th className="px-6 py-3">Product</th>
-              <th className="px-6 py-3">Category</th>
-              <th className="px-6 py-3">Price from</th>
-              <th className="px-6 py-3 w-28">Status</th>
-              <th className="px-6 py-3 w-28 text-right">Actions</th>
+              <th className="px-6 py-3">Товар</th>
+              <th className="px-6 py-3">Категория</th>
+              <th className="px-6 py-3">Цена от</th>
+              <th className="px-6 py-3 w-28">Статус</th>
+              <th className="px-6 py-3 w-28 text-right">Действия</th>
             </tr>
           </thead>
           <tbody>
             {loading && (
               <tr>
                 <td className="px-6 py-12 text-center text-[#808080]" colSpan={5}>
-                  Loading…
+                  Загрузка…
                 </td>
               </tr>
             )}
             {!loading && filtered.length === 0 && (
               <tr>
                 <td className="px-6 py-12 text-center text-[#808080]" colSpan={5}>
-                  {items.length === 0 ? 'No products yet.' : 'Nothing matches your filters.'}
+                  {items.length === 0 ? 'Пока нет товаров.' : 'Ничего не найдено по вашим фильтрам.'}
                 </td>
               </tr>
             )}
@@ -148,11 +148,11 @@ export function ProductsList() {
                         p.isActive ? 'text-emerald-700' : 'text-[#ABA094]'
                       }`}
                     >
-                      {p.isActive ? 'Active' : 'Hidden'}
+                      {p.isActive ? 'Активен' : 'Скрыт'}
                     </span>
                     {p.isFeatured && (
                       <span className="ml-2 text-[11px] uppercase tracking-[0.18em] text-[#7A5C2A]">
-                        Featured
+                        Рекомендуемый
                       </span>
                     )}
                   </td>

@@ -1,21 +1,25 @@
 import { Link, useLocation } from 'react-router-dom';
-import { User, ShoppingBag, Menu, X } from 'lucide-react';
+import { User, ShoppingBag, Menu, X, ChevronDown } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import { useState, useEffect } from 'react';
 import { useCartUI } from '../cart/CartContext';
 import { useAuthUI } from '../auth/AuthContext';
+import { categoriesApi } from '@/src/lib/api';
+import type { Category } from '@/src/lib/api/types';
 
 const NAV_ITEMS: { to: string; label: string }[] = [
   { to: '/', label: 'Goodveen' },
-  { to: '/catalog', label: 'Catalog' },
-  { to: '/events', label: 'Events' },
-  { to: '/workshop', label: 'Workshop' },
-  { to: '/contact', label: 'Contact us' },
+  { to: '/catalog', label: 'Каталог' },
+  { to: '/events', label: 'События' },
+  { to: '/workshop', label: 'Мастерская' },
+  { to: '/contact', label: 'Контакты' },
 ];
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [catalogOpen, setCatalogOpen] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
   const location = useLocation();
   const cartUI = useCartUI();
   const authUI = useAuthUI();
@@ -29,7 +33,12 @@ export function Header() {
   }, []);
 
   useEffect(() => {
+    categoriesApi.list(true).then(setCategories).catch(() => {});
+  }, []);
+
+  useEffect(() => {
     setMobileOpen(false);
+    setCatalogOpen(false);
   }, [location.pathname]);
 
   const onLight = isScrolled || !isHero;
@@ -53,6 +62,47 @@ export function Header() {
             // Goodveen (home) entry never shows an active state — it acts as the brand link.
             const active =
               item.to === '/' ? false : location.pathname.startsWith(item.to);
+            
+            if (item.to === '/catalog') {
+              return (
+                <div key={item.to} className="flex-1 h-full relative">
+                  <button
+                    onClick={() => setCatalogOpen(!catalogOpen)}
+                    className={cn(
+                      'w-full h-full flex items-center justify-center gap-1 uppercase tracking-[0.2em] text-[12px] transition-colors',
+                      active
+                        ? 'bg-white text-brand-gray'
+                        : onLight
+                        ? 'hover:bg-brand-border'
+                        : 'hover:bg-white/10'
+                    )}
+                  >
+                    {item.label}
+                    <ChevronDown size={14} className={cn('transition-transform', catalogOpen && 'rotate-180')} />
+                  </button>
+                  {catalogOpen && (
+                    <div className="absolute top-full left-0 right-0 bg-white text-brand-gray shadow-lg z-50 border-t border-brand-border">
+                      <Link
+                        to="/catalog"
+                        className="block px-5 py-3 text-[12px] tracking-[0.2em] uppercase hover:bg-brand-border transition-colors border-b border-brand-border"
+                      >
+                        Все товары
+                      </Link>
+                      {categories.map((cat) => (
+                        <Link
+                          key={cat.id}
+                          to={`/catalog?category=${cat.slug}`}
+                          className="block px-5 py-3 text-[12px] tracking-[0.2em] uppercase hover:bg-brand-border transition-colors border-b border-brand-border last:border-b-0"
+                        >
+                          {cat.name}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            }
+            
             return (
               <Link
                 key={item.to}
@@ -149,6 +199,43 @@ export function Header() {
             {NAV_ITEMS.map((item) => {
               const active =
                 item.to === '/' ? false : location.pathname.startsWith(item.to);
+              
+              if (item.to === '/catalog') {
+                return (
+                  <div key={item.to}>
+                    <button
+                      onClick={() => setCatalogOpen(!catalogOpen)}
+                      className={cn(
+                        'w-full h-[56px] px-5 flex items-center justify-between uppercase tracking-[0.2em] text-[12px] border-b border-brand-border',
+                        active && 'bg-brand-border'
+                      )}
+                    >
+                      {item.label}
+                      <ChevronDown size={14} className={cn('transition-transform', catalogOpen && 'rotate-180')} />
+                    </button>
+                    {catalogOpen && (
+                      <div className="bg-brand-border/30">
+                        <Link
+                          to="/catalog"
+                          className="block h-[48px] px-8 flex items-center text-[11px] tracking-[0.2em] uppercase border-b border-brand-border"
+                        >
+                          Все товары
+                        </Link>
+                        {categories.map((cat) => (
+                          <Link
+                            key={cat.id}
+                            to={`/catalog?category=${cat.slug}`}
+                            className="block h-[48px] px-8 flex items-center text-[11px] tracking-[0.2em] uppercase border-b border-brand-border last:border-b-0"
+                          >
+                            {cat.name}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+              
               return (
                 <Link
                   key={item.to}

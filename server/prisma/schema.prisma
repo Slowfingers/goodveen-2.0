@@ -333,3 +333,20 @@ model PageSetting {
 
   @@map("page_settings")
 }
+
+// ==================== CONTACT SETTINGS ====================
+model ContactSettings {
+  id          String   @id @default("contact")
+  address     String   @default("Tashkent, Uzbekiston Ovozi street 2/1")
+  addressNote String?  @default("Mirobod, near the Botanical garden entrance")
+  phones      String   @default("[\"+ 998 71 233 97 80\",\"+998 99 955 90 90\",\"+998 71 120 06 04\"]")
+  email       String   @default("hello@goodveen.uz")
+  emailNote   String?  @default("For wholesale & press")
+  openHours   String   @default("Every day · 09:00 — 21:00")
+  instagram   String?
+  facebook    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("contact_settings")
+}

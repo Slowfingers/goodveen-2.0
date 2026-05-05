@@ -65,3 +65,56 @@ pagesRouter.put('/about', requireAdmin, async (req, res) => {
   });
   res.json(serializeAbout(about));
 });
+
+// ===== Contact settings =====
+pagesRouter.get('/contact', async (_req, res) => {
+  let contact = await prisma.contactSettings.findUnique({ where: { id: 'contact' } });
+  if (!contact) {
+    contact = await prisma.contactSettings.create({ data: { id: 'contact' } });
+  }
+  const phones = JSON.parse(contact.phones || '[]');
+  res.json({ ...contact, phones });
+});
+
+const contactSchema = z.object({
+  address: z.string().optional(),
+  addressNote: z.string().optional().nullable(),
+  phones: z.array(z.string()).optional(),
+  email: z.string().optional(),
+  emailNote: z.string().optional().nullable(),
+  openHours: z.string().optional(),
+  instagram: z.string().optional().nullable(),
+  facebook: z.string().optional().nullable(),
+});
+
+pagesRouter.put('/contact', requireAdmin, async (req, res) => {
+  const parsed = contactSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const data = parsed.data;
+  const contact = await prisma.contactSettings.upsert({
+    where: { id: 'contact' },
+    update: {
+      ...(data.address !== undefined && { address: data.address }),
+      ...(data.addressNote !== undefined && { addressNote: data.addressNote }),
+      ...(data.phones !== undefined && { phones: JSON.stringify(data.phones) }),
+      ...(data.email !== undefined && { email: data.email }),
+      ...(data.emailNote !== undefined && { emailNote: data.emailNote }),
+      ...(data.openHours !== undefined && { openHours: data.openHours }),
+      ...(data.instagram !== undefined && { instagram: data.instagram }),
+      ...(data.facebook !== undefined && { facebook: data.facebook }),
+    },
+    create: {
+      id: 'contact',
+      address: data.address || 'Tashkent, Uzbekiston Ovozi street 2/1',
+      addressNote: data.addressNote,
+      phones: JSON.stringify(data.phones || []),
+      email: data.email || 'hello@goodveen.uz',
+      emailNote: data.emailNote,
+      openHours: data.openHours || 'Every day · 09:00 — 21:00',
+      instagram: data.instagram,
+      facebook: data.facebook,
+    },
+  });
+  const phones = JSON.parse(contact.phones || '[]');
+  res.json({ ...contact, phones });
+});

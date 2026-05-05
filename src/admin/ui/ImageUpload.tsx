@@ -158,7 +158,7 @@ export function GalleryUpload({
           ) : (
             <ImagePlus size={18} className="text-[#808080]" />
           )}
-          <span className="text-[10px] tracking-[0.2em] uppercase text-[#808080]">Add</span>
+          <span className="text-[10px] tracking-[0.2em] uppercase text-[#808080]">Добавить</span>
         </button>
       </div>
 

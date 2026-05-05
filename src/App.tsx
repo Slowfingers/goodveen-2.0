@@ -30,6 +30,8 @@ import { Cabinet } from './pages/Cabinet';
 import { Events } from './pages/Events';
 import { EventDetails } from './pages/EventDetails';
 import { Contact } from './pages/Contact';
+import { Workshop } from './pages/Workshop';
+import { About } from './pages/About';
 import { adminRouteTree } from './admin/AdminRoutes';
 
 function App() {
@@ -43,7 +45,8 @@ function App() {
           <Route path="product/:id" element={<Product />} />
           <Route path="events" element={<Events />} />
           <Route path="events/:id" element={<EventDetails />} />
-          <Route path="workshop" element={<Events />} /> 
+          <Route path="workshop" element={<Workshop />} />
+          <Route path="about" element={<About />} />
           <Route path="contact" element={<Contact />} />
           <Route path="login" element={<AuthRoute mode="login" />} />
           <Route path="register" element={<AuthRoute mode="register" />} />

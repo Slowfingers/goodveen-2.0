@@ -24,21 +24,21 @@ export function EventsList() {
   }, []);
 
   const onDelete = async (id: string) => {
-    if (!confirm('Delete this event?')) return;
+    if (!confirm('Удалить это событие?')) return;
     try {
       await eventsApi.remove(id);
       await refresh();
     } catch (e) {
-      alert(e instanceof Error ? e.message : 'Failed');
+      alert(e instanceof Error ? e.message : 'Ошибка');
     }
   };
 
   return (
     <div>
-      <PageHeader title="Events">
+      <PageHeader title="События">
         <Link to="/admin/events/new">
           <Button>
-            <Plus size={14} /> New event
+            <Plus size={14} /> Новое событие
           </Button>
         </Link>
       </PageHeader>
@@ -47,25 +47,25 @@ export function EventsList() {
         <table className="w-full text-[14px]">
           <thead>
             <tr className="bg-[#F7F4EF] text-left text-[11px] uppercase tracking-[0.2em] text-[#808080]">
-              <th className="px-6 py-3">Event</th>
-              <th className="px-6 py-3 w-32">Tag</th>
-              <th className="px-6 py-3 w-32">Published</th>
-              <th className="px-6 py-3 w-28">Status</th>
-              <th className="px-6 py-3 w-28 text-right">Actions</th>
+              <th className="px-6 py-3">Событие</th>
+              <th className="px-6 py-3 w-32">Тег</th>
+              <th className="px-6 py-3 w-32">Опубликовано</th>
+              <th className="px-6 py-3 w-28">Статус</th>
+              <th className="px-6 py-3 w-28 text-right">Действия</th>
             </tr>
           </thead>
           <tbody>
             {loading && (
               <tr>
                 <td className="px-6 py-12 text-center text-[#808080]" colSpan={5}>
-                  Loading…
+                  Загрузка…
                 </td>
               </tr>
             )}
             {!loading && items.length === 0 && (
               <tr>
                 <td className="px-6 py-12 text-center text-[#808080]" colSpan={5}>
-                  No events yet.
+                  Пока нет событий.
                 </td>
               </tr>
             )}
@@ -95,7 +95,7 @@ export function EventsList() {
                       e.isPublished ? 'text-emerald-700' : 'text-[#ABA094]'
                     }`}
                   >
-                    {e.isPublished ? 'Published' : 'Draft'}
+                    {e.isPublished ? 'Опубликовано' : 'Черновик'}
                   </span>
                 </td>
                 <td className="px-6 py-3">

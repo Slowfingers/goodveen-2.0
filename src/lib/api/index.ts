@@ -2,6 +2,7 @@ import { apiRequest } from './client';
 import type {
   AboutPage,
   Category,
+  ContactSettings,
   Event,
   FilterColor,
   FilterFlowerType,
@@ -142,6 +143,9 @@ export const pagesApi = {
   upsertSetting: (input: Partial<PageSetting> & { pageKey: string }) =>
     apiRequest<PageSetting>('/api/pages/settings', { method: 'PUT', body: input }),
   getAbout: () => apiRequest<AboutPage>('/api/pages/about'),
-  updateAbout: (input: { spaceImages?: string[]; workshopPhotos?: string[] }) =>
+  updateAbout: (input: Partial<AboutPage>) =>
     apiRequest<AboutPage>('/api/pages/about', { method: 'PUT', body: input }),
+  getContact: () => apiRequest<ContactSettings>('/api/pages/contact'),
+  updateContact: (input: Partial<ContactSettings>) =>
+    apiRequest<ContactSettings>('/api/pages/contact', { method: 'PUT', body: input }),
 };

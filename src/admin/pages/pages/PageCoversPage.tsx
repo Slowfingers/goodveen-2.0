@@ -5,11 +5,12 @@ import { Button, Card, Field, Input, PageHeader, SectionTitle, Textarea } from '
 import { SingleImageUpload } from '../../ui/ImageUpload';
 
 const DEFAULT_PAGES: { key: string; label: string }[] = [
-  { key: 'home', label: 'Home page' },
-  { key: 'catalog', label: 'Catalog' },
-  { key: 'events', label: 'Events' },
-  { key: 'contacts', label: 'Contacts' },
-  { key: 'about', label: 'About' },
+  { key: 'home', label: 'Главная страница' },
+  { key: 'catalog', label: 'Каталог' },
+  { key: 'events', label: 'События' },
+  { key: 'workshop', label: 'Мастерская' },
+  { key: 'about', label: 'О нас' },
+  { key: 'contacts', label: 'Контакты' },
 ];
 
 export function PageCoversPage() {
@@ -85,9 +86,9 @@ export function PageCoversPage() {
 
   return (
     <div>
-      <PageHeader title="Page covers" />
+      <PageHeader title="Обложки страниц" />
 
-      {loading && <div className="text-[12px] text-[#808080]">Loading…</div>}
+      {loading && <div className="text-[12px] text-[#808080]">Загрузка…</div>}
 
       <div className="space-y-6">
         {merged.map((p) => (
@@ -95,7 +96,7 @@ export function PageCoversPage() {
             <div className="flex items-center justify-between mb-4 pb-2 border-b border-[#EEE]">
               <h3 className="text-[13px] uppercase tracking-[0.2em] text-[#303030]">{p.label}</h3>
               <Button onClick={() => save(p.pageKey)} disabled={saving === p.pageKey}>
-                {saving === p.pageKey ? 'Saving…' : 'Save'}
+                {saving === p.pageKey ? 'Сохранение…' : 'Сохранить'}
               </Button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-6">
@@ -106,20 +107,20 @@ export function PageCoversPage() {
                 height="h-64"
               />
               <div className="space-y-4">
-                <Field label="Title">
+                <Field label="Заголовок">
                   <Input
                     value={p.title ?? ''}
                     onChange={(e) => update(p.pageKey, { title: e.target.value })}
                   />
                 </Field>
-                <Field label="Subtitle">
+                <Field label="Подзаголовок">
                   <Textarea
                     rows={3}
                     value={p.subtitle ?? ''}
                     onChange={(e) => update(p.pageKey, { subtitle: e.target.value })}
                   />
                 </Field>
-                <Field label="Hero video URL" hint="Optional. Mp4 served from /uploads or external URL.">
+                <Field label="URL видео" hint="Опционально. Mp4 из /uploads или внешняя ссылка.">
                   <Input
                     value={p.heroVideo ?? ''}
                     onChange={(e) => update(p.pageKey, { heroVideo: e.target.value || null })}
@@ -127,7 +128,6 @@ export function PageCoversPage() {
                 </Field>
               </div>
             </div>
-            <SectionTitle>{''}</SectionTitle>
           </Card>
         ))}
       </div>

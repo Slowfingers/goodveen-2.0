@@ -177,3 +177,15 @@ export interface PageSetting {
   title: string | null;
   subtitle: string | null;
 }
+
+export interface ContactSettings {
+  id: string;
+  address: string;
+  addressNote: string | null;
+  phones: string[];
+  email: string;
+  emailNote: string | null;
+  openHours: string;
+  instagram: string | null;
+  facebook: string | null;
+}
