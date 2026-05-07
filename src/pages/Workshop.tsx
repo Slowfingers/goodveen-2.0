@@ -10,6 +10,10 @@ export function Workshop() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    document.title = 'Goodveen - Мастерская';
+  }, []);
+
+  useEffect(() => {
     window.scrollTo(0, 0);
     let active = true;
     (async () => {

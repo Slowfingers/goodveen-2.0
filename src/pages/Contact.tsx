@@ -3,6 +3,10 @@ import { Clock, MapPin, Phone, Instagram, Send, Facebook } from 'lucide-react';
 
 export function Contact() {
   useEffect(() => {
+    document.title = 'Goodveen - Контакты';
+  }, []);
+
+  useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
@@ -34,8 +38,8 @@ export function Contact() {
       </section>
 
       {/* Main Content */}
-      <section className="bg-white py-10 md:py-20 px-5 md:px-10">
-        <div className="flex flex-col md:flex-row gap-10 md:gap-5">
+      <section className="w-full flex justify-center bg-white py-10 md:py-20 px-5 md:px-10">
+        <div className="w-full max-w-[1360px] flex flex-col md:flex-row gap-10 md:gap-5">
           {/* Left Column: Contact Info + Form */}
           <div className="flex flex-col gap-10 w-full md:w-[560px] md:shrink-0">
             {/* Contact Info */}

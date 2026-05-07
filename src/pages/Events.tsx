@@ -121,6 +121,12 @@ export function Events() {
   const [sort, setSort] = useState<Sort>('newest');
   const [sortOpen, setSortOpen] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
+
+  useEffect(() => {
+    document.title = 'Goodveen - События';
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -156,12 +162,25 @@ export function Events() {
     });
   }, [items, tag, sort]);
 
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [tag, sort]);
+
+  // Pagination logic
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const paginatedItems = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filtered.slice(startIndex, endIndex);
+  }, [filtered, currentPage, itemsPerPage]);
+
   const sortLabel = SORT_OPTIONS.find((o) => o.value === sort)?.label ?? 'Sort';
 
-  // group filtered into rows preserving span layout: pairs of half + a full when met
+  // group paginatedItems into rows preserving span layout: pairs of half + a full when met
   const rows: EventItem[][] = [];
   let buf: EventItem[] = [];
-  for (const e of filtered) {
+  for (const e of paginatedItems) {
     if (e.span === 'full') {
       if (buf.length) {
         rows.push(buf);
@@ -304,21 +323,57 @@ export function Events() {
       </section>
 
       {/* ===== PAGINATION ===== */}
-      <section className="w-full flex justify-center py-10 md:py-[40px] px-5 md:px-10 border-b border-brand-border">
-        <div className="flex">
-          <PageBtn ariaLabel="Previous">
-            <ArrowLeft size={16} strokeWidth={1.25} />
-          </PageBtn>
-          <PageBtn>1</PageBtn>
-          <PageBtn active>2</PageBtn>
-          <PageBtn>3</PageBtn>
-          <PageBtn disabled>…</PageBtn>
-          <PageBtn>9</PageBtn>
-          <PageBtn ariaLabel="Next">
-            <ArrowRight size={16} strokeWidth={1.25} />
-          </PageBtn>
-        </div>
-      </section>
+      {totalPages > 1 && (
+        <section className="w-full flex justify-center py-10 md:py-[40px] px-5 md:px-10 border-b border-brand-border">
+          <div className="flex">
+            <PageBtn
+              ariaLabel="Previous"
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            >
+              <ArrowLeft size={16} strokeWidth={1.25} />
+            </PageBtn>
+            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+              let pageNum;
+              if (totalPages <= 5) {
+                pageNum = i + 1;
+              } else if (currentPage <= 3) {
+                pageNum = i + 1;
+              } else if (currentPage >= totalPages - 2) {
+                pageNum = totalPages - 4 + i;
+              } else {
+                pageNum = currentPage - 2 + i;
+              }
+              return (
+                <PageBtn
+                  active={currentPage === pageNum}
+                  onClick={() => setCurrentPage(pageNum)}
+                >
+                  {pageNum}
+                </PageBtn>
+              );
+            })}
+            {totalPages > 5 && currentPage < totalPages - 2 && (
+              <PageBtn disabled>…</PageBtn>
+            )}
+            {totalPages > 5 && (
+              <PageBtn
+                active={currentPage === totalPages}
+                onClick={() => setCurrentPage(totalPages)}
+              >
+                {totalPages}
+              </PageBtn>
+            )}
+            <PageBtn
+              ariaLabel="Next"
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            >
+              <ArrowRight size={16} strokeWidth={1.25} />
+            </PageBtn>
+          </div>
+        </section>
+      )}
 
       {/* ===== MOBILE FILTERS ===== */}
       {mobileFiltersOpen && (
@@ -452,12 +507,14 @@ interface PageBtnProps {
   active?: boolean;
   disabled?: boolean;
   ariaLabel?: string;
+  onClick?: () => void;
 }
-function PageBtn({ children, active, disabled, ariaLabel }: PageBtnProps) {
+function PageBtn({ children, active, disabled, ariaLabel, onClick }: PageBtnProps) {
   return (
     <button
       aria-label={ariaLabel}
       disabled={disabled}
+      onClick={onClick}
       className={`w-[50px] h-[40px] md:w-[120px] md:h-[68px] flex items-center justify-center border border-brand-border text-[12px] md:text-[14px] tracking-[0.2em] uppercase -ml-px first:ml-0 transition-colors ${
         active
           ? 'bg-brand-border text-brand-gray'

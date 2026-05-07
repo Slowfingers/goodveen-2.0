@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
-import { ArrowRight, ArrowLeft, Volume2, VolumeX } from 'lucide-react';
+import { useEffect, useState, useRef } from 'react';
+import { ArrowRight, ShoppingBag, VolumeX, Volume2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { categoriesApi, productsApi, eventsApi } from '../lib/api';
-import type { Category, Product, Event as ApiEvent } from '../lib/api/types';
+import { categoriesApi, productsApi, eventsApi, pagesApi } from '../lib/api';
+import type { Category, Product as ApiProduct, Event, PageSetting } from '../lib/api/types';
+import { useCartUI } from '../components/cart/CartContext';
 
 const FALLBACK_CATEGORIES = [
   { id: 'bouquets', name: 'Bouquets', slug: 'bouquets', image: 'https://images.unsplash.com/photo-1526047932273-341f2a588b39?q=80&w=2670&auto=format&fit=crop', description: null, isActive: true, sortOrder: 0, createdAt: '', updatedAt: '' },
@@ -46,8 +47,8 @@ export function Home() {
     (async () => {
       const [cats, prods, evts] = await Promise.all([
         categoriesApi.list(true).catch(() => [] as Category[]),
-        productsApi.list({ onlyActive: true }).catch(() => [] as Product[]),
-        eventsApi.list({ onlyPublished: true }).catch(() => [] as ApiEvent[]),
+        productsApi.list({ onlyActive: true }).catch(() => [] as ApiProduct[]),
+        eventsApi.list({ onlyPublished: true }).catch(() => [] as Event[]),
       ]);
       if (cats.length) setCategories(cats);
       if (prods.length)
@@ -71,6 +72,10 @@ export function Home() {
           })),
         );
     })();
+  }, []);
+
+  useEffect(() => {
+    document.title = 'Goodveen';
   }, []);
 
   useEffect(() => {
@@ -171,7 +176,7 @@ export function Home() {
                 className="relative group overflow-hidden flex items-end justify-center p-6 md:p-10 h-[200px] md:h-auto"
               >
                 <img
-                  src={cat.image ?? FALLBACK_CATEGORIES[i + 1]?.image ?? ''}
+                  src={cat.image ?? FALLBACK_CATEGORIES[i + 1]?.image ?? FALLBACK_CATEGORIES[0].image}
                   alt={cat.name}
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
@@ -197,72 +202,28 @@ export function Home() {
             </p>
           </div>
 
-          {/* Mosaic 4 cols * 3 rows desktop / 1 col mobile */}
+          {/* Grid 4 cols */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-5 md:gap-10 md:auto-rows-[400px]">
-            {/* Row 1 */}
-            <CardImage
-              slug={featuredProducts[0]?.slug ?? '#'}
-              title={featuredProducts[0]?.name ?? ''}
-              desc={featuredProducts[0]?.description ?? ''}
-              img={featuredProducts[0]?.img ?? ''}
-            />
-            <CardWhite
-              slug={featuredProducts[1]?.slug ?? '#'}
-              title={featuredProducts[1]?.name ?? ''}
-              desc={featuredProducts[1]?.description ?? ''}
-              img={featuredProducts[1]?.img ?? ''}
-            />
-            <div className="hidden md:block" />
-            <CardImage
-              slug={featuredProducts[2]?.slug ?? '#'}
-              title={featuredProducts[2]?.name ?? ''}
-              desc={featuredProducts[2]?.description ?? ''}
-              img={featuredProducts[2]?.img ?? ''}
-            />
-
-            {/* Row 2 */}
-            <div className="hidden md:block" />
-            <CardImage
-              slug={featuredProducts[3]?.slug ?? '#'}
-              title={featuredProducts[3]?.name ?? ''}
-              desc={featuredProducts[3]?.description ?? ''}
-              img={featuredProducts[3]?.img ?? ''}
-            />
-            <div className="md:col-span-2">
-              <CardImage
-                slug={featuredProducts[4]?.slug ?? '#'}
-                title={featuredProducts[4]?.name ?? ''}
-                desc={featuredProducts[4]?.description ?? ''}
-                img={featuredProducts[4]?.img ?? ''}
-                full
-              />
-            </div>
-
-            {/* Row 3 */}
-            <CardWhite
-              slug={featuredProducts[5]?.slug ?? '#'}
-              title={featuredProducts[5]?.name ?? ''}
-              desc={featuredProducts[5]?.description ?? ''}
-              img={featuredProducts[5]?.img ?? ''}
-            />
-            <CardImage
-              slug={featuredProducts[6]?.slug ?? '#'}
-              title={featuredProducts[6]?.name ?? ''}
-              desc={featuredProducts[6]?.description ?? ''}
-              img={featuredProducts[6]?.img ?? ''}
-            />
+            {featuredProducts.slice(0, 7).map((product, index) => (
+              <div key={product.slug || index}>
+                <CardWhite
+                  slug={product.slug ?? '#'}
+                  title={product.name ?? ''}
+                  desc={product.description ?? ''}
+                  img={product.img ?? ''}
+                />
+              </div>
+            ))}
             <Link
               to="/catalog"
-              className="relative flex items-end justify-end p-5 group border border-transparent hover:border-brand-border transition-colors h-[120px] md:h-auto"
+              className="relative flex items-end justify-end p-5 group border border-transparent hover:border-brand-border transition-colors h-[240px] md:h-[400px]"
             >
               <span className="absolute right-0 bottom-0 h-[180px] w-px bg-[#D0D0D0] hidden md:block" />
               <span className="absolute right-0 bottom-0 w-[80%] h-px bg-[#D0D0D0] hidden md:block" />
-              <span className="relative z-10 flex items-center gap-3 md:gap-4 text-[12px] tracking-[0.2em] uppercase text-brand-gray group-hover:text-brand-taupe transition-colors">
+              <span className="relative z-10 text-right text-[12px] tracking-[0.2em] uppercase text-brand-gray group-hover:text-brand-taupe transition-colors">
                 Explore the full collection
-                <ArrowRight size={20} strokeWidth={1.25} />
               </span>
             </Link>
-            <div className="hidden md:block" />
           </div>
         </div>
       </section>
@@ -279,31 +240,37 @@ export function Home() {
             </p>
           </div>
 
-          <div className="relative w-full h-[280px] md:h-[480px] overflow-hidden flex justify-center items-center">
-            <div className="flex gap-5 md:gap-10 items-center justify-center w-max">
+          <div className="relative w-full h-[280px] md:h-[480px] overflow-visible flex justify-center items-center">
+            <div className="flex gap-5 md:gap-10 items-center justify-center w-max relative z-0">
               {highlights.map((e, i) => (
-                <HighlightCard
-                  slug={e.slug}
-                  muted={i !== 1}
-                  title={e.title}
-                  desc={e.excerpt ?? ''}
-                  date={formatEventDate(e.publishedAt)}
-                  img={e.image ?? FALLBACK_HIGHLIGHTS[i]?.image ?? ''}
-                />
+                <div key={e.id || i}>
+                  <HighlightCard
+                    slug={e.slug}
+                    muted={i !== 1}
+                    title={e.title}
+                    desc={e.excerpt ?? ''}
+                    date={formatEventDate(e.publishedAt)}
+                    img={e.image ?? FALLBACK_HIGHLIGHTS[i]?.image ?? ''}
+                  />
+                </div>
               ))}
             </div>
 
             <button
               aria-label="Previous"
-              className="absolute left-2 md:left-10 top-1/2 -translate-y-1/2 w-9 h-[80px] md:w-10 md:h-[120px] border border-[#D0D0D0] flex items-center justify-center bg-white/70 backdrop-blur-sm hover:bg-white transition-colors z-20"
+              className="absolute left-0 md:left-5 top-1/2 -translate-y-1/2 w-8 h-[60px] md:w-9 md:h-[100px] flex items-center justify-center bg-white/70 backdrop-blur-sm hover:bg-white transition-colors pointer-events-auto"
             >
-              <ArrowLeft className="text-brand-gray" size={20} strokeWidth={1.25} />
+              <svg width="16" height="41" viewBox="0 0 16 41" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M14.6094 0.286621L0.609375 20.2864L14.6094 40.2866" stroke="#D0D0D0"/>
+              </svg>
             </button>
             <button
               aria-label="Next"
-              className="absolute right-2 md:right-10 top-1/2 -translate-y-1/2 w-9 h-[80px] md:w-10 md:h-[120px] border border-[#D0D0D0] flex items-center justify-center bg-white/70 backdrop-blur-sm hover:bg-white transition-colors z-20"
+              className="absolute right-0 md:right-5 top-1/2 -translate-y-1/2 w-8 h-[60px] md:w-9 md:h-[100px] flex items-center justify-center bg-white/70 backdrop-blur-sm hover:bg-white transition-colors pointer-events-auto"
             >
-              <ArrowRight className="text-brand-gray" size={20} strokeWidth={1.25} />
+              <svg width="16" height="41" viewBox="0 0 16 41" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ transform: 'scaleX(-1)' }}>
+                <path d="M14.6094 0.286621L0.609375 20.2864L14.6094 40.2866" stroke="#D0D0D0"/>
+              </svg>
             </button>
           </div>
         </div>
@@ -331,7 +298,7 @@ function CardImage({
       className={`relative group overflow-hidden flex flex-col justify-end p-5 h-[280px] md:h-auto ${full ? 'md:h-full' : ''}`}
     >
       <img
-        src={img}
+        src={img || FALLBACK_PRODUCTS[0].img}
         alt={title}
         className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
       />
@@ -348,18 +315,18 @@ function CardWhite({ slug, title, desc, img }: { slug: string; title: string; de
   return (
     <Link
       to={slug !== '#' ? `/product/${slug}` : '/catalog'}
-      className="border border-brand-border flex flex-col group hover:shadow-md transition-shadow h-[360px] md:h-auto"
+      className="border border-brand-border flex flex-col group hover:shadow-md transition-shadow h-[240px] md:h-full"
     >
-      <div className="flex-1 overflow-hidden border-b border-brand-border relative">
+      <div className="flex-1 overflow-hidden border-b border-brand-border relative min-h-[160px]">
         <img
-          src={img}
+          src={img || FALLBACK_PRODUCTS[0].img}
           alt={title}
           className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
         />
       </div>
-      <div className="p-5 bg-white">
-        <h4 className="text-brand-gray text-[12px] tracking-[0.2em] uppercase mb-2">{title}</h4>
-        <p className="text-brand-gray-light text-[12px] leading-[16px]">{desc}</p>
+      <div className="p-5 bg-white h-[120px] flex flex-col">
+        <h4 className="text-brand-gray text-[12px] tracking-[0.2em] uppercase mb-2 truncate">{title}</h4>
+        <p className="text-brand-gray-light text-[12px] leading-[16px] line-clamp-2">{desc}</p>
       </div>
     </Link>
   );
@@ -383,12 +350,9 @@ function HighlightCard({
   return (
     <Link
       to={`/events/${slug}`}
-      className={`relative w-[280px] h-[280px] md:w-[800px] md:h-[480px] overflow-hidden flex flex-col justify-end p-5 shrink-0 ${
-        muted ? 'opacity-25' : ''
-      }`}
+      className="relative w-[280px] h-[280px] md:w-[800px] md:h-[480px] overflow-hidden flex flex-col justify-end p-5 shrink-0"
     >
-      <img src={img} alt={title} className="absolute inset-0 w-full h-full object-cover" />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/55 to-transparent" />
+      <img src={img || FALLBACK_HIGHLIGHTS[0]?.image} alt={title} className="absolute inset-0 w-full h-full object-cover" />
       <h4 className="relative z-10 text-white text-[12px] tracking-[0.2em] uppercase mb-1">
         {title}
       </h4>

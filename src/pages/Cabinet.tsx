@@ -27,6 +27,10 @@ export function Cabinet() {
   const [tab, setTab] = useState<Tab>(initial);
 
   useEffect(() => {
+    document.title = 'Goodveen - Кабинет';
+  }, []);
+
+  useEffect(() => {
     if (tab !== params.get('tab')) {
       const next = new URLSearchParams(params);
       if (tab === 'personal') next.delete('tab');

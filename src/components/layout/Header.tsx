@@ -49,21 +49,26 @@ export function Header() {
     <header
       className={cn(
         'fixed top-0 left-0 right-0 z-50 transition-colors duration-300',
-        onLight ? 'bg-white text-brand-gray border-b border-brand-border' : 'text-white'
+        onLight ? 'bg-white text-brand-gray' : 'text-white'
       )}
     >
+      <div className={cn(
+        'absolute bottom-0 left-0 right-0 h-px',
+        onLight ? 'bg-[#EEEEEE]' : 'bg-white/20'
+      )} />
       <div
         className={cn(
-          'w-full max-w-[1440px] mx-auto px-5 md:px-10 h-[60px] flex items-stretch',
+          'w-full h-[60px] flex items-stretch',
           !onLight && 'bg-gradient-to-b from-black/40 to-transparent'
         )}
       >
         {/* Desktop nav */}
         <nav className="hidden md:flex h-full items-stretch w-full">
-          {NAV_ITEMS.map((item) => {
+          {NAV_ITEMS.map((item, index) => {
             // Goodveen (home) entry never shows an active state — it acts as the brand link.
             const active =
               item.to === '/' ? false : location.pathname.startsWith(item.to);
+            const isLast = index === NAV_ITEMS.length - 1;
             
             if (item.to === '/catalog') {
               return (
@@ -71,7 +76,8 @@ export function Header() {
                   <button
                     onClick={() => setCatalogOpen(!catalogOpen)}
                     className={cn(
-                      'w-full h-full flex items-center justify-center gap-1 uppercase tracking-[0.2em] text-[12px] transition-colors',
+                      'w-full h-full flex items-center justify-center gap-1 uppercase tracking-[0.2em] text-[12px] transition-colors border-r',
+                      onLight ? 'border-[#EEEEEE]' : 'border-white/20',
                       active
                         ? 'bg-white text-brand-gray'
                         : onLight
@@ -110,7 +116,8 @@ export function Header() {
                 key={item.to}
                 to={item.to}
                 className={cn(
-                  'flex-1 h-full flex items-center justify-center uppercase tracking-[0.2em] text-[12px] transition-colors',
+                  'flex-1 h-full flex items-center justify-center uppercase tracking-[0.2em] text-[12px] transition-colors border-r',
+                  onLight ? 'border-[#EEEEEE]' : 'border-white/20',
                   active
                     ? 'bg-white text-brand-gray'
                     : onLight
@@ -123,16 +130,15 @@ export function Header() {
             );
           })}
 
-          <div className="w-px self-stretch bg-current opacity-20" />
           <button
             className={cn(
-              'w-[60px] h-full flex items-center justify-center uppercase tracking-[0.2em] text-[12px] transition-colors',
+              'w-[60px] h-full flex items-center justify-center uppercase tracking-[0.2em] text-[12px] transition-colors border-r',
+              onLight ? 'border-[#EEEEEE]' : 'border-white/20',
               onLight ? 'hover:bg-brand-border' : 'hover:bg-white/10'
             )}
           >
             RU
           </button>
-          <div className="w-px self-stretch bg-current opacity-20" />
           <button
             onClick={() => {
               if (user) {
@@ -142,14 +148,14 @@ export function Header() {
               }
             }}
             className={cn(
-              'w-[60px] h-full flex items-center justify-center transition-colors',
+              'w-[60px] h-full flex items-center justify-center transition-colors border-r',
+              onLight ? 'border-[#EEEEEE]' : 'border-white/20',
               onLight ? 'hover:bg-brand-border' : 'hover:bg-white/10'
             )}
             aria-label="Account"
           >
             <User size={20} strokeWidth={1.25} />
           </button>
-          <div className="w-px self-stretch bg-current opacity-20" />
           <button
             onClick={cartUI.open}
             className={cn(
@@ -168,14 +174,14 @@ export function Header() {
             onClick={() => setMobileOpen((v) => !v)}
             aria-label="Menu"
             className={cn(
-              'flex-1 h-full flex items-center justify-start gap-3 uppercase tracking-[0.2em] text-[12px]',
+              'flex-1 h-full flex items-center justify-start gap-3 uppercase tracking-[0.2em] text-[12px] border-r',
+              onLight ? 'border-[#EEEEEE]' : 'border-white/20',
               onLight ? 'hover:bg-brand-border' : 'hover:bg-white/10'
             )}
           >
             {mobileOpen ? <X size={20} strokeWidth={1.25} /> : <Menu size={20} strokeWidth={1.25} />}
             <span>Menu</span>
           </button>
-          <div className="w-px self-stretch bg-current opacity-20" />
           <button
             onClick={() => {
               if (user) {
@@ -185,14 +191,14 @@ export function Header() {
               }
             }}
             className={cn(
-              'w-[56px] h-full flex items-center justify-center',
+              'w-[56px] h-full flex items-center justify-center border-r',
+              onLight ? 'border-[#EEEEEE]' : 'border-white/20',
               onLight ? 'hover:bg-brand-border' : 'hover:bg-white/10'
             )}
             aria-label="Account"
           >
             <User size={20} strokeWidth={1.25} />
           </button>
-          <div className="w-px self-stretch bg-current opacity-20" />
           <button
             onClick={cartUI.open}
             className={cn(

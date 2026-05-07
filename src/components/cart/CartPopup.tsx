@@ -1,56 +1,28 @@
 import { useState, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, Plus, Minus, X, ShoppingBag, Check } from 'lucide-react';
-import { useCartUI } from './CartContext';
-
-type CartItem = {
-  id: string;
-  name: string;
-  size: string;
-  color: string;
-  unitPrice: number; // thousands of UZS
-  qty: number;
-  img: string;
-};
-
-const INITIAL_CART: CartItem[] = [
-  {
-    id: 'wild-serenity',
-    name: 'Wild Serenity',
-    size: 'L',
-    color: 'Lavender',
-    unitPrice: 600,
-    qty: 1,
-    img: 'https://images.unsplash.com/photo-1549007628-9418af83b544?q=80&w=2400&auto=format&fit=crop',
-  },
-  {
-    id: 'urban-poetry',
-    name: 'Urban Poetry',
-    size: 'M',
-    color: 'Charcoal',
-    unitPrice: 480,
-    qty: 2,
-    img: 'https://images.unsplash.com/photo-1490750967868-88aa4486c946?q=80&w=2400&auto=format&fit=crop',
-  },
-];
+import { useCartUI, type CartItem } from './CartContext';
 
 export function CartPopup() {
-  const { isOpen, close } = useCartUI();
+  const { isOpen, close, items, updateQty, removeItem } = useCartUI();
   const navigate = useNavigate();
-  const [items, setItems] = useState<CartItem[]>(INITIAL_CART);
   const [agreed, setAgreed] = useState(true);
   const [promo, setPromo] = useState('');
   const [promoApplied, setPromoApplied] = useState(false);
 
   if (!isOpen) return null;
 
-  const inc = (id: string) =>
-    setItems((cur) => cur.map((i) => (i.id === id ? { ...i, qty: Math.min(99, i.qty + 1) } : i)));
-  const dec = (id: string) =>
-    setItems((cur) => cur.map((i) => (i.id === id ? { ...i, qty: Math.max(1, i.qty - 1) } : i)));
-  const remove = (id: string) => setItems((cur) => cur.filter((i) => i.id !== id));
+  const inc = (id: string, size: string) => {
+    const item = items.find((i) => i.id === id && i.size === size);
+    if (item) updateQty(id, size, item.qty + 1);
+  };
+  const dec = (id: string, size: string) => {
+    const item = items.find((i) => i.id === id && i.size === size);
+    if (item) updateQty(id, size, Math.max(1, item.qty - 1));
+  };
+  const remove = (id: string, size: string) => removeItem(id, size);
 
-  const subtotal = items.reduce((sum, i) => sum + i.unitPrice * i.qty, 0);
+  const subtotal = items.reduce((sum, i) => sum + i.price * i.qty, 0);
   const discount = promoApplied ? Math.round(subtotal * 0.1) : 0;
   const delivery = items.length === 0 || subtotal >= 1000 ? 0 : 50;
   const total = subtotal - discount + delivery;
@@ -123,9 +95,9 @@ export function CartPopup() {
                   <CartRow
                     key={item.id}
                     item={item}
-                    onInc={() => inc(item.id)}
-                    onDec={() => dec(item.id)}
-                    onRemove={() => remove(item.id)}
+                    onInc={() => inc(item.id, item.size)}
+                    onDec={() => dec(item.id, item.size)}
+                    onRemove={() => remove(item.id, item.size)}
                     onClose={close}
                   />
                 ))}
@@ -150,17 +122,17 @@ export function CartPopup() {
                 </div>
 
                 <div className="flex flex-col gap-2 max-w-[380px] md:self-end md:items-end md:w-[320px] pt-2">
-                  <Row label="Subtotal" value={`${subtotal.toLocaleString()} 000 UZS`} />
+                  <Row label="Subtotal" value={`${subtotal.toLocaleString()} UZS`} />
                   {promoApplied && (
                     <Row
                       label="Promo (-10%)"
-                      value={`− ${discount.toLocaleString()} 000 UZS`}
+                      value={`− ${discount.toLocaleString()} UZS`}
                       accent
                     />
                   )}
                   <Row
                     label="Delivery"
-                    value={delivery === 0 ? 'Free' : `${delivery.toLocaleString()} 000 UZS`}
+                    value={delivery === 0 ? 'Free' : `${delivery.toLocaleString()} UZS`}
                   />
                 </div>
               </div>
@@ -172,7 +144,7 @@ export function CartPopup() {
                 <span className="text-[12px] tracking-[0.2em] uppercase text-brand-gray">Total</span>
                 <span className="text-[24px] md:text-[28px] font-light text-brand-gray">
                   {total.toLocaleString()}
-                  <span className="text-brand-gray-light text-[14px] ml-1">000 UZS</span>
+                  <span className="text-brand-gray-light text-[14px] ml-1">UZS</span>
                 </span>
               </div>
 
@@ -233,7 +205,7 @@ interface CartRowProps {
   key?: string | number;
 }
 function CartRow({ item, onInc, onDec, onRemove, onClose }: CartRowProps) {
-  const total = item.unitPrice * item.qty;
+  const total = item.price * item.qty;
   return (
     <div className="flex items-stretch gap-4 md:gap-5 py-4 md:py-5 border-b border-brand-border">
       <div className="relative w-[88px] h-[88px] md:w-[112px] md:h-[112px] overflow-hidden bg-brand-border shrink-0">
@@ -243,17 +215,17 @@ function CartRow({ item, onInc, onDec, onRemove, onClose }: CartRowProps) {
         <div className="flex items-start justify-between gap-3">
           <div className="flex flex-col gap-1 min-w-0">
             <Link
-              to={`/product/${item.id}`}
+              to={`/product/${item.slug}`}
               onClick={onClose}
               className="text-[13px] md:text-[14px] tracking-[0.2em] uppercase text-brand-gray hover:text-brand-taupe transition-colors truncate"
             >
               {item.name}
             </Link>
             <p className="text-[12px] md:text-[13px] text-brand-gray-light">
-              {item.color} · Size {item.size}
+              Size {item.size}
             </p>
             <p className="text-[12px] md:text-[13px] text-brand-gray-light">
-              {item.unitPrice.toLocaleString()} 000 UZS
+              {item.price.toLocaleString()} UZS
             </p>
           </div>
           <button
@@ -283,7 +255,7 @@ function CartRow({ item, onInc, onDec, onRemove, onClose }: CartRowProps) {
             </button>
           </div>
           <span className="text-[14px] md:text-[15px] text-brand-gray">
-            {total.toLocaleString()} 000 UZS
+            {total.toLocaleString()} UZS
           </span>
         </div>
       </div>

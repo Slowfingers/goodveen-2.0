@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { ArrowRight, ArrowLeft, SlidersHorizontal, Check, X } from 'lucide-react';
+import { ArrowRight, ArrowLeft, SlidersHorizontal, Check, X, ShoppingBag } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { filtersApi, productsApi, categoriesApi } from '../lib/api';
 import type { Product as ApiProduct, Category } from '../lib/api/types';
+import { useCartUI } from '../components/cart/CartContext';
 
 type FilterKey = 'color' | 'flower' | 'price' | 'event';
 type SortValue = 'popular' | 'newest' | 'price-asc' | 'price-desc';
@@ -34,14 +35,12 @@ type Product = {
   createdAt: string;
   colors: string[];
   flowerTypes: string[];
-  variant: 'image' | 'white' | 'wide';
 };
 
 const FALLBACK_IMG =
   'https://images.unsplash.com/photo-1563241527-3004b7be0ffd?q=80&w=2400&auto=format&fit=crop';
 
-function mapApi(p: ApiProduct, idx: number): Product {
-  const variants: Product['variant'][] = ['image', 'white', 'image', 'image'];
+function mapApi(p: ApiProduct): Product {
   const cover = p.images?.[0]?.url ?? FALLBACK_IMG;
   const minPrice = p.sizes?.length ? Math.min(...p.sizes.map((s) => s.price)) : null;
   return {
@@ -54,26 +53,14 @@ function mapApi(p: ApiProduct, idx: number): Product {
     createdAt: p.createdAt,
     colors: p.colors,
     flowerTypes: p.flowerTypes,
-    variant: variants[idx % variants.length],
   };
 }
 
-// Build 4-small / 2-wide repeating mosaic rows.
+// Build rows with 4 items per row
 function buildRows(items: Product[]): Product[][] {
   const rows: Product[][] = [];
-  let i = 0;
-  let pattern: 'quad' | 'wide' = 'quad';
-  while (i < items.length) {
-    if (pattern === 'quad') {
-      rows.push(items.slice(i, i + 4));
-      i += 4;
-      pattern = 'wide';
-    } else {
-      const pair = items.slice(i, i + 2).map((p) => ({ ...p, variant: 'wide' as const }));
-      if (pair.length) rows.push(pair);
-      i += 2;
-      pattern = 'quad';
-    }
+  for (let i = 0; i < items.length; i += 4) {
+    rows.push(items.slice(i, i + 4));
   }
   return rows;
 }
@@ -90,14 +77,20 @@ export function Catalog() {
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [selectedFlowers, setSelectedFlowers] = useState<string[]>([]);
   const [selectedEvents, setSelectedEvents] = useState<string[]>([]);
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1500]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 100000]);
   const [sort, setSort] = useState<SortValue>('popular');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
 
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [colorOptions, setColorOptions] = useState<{ name: string; hex: string }[]>(FALLBACK_COLORS);
   const [flowerOptions, setFlowerOptions] = useState<string[]>(FALLBACK_FLOWERS);
   const [currentCategory, setCurrentCategory] = useState<Category | null>(null);
+
+  useEffect(() => {
+    document.title = currentCategory ? `Goodveen - ${currentCategory.name}` : 'Goodveen - Каталог';
+  }, [currentCategory]);
 
   useEffect(() => {
     let active = true;
@@ -120,11 +113,11 @@ export function Catalog() {
         } else {
           setCurrentCategory(null);
         }
-        
-        const items = await productsApi.list({ onlyActive: true, categoryId });
+
+        const items = await productsApi.list({ onlyActive: true, ...(categoryId && { categoryId }) });
         
         if (!active) return;
-        setProducts(items.map(mapApi));
+        setProducts(items.map((item) => mapApi(item)));
         if (colors.length)
           setColorOptions(
             colors.filter((c) => c.isActive).map((c) => ({ name: c.name, hex: c.hex })),
@@ -170,7 +163,20 @@ export function Catalog() {
     return sorted;
   }, [products, selectedColors, selectedFlowers, priceRange, sort]);
 
-  const rows = useMemo(() => buildRows(filteredProducts), [filteredProducts]);
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedColors, selectedFlowers, priceRange, sort]);
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const paginatedProducts = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredProducts.slice(startIndex, endIndex);
+  }, [filteredProducts, currentPage, itemsPerPage]);
+
+  const rows = useMemo(() => buildRows(paginatedProducts), [paginatedProducts]);
 
   // close popovers on Esc / outside-click
   const filtersRef = useRef<HTMLDivElement>(null);
@@ -249,7 +255,7 @@ export function Catalog() {
                 [
                   { key: 'color' as FilterKey, label: 'Цвет', count: selectedColors.length },
                   { key: 'flower' as FilterKey, label: 'Тип цветов', count: selectedFlowers.length },
-                  { key: 'price' as FilterKey, label: 'Цена', count: priceRange[0] !== 0 || priceRange[1] !== 1500 ? 1 : 0 },
+                  { key: 'price' as FilterKey, label: 'Цена', count: priceRange[0] !== 0 || priceRange[1] !== 100000 ? 1 : 0 },
                   { key: 'event' as FilterKey, label: 'Событие', count: selectedEvents.length },
                 ]
               ).map(({ key, label, count }) => (
@@ -345,7 +351,7 @@ export function Catalog() {
               <FilterPopover
                 anchor="left-1/2"
                 onApply={() => setOpenFilter(null)}
-                onReset={() => setPriceRange([0, 1500])}
+                onReset={() => setPriceRange([0, 100000])}
               >
                 <PriceRange value={priceRange} onChange={setPriceRange} />
               </FilterPopover>
@@ -410,21 +416,57 @@ export function Catalog() {
       </section>
 
       {/* ===== PAGINATION ===== */}
-      <section className="w-full flex justify-center py-10 md:py-[40px] px-5 md:px-10 border-b border-brand-border">
-        <div className="flex">
-          <PageBtn ariaLabel="Previous">
-            <ArrowLeft size={16} strokeWidth={1.25} />
-          </PageBtn>
-          <PageBtn>1</PageBtn>
-          <PageBtn active>2</PageBtn>
-          <PageBtn>3</PageBtn>
-          <PageBtn disabled>…</PageBtn>
-          <PageBtn>17</PageBtn>
-          <PageBtn ariaLabel="Next">
-            <ArrowRight size={16} strokeWidth={1.25} />
-          </PageBtn>
-        </div>
-      </section>
+      {totalPages > 1 && (
+        <section className="w-full flex justify-center py-10 md:py-[40px] px-5 md:px-10 border-b border-brand-border">
+          <div className="flex">
+            <PageBtn
+              ariaLabel="Previous"
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            >
+              <ArrowLeft size={16} strokeWidth={1.25} />
+            </PageBtn>
+            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+              let pageNum;
+              if (totalPages <= 5) {
+                pageNum = i + 1;
+              } else if (currentPage <= 3) {
+                pageNum = i + 1;
+              } else if (currentPage >= totalPages - 2) {
+                pageNum = totalPages - 4 + i;
+              } else {
+                pageNum = currentPage - 2 + i;
+              }
+              return (
+                <PageBtn
+                  active={currentPage === pageNum}
+                  onClick={() => setCurrentPage(pageNum)}
+                >
+                  {pageNum}
+                </PageBtn>
+              );
+            })}
+            {totalPages > 5 && currentPage < totalPages - 2 && (
+              <PageBtn disabled>…</PageBtn>
+            )}
+            {totalPages > 5 && (
+              <PageBtn
+                active={currentPage === totalPages}
+                onClick={() => setCurrentPage(totalPages)}
+              >
+                {totalPages}
+              </PageBtn>
+            )}
+            <PageBtn
+              ariaLabel="Next"
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            >
+              <ArrowRight size={16} strokeWidth={1.25} />
+            </PageBtn>
+          </div>
+        </section>
+      )}
 
       {/* ===== CRAFTED BY HAND ===== */}
       <section className="w-full flex justify-center py-[60px] md:py-[120px] px-5 md:px-10 border-b border-brand-border">
@@ -580,16 +622,6 @@ export function Catalog() {
 
 interface CatalogRowProps { row: Product[]; key?: string | number }
 function CatalogRow({ row }: CatalogRowProps) {
-  if (row.length === 2) {
-    // Wide row: two 2-col-spanning cards
-    return (
-      <div className="grid grid-cols-2 md:grid-cols-2 gap-5 md:gap-10 md:h-[400px]">
-        {row.map((p) => (
-          <ProductCard key={p.id} product={p} wide />
-        ))}
-      </div>
-    );
-  }
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-5 md:gap-10 md:h-[400px]">
       {row.map((p) => (
@@ -599,56 +631,28 @@ function CatalogRow({ row }: CatalogRowProps) {
   );
 }
 
-interface ProductCardProps { product: Product; wide?: boolean; key?: string | number }
-function ProductCard({ product, wide = false }: ProductCardProps) {
-  const heightCls = wide ? 'h-[200px] md:h-full' : 'h-[240px] md:h-full';
-
-  if (product.variant === 'white') {
-    return (
-      <Link
-        to={`/product/${product.slug}`}
-        className={`border border-brand-border flex flex-col group hover:shadow-md transition-shadow ${heightCls}`}
-      >
-        <div className="flex-1 overflow-hidden border-b border-brand-border relative">
-          <img
-            src={product.img}
-            alt={product.title}
-            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-          />
-        </div>
-        <div className="p-3 md:p-5 bg-white">
-          <h4 className="text-brand-gray text-[11px] md:text-[12px] tracking-[0.2em] uppercase mb-1 md:mb-2 truncate">
-            {product.title}
-          </h4>
-          <p className="text-brand-gray-light text-[11px] md:text-[12px] leading-[14px] md:leading-[16px] line-clamp-2">
-            {product.desc}
-          </p>
-        </div>
-      </Link>
-    );
-  }
-
+interface ProductCardProps { product: Product; key?: string | number }
+function ProductCard({ product }: ProductCardProps) {
   return (
     <Link
       to={`/product/${product.slug}`}
-      className={`relative group overflow-hidden flex flex-col justify-end p-3 md:p-5 ${heightCls}`}
+      className="border border-brand-border flex flex-col group hover:shadow-md transition-shadow h-[240px] md:h-full"
     >
-      <img
-        src={product.img}
-        alt={product.title}
-        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-transparent" />
-      <h4 className="relative z-10 text-white text-[11px] md:text-[12px] tracking-[0.2em] uppercase mb-1 md:mb-2 truncate">
-        {product.title}
-      </h4>
-      <p
-        className={`relative z-10 text-white text-[11px] md:text-[12px] leading-[14px] md:leading-[16px] opacity-90 ${
-          wide ? 'max-w-[620px]' : 'max-w-[270px]'
-        } line-clamp-2`}
-      >
-        {product.desc}
-      </p>
+      <div className="flex-1 overflow-hidden border-b border-brand-border relative">
+        <img
+          src={product.img}
+          alt={product.title}
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+        />
+      </div>
+      <div className="p-3 md:p-5 bg-white h-[100px] md:h-[120px] flex flex-col">
+        <h4 className="text-brand-gray text-[11px] md:text-[12px] tracking-[0.2em] uppercase mb-1 md:mb-2 truncate">
+          {product.title}
+        </h4>
+        <p className="text-brand-gray-light text-[11px] md:text-[12px] leading-[14px] md:leading-[16px] line-clamp-2">
+          {product.desc}
+        </p>
+      </div>
     </Link>
   );
 }
@@ -658,12 +662,14 @@ interface PageBtnProps {
   active?: boolean;
   disabled?: boolean;
   ariaLabel?: string;
+  onClick?: () => void;
 }
-function PageBtn({ children, active, disabled, ariaLabel }: PageBtnProps) {
+function PageBtn({ children, active, disabled, ariaLabel, onClick }: PageBtnProps) {
   return (
     <button
       aria-label={ariaLabel}
       disabled={disabled}
+      onClick={onClick}
       className={`w-[50px] h-[40px] md:w-[151px] md:h-[68px] flex items-center justify-center border border-brand-border text-[12px] md:text-[14px] tracking-[0.2em] uppercase -ml-px first:ml-0 transition-colors ${
         active
           ? 'bg-brand-border text-brand-gray'
@@ -879,7 +885,7 @@ function MobileFiltersDrawer({
               setSelectedColors([]);
               setSelectedFlowers([]);
               setSelectedEvents([]);
-              setPriceRange([0, 1500]);
+              setPriceRange([0, 100000]);
             }}
             className="flex-1 h-14 text-[12px] tracking-[0.2em] uppercase text-brand-gray-light"
           >

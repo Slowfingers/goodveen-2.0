@@ -10,6 +10,10 @@ export function About() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    document.title = 'Goodveen - О нас';
+  }, []);
+
+  useEffect(() => {
     window.scrollTo(0, 0);
     let active = true;
     (async () => {

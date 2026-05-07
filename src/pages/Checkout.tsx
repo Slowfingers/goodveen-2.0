@@ -1,5 +1,6 @@
-import { useState, type ReactNode } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
+import { useCartUI } from '../components/cart/CartContext';
 import {
   ArrowRight,
   ArrowLeft,
@@ -24,30 +25,16 @@ const STEPS: { key: Step; label: string }[] = [
   { key: 'confirm', label: 'Confirmation' },
 ];
 
-const ITEMS = [
-  {
-    id: 'wild-serenity',
-    name: 'Wild Serenity',
-    size: 'L',
-    qty: 1,
-    price: 600,
-    img: 'https://images.unsplash.com/photo-1549007628-9418af83b544?q=80&w=2400&auto=format&fit=crop',
-  },
-  {
-    id: 'urban-poetry',
-    name: 'Urban Poetry',
-    size: 'M',
-    qty: 2,
-    price: 480,
-    img: 'https://images.unsplash.com/photo-1490750967868-88aa4486c946?q=80&w=2400&auto=format&fit=crop',
-  },
-];
-
 type Delivery = 'pickup' | 'courier-day' | 'courier-fast';
 type Payment = 'card' | 'apple' | 'cash';
 
 export function Checkout() {
+  const cartUI = useCartUI();
   const [step, setStep] = useState<Step>('contact');
+
+  useEffect(() => {
+    document.title = 'Goodveen - Оформление заказа';
+  }, []);
 
   // form state
   const [name, setName] = useState('');
@@ -95,7 +82,7 @@ export function Checkout() {
   const [agreed, setAgreed] = useState(true);
   const [mobileSummaryOpen, setMobileSummaryOpen] = useState(false);
 
-  const subtotal = ITEMS.reduce((s, i) => s + i.price * i.qty, 0);
+  const subtotal = cartUI.items.reduce((s, i) => s + i.price * i.qty, 0);
   const deliveryFee = delivery === 'pickup' ? 0 : delivery === 'courier-fast' ? 80 : 0;
   const total = subtotal + deliveryFee;
 
@@ -160,13 +147,13 @@ export function Checkout() {
                 </div>
                 <span className="text-[18px] font-light text-brand-gray">
                   {total.toLocaleString()}
-                  <span className="text-brand-gray-light text-[12px] ml-1">000 UZS</span>
+                  <span className="text-brand-gray-light text-[12px] ml-1">UZS</span>
                 </span>
               </button>
               {mobileSummaryOpen && (
                 <div className="px-5 pb-5 flex flex-col gap-4 border-t border-brand-border pt-4">
                   <div className="flex flex-col">
-                    {ITEMS.map((it) => (
+                    {cartUI.items.map((it) => (
                       <div
                         key={it.id}
                         className="flex items-center gap-3 py-2 border-b last:border-b-0 border-brand-border"
@@ -179,25 +166,21 @@ export function Checkout() {
                           />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-[12px] tracking-[0.2em] uppercase text-brand-gray truncate">
-                            {it.name}
-                          </p>
-                          <p className="text-[11px] text-brand-gray-light">
-                            Size {it.size} · ×{it.qty}
-                          </p>
+                          <div className="text-[12px] text-brand-gray truncate">{it.name}</div>
+                          <div className="text-[11px] text-brand-gray-light">{it.size}</div>
                         </div>
                         <span className="text-[12px] text-brand-gray shrink-0">
-                          {(it.price * it.qty).toLocaleString()} 000
+                          {(it.price * it.qty).toLocaleString()}
                         </span>
                       </div>
                     ))}
                   </div>
                   <div className="flex flex-col gap-1 text-[13px]">
-                    <Row label="Subtotal" value={`${subtotal.toLocaleString()} 000 UZS`} />
+                    <Row label="Subtotal" value={`${subtotal.toLocaleString()} UZS`} />
                     <Row
                       label="Delivery"
                       value={
-                        deliveryFee === 0 ? 'Free' : `${deliveryFee.toLocaleString()} 000 UZS`
+                        deliveryFee === 0 ? 'Free' : `${deliveryFee.toLocaleString()} UZS`
                       }
                     />
                   </div>
@@ -498,7 +481,7 @@ export function Checkout() {
                 </h2>
 
                 <div className="flex flex-col">
-                  {ITEMS.map((it) => (
+                  {cartUI.items.map((it) => (
                     <div
                       key={it.id}
                       className="flex items-center gap-4 py-3 border-b last:border-b-0 border-brand-border"
@@ -515,17 +498,17 @@ export function Checkout() {
                         </p>
                       </div>
                       <span className="text-[13px] text-brand-gray shrink-0">
-                        {(it.price * it.qty).toLocaleString()} 000
+                        {(it.price * it.qty).toLocaleString()}
                       </span>
                     </div>
                   ))}
                 </div>
 
                 <div className="flex flex-col gap-2 pt-2">
-                  <Row label="Subtotal" value={`${subtotal.toLocaleString()} 000 UZS`} />
+                  <Row label="Subtotal" value={`${subtotal.toLocaleString()} UZS`} />
                   <Row
                     label="Delivery"
-                    value={deliveryFee === 0 ? 'Free' : `${deliveryFee.toLocaleString()} 000 UZS`}
+                    value={deliveryFee === 0 ? 'Free' : `${deliveryFee.toLocaleString()} UZS`}
                   />
                 </div>
 
@@ -533,7 +516,7 @@ export function Checkout() {
                   <span className="text-[12px] tracking-[0.2em] uppercase text-brand-gray">Total</span>
                   <span className="text-[24px] md:text-[28px] font-light text-brand-gray">
                     {total.toLocaleString()}
-                    <span className="text-brand-gray-light text-[14px] ml-1">000 UZS</span>
+                    <span className="text-brand-gray-light text-[14px] ml-1">UZS</span>
                   </span>
                 </div>
 
@@ -607,7 +590,7 @@ export function Checkout() {
                   </Detail>
                 )}
                 <Detail label="Total">
-                  {total.toLocaleString()} 000 UZS
+                  {total.toLocaleString()} UZS
                 </Detail>
               </dl>
 
@@ -649,7 +632,7 @@ export function Checkout() {
             </span>
             <span className="text-[18px] font-light text-brand-gray">
               {total.toLocaleString()}
-              <span className="text-brand-gray-light text-[12px] ml-1">000 UZS</span>
+              <span className="text-brand-gray-light text-[12px] ml-1">UZS</span>
             </span>
           </div>
           <button

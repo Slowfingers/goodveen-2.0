@@ -68,7 +68,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refresh = useCallback(async () => {
     const token = getToken();
-    console.log('AuthContext refresh - token:', token ? 'exists' : 'null');
     if (!token) {
       setUser(null);
       setLoading(false);
@@ -76,10 +75,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     try {
       const { user: userData } = await authApi.me();
-      console.log('AuthContext refresh - user loaded:', userData);
       setUser(userData);
     } catch (err) {
-      console.log('AuthContext refresh - error:', err);
       if (err instanceof ApiError && (err.status === 401 || err.status === 404)) {
         setToken(null);
       }
@@ -94,12 +91,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [refresh]);
 
   const signIn = useCallback(async (email: string, password: string) => {
-    console.log('AuthContext signIn - email:', email);
     const { token, user: userData } = await authApi.login(email, password);
-    console.log('AuthContext signIn - token received, user:', userData);
     setToken(token);
     setUser(userData);
-    console.log('AuthContext signIn - state updated');
   }, []);
 
   const signOut = useCallback(() => {

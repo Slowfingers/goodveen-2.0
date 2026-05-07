@@ -29,6 +29,10 @@ export function EventDetails() {
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
+    document.title = event ? `Goodveen - ${event.title}` : 'Goodveen - Событие';
+  }, [event]);
+
+  useEffect(() => {
     window.scrollTo(0, 0);
   }, [id]);
 

@@ -11,6 +11,7 @@ import {
   Sparkles,
   Leaf,
   ShieldCheck,
+  ShoppingBag,
 } from 'lucide-react';
 import { useCartUI } from '@/src/components/cart/CartContext';
 import { productsApi } from '../lib/api';
@@ -49,6 +50,24 @@ export function Product() {
   );
   const [wishlisted, setWishlisted] = useState(false);
   const cartUI = useCartUI();
+
+  const addToCart = () => {
+    if (!product || !activeSize) return;
+    cartUI.addItem({
+      id: product.id,
+      slug: product.slug,
+      name: product.name,
+      size: activeSize.name,
+      qty: qty,
+      price: activeSize.price,
+      img: images[0],
+    });
+    cartUI.open();
+  };
+
+  useEffect(() => {
+    document.title = product ? `Goodveen - ${product.name}` : 'Goodveen - Товар';
+  }, [product]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -331,13 +350,13 @@ export function Product() {
 
               {/* Actions */}
               <div className="flex flex-col gap-3">
-                <Link
-                  to="/cart"
+                <button
+                  onClick={addToCart}
                   className="w-full h-14 bg-brand-gray text-white flex items-center justify-center gap-3 uppercase tracking-[0.25em] text-[12px] hover:bg-black transition-colors"
                 >
                   Add to cart
-                  <ArrowRight size={16} strokeWidth={1.25} />
-                </Link>
+                  <ShoppingBag size={16} strokeWidth={1.25} />
+                </button>
                 <Link
                   to="/checkout"
                   className="w-full h-14 border border-brand-gray text-brand-gray flex items-center justify-center uppercase tracking-[0.25em] text-[12px] hover:bg-brand-border/40 transition-colors"
@@ -423,11 +442,11 @@ export function Product() {
           </span>
         </div>
         <button
-          onClick={cartUI.open}
+          onClick={addToCart}
           className="h-12 px-5 bg-brand-gray text-white flex items-center gap-2 uppercase tracking-[0.2em] text-[12px] hover:bg-black transition-colors shrink-0"
         >
           Add to cart
-          <ArrowRight size={16} strokeWidth={1.25} />
+          <ShoppingBag size={16} strokeWidth={1.25} />
         </button>
       </div>
 
