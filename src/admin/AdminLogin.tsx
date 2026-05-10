@@ -17,8 +17,8 @@ export function AdminLogin() {
   if (profile && !isAdmin) {
     return (
       <FullScreenMessage
-        title="Access denied"
-        body={`Account ${profile.email} is not an administrator.`}
+        title="Доступ запрещён"
+        body={`Аккаунт ${profile.email} не является администраторским.`}
       />
     );
   }
@@ -30,7 +30,14 @@ export function AdminLogin() {
     try {
       await signIn(email.trim(), password);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Sign-in failed');
+      const e = err as any;
+      if (e?.status === 401) {
+        setError('Неверный email или пароль');
+      } else if (e?.status === 403) {
+        setError('Доступ запрещён');
+      } else {
+        setError('Ошибка входа. Попробуйте позже.');
+      }
     } finally {
       setSubmitting(false);
     }
@@ -45,7 +52,7 @@ export function AdminLogin() {
         <div className="text-center mb-8">
           <div className="text-[24px] tracking-[0.18em] uppercase text-[#303030]">Goodveen</div>
           <div className="text-[12px] tracking-[0.24em] uppercase text-[#808080] mt-1">
-            Admin panel
+            Админ-панель
           </div>
         </div>
 
@@ -62,7 +69,7 @@ export function AdminLogin() {
         />
 
         <label className="block text-[12px] uppercase tracking-[0.18em] text-[#808080] mb-2">
-          Password
+          Пароль
         </label>
         <input
           type="password"
@@ -84,7 +91,7 @@ export function AdminLogin() {
           disabled={submitting}
           className="w-full bg-[#303030] text-white py-3 text-[12px] tracking-[0.24em] uppercase disabled:opacity-60"
         >
-          {submitting ? 'Signing in…' : 'Sign in'}
+          {submitting ? 'Вход…' : 'Войти'}
         </button>
       </form>
     </div>
@@ -94,7 +101,7 @@ export function AdminLogin() {
 function FullScreenLoader() {
   return (
     <div className="min-h-screen bg-[#F7F4EF] flex items-center justify-center text-[12px] tracking-[0.2em] uppercase text-[#808080]">
-      Loading…
+      Загрузка…
     </div>
   );
 }

@@ -43,6 +43,24 @@ export function Header() {
     setCatalogOpen(false);
   }, [location.pathname]);
 
+  // Close mobile menu on Escape
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMobileOpen(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [mobileOpen]);
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileOpen]);
+
   const onLight = isScrolled || !isHero;
 
   return (
@@ -170,109 +188,130 @@ export function Header() {
 
         {/* Mobile bar */}
         <div className="flex md:hidden h-full w-full items-stretch">
-          <button
-            onClick={() => setMobileOpen((v) => !v)}
-            aria-label="Menu"
+          {/* Logo */}
+          <Link
+            to="/"
             className={cn(
-              'flex-1 h-full flex items-center justify-start gap-3 uppercase tracking-[0.2em] text-[12px] border-r',
+              'flex-1 h-full flex items-center px-5 uppercase tracking-[0.2em] text-[12px]',
+              onLight ? 'text-brand-gray' : 'text-white'
+            )}
+          >
+            Goodveen
+          </Link>
+          {/* Cart */}
+          <button
+            onClick={cartUI.open}
+            className={cn(
+              'w-[56px] h-full flex items-center justify-center border-x',
               onLight ? 'border-[#EEEEEE]' : 'border-white/20',
               onLight ? 'hover:bg-brand-border' : 'hover:bg-white/10'
             )}
+            aria-label="Корзина"
           >
-            {mobileOpen ? <X size={20} strokeWidth={1.25} /> : <Menu size={20} strokeWidth={1.25} />}
-            <span>Menu</span>
+            <ShoppingBag size={20} strokeWidth={1.25} />
           </button>
+          {/* Account */}
           <button
-            onClick={() => {
-              if (user) {
-                navigate('/cabinet');
-              } else {
-                authUI.open('login');
-              }
-            }}
+            onClick={() => { if (user) { navigate('/cabinet'); } else { authUI.open('login'); } }}
             className={cn(
               'w-[56px] h-full flex items-center justify-center border-r',
               onLight ? 'border-[#EEEEEE]' : 'border-white/20',
               onLight ? 'hover:bg-brand-border' : 'hover:bg-white/10'
             )}
-            aria-label="Account"
+            aria-label="Аккаунт"
           >
             <User size={20} strokeWidth={1.25} />
           </button>
+          {/* Burger */}
           <button
-            onClick={cartUI.open}
+            onClick={() => setMobileOpen((v) => !v)}
+            aria-label="Меню"
             className={cn(
-              'w-[56px] h-full flex items-center justify-center',
-              onLight ? 'hover:bg-brand-border' : 'hover:bg-white/10'
+              'w-[56px] h-full flex items-center justify-center border-r',
+              onLight ? 'border-[#EEEEEE]' : 'border-white/20',
+              mobileOpen ? 'bg-white text-brand-gray' : onLight ? 'hover:bg-brand-border' : 'hover:bg-white/10'
             )}
-            aria-label="Cart"
           >
-            <ShoppingBag size={20} strokeWidth={1.25} />
+            {mobileOpen ? <X size={20} strokeWidth={1.25} /> : <Menu size={20} strokeWidth={1.25} />}
           </button>
         </div>
       </div>
 
+      {/* Mobile overlay (click outside to close) */}
+      {mobileOpen && (
+        <div
+          className="md:hidden fixed inset-0 top-[56px] z-40 bg-black/30"
+          onClick={() => setMobileOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
       {/* Mobile drawer */}
       {mobileOpen && (
-        <div className="md:hidden bg-white text-brand-gray border-b border-brand-border">
-          <nav className="flex flex-col">
-            {NAV_ITEMS.map((item) => {
-              const active =
-                item.to === '/' ? false : location.pathname.startsWith(item.to);
-              
-              if (item.to === '/catalog') {
-                return (
-                  <div key={item.to}>
-                    <button
-                      onClick={() => setCatalogOpen(!catalogOpen)}
-                      className={cn(
-                        'w-full h-[56px] px-5 flex items-center justify-between uppercase tracking-[0.2em] text-[12px] border-b border-brand-border',
-                        active && 'bg-brand-border'
-                      )}
-                    >
-                      {item.label}
-                      <ChevronDown size={14} className={cn('transition-transform', catalogOpen && 'rotate-180')} />
-                    </button>
-                    {catalogOpen && (
-                      <div className="bg-brand-border/30">
-                        <Link
-                          to="/catalog"
-                          className="block h-[48px] px-8 flex items-center text-[11px] tracking-[0.2em] uppercase border-b border-brand-border"
-                        >
-                          Все товары
-                        </Link>
-                        {categories.map((cat) => (
-                          <Link
-                            key={cat.id}
-                            to={`/catalog?category=${cat.slug}`}
-                            className="block h-[48px] px-8 flex items-center text-[11px] tracking-[0.2em] uppercase border-b border-brand-border last:border-b-0"
-                          >
-                            {cat.name}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                );
-              }
-              
-              return (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  className={cn(
-                    'h-[56px] px-5 flex items-center uppercase tracking-[0.2em] text-[12px] border-b border-brand-border',
-                    active && 'bg-brand-border'
-                  )}
+        <div className="md:hidden absolute top-full left-0 right-0 bg-white text-brand-gray shadow-[0px_40px_80px_rgba(0,0,0,0.32)] z-50">
+          <div className="flex flex-col gap-10 p-10">
+            {/* Language switcher */}
+            <div className="flex items-center gap-[60px] pb-5 border-b border-[#D0D0D0]">
+              <button className="text-[12px] tracking-[0.2em] uppercase text-[#BABABA]">Рус</button>
+              <button className="text-[12px] tracking-[0.2em] uppercase text-brand-gray">ENG</button>
+              <button className="text-[12px] tracking-[0.2em] uppercase text-brand-gray">O'zB</button>
+            </div>
+
+            {/* Catalog expandable */}
+            <div className="flex flex-col gap-5">
+              <div className="bg-[#F6F6F6] px-4 py-3">
+                <button
+                  onClick={() => setCatalogOpen(!catalogOpen)}
+                  className="w-full flex items-center justify-between"
                 >
-                  {item.label}
+                  <span className="text-[16px] tracking-[0.02em] text-brand-gray">Каталог</span>
+                  <ChevronDown size={20} strokeWidth={1} className={cn('text-brand-gray transition-transform', catalogOpen && 'rotate-180')} />
+                </button>
+                {catalogOpen && (
+                  <div className="mt-3 flex flex-col gap-2">
+                    <Link to="/catalog" className="text-[14px] tracking-[0.02em] text-brand-gray py-1">
+                      Все товары
+                    </Link>
+                    {categories.map((cat) => (
+                      <Link
+                        key={cat.id}
+                        to={`/catalog?category=${cat.slug}`}
+                        className="text-[14px] tracking-[0.02em] text-brand-gray py-1"
+                      >
+                        {cat.name}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Nav links */}
+              <div className="flex flex-col items-center gap-10">
+                <Link to="/events" className="text-[14px] tracking-[0.2em] uppercase text-brand-gray">
+                  События
                 </Link>
-              );
-            })}
-            <button className="h-[56px] px-5 flex items-center uppercase tracking-[0.2em] text-[12px] text-left">
-              RU
-            </button>
-          </nav>
+                <Link to="/workshop" className="text-[14px] tracking-[0.2em] uppercase text-brand-gray">
+                  Мастерская
+                </Link>
+                <Link to="/contact" className="text-[14px] tracking-[0.2em] uppercase text-brand-gray">
+                  Контакты
+                </Link>
+              </div>
+            </div>
+
+            {/* Social icons */}
+            <div className="flex items-center gap-10">
+              <a href="#" aria-label="Instagram" className="w-8 h-8 flex items-center justify-center text-brand-gray">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><rect x="6" y="6" width="20" height="20" rx="5" stroke="#303030" strokeWidth="1.5"/><circle cx="16" cy="16" r="5" stroke="#303030" strokeWidth="1.5"/><circle cx="22" cy="10" r="1" fill="#303030"/></svg>
+              </a>
+              <a href="#" aria-label="Telegram" className="w-8 h-8 flex items-center justify-center text-brand-gray">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><path d="M26 7L5 15.5L13 17.5L17 25L20 18L26 7Z" stroke="#303030" strokeWidth="1.5" strokeLinejoin="round"/><path d="M13 17.5L17 21.5" stroke="#303030" strokeWidth="1.5"/></svg>
+              </a>
+              <a href="#" aria-label="Facebook" className="w-8 h-8 flex items-center justify-center text-brand-gray">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><path d="M18 6H15C13.3 6 12 7.3 12 9V13H9V17H12V26H16V17H19L20 13H16V9C16 8.4 16.4 8 17 8H20V6H18Z" stroke="#303030" strokeWidth="1.5" strokeLinejoin="round"/></svg>
+              </a>
+            </div>
+          </div>
         </div>
       )}
     </header>

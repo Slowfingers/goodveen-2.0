@@ -36,13 +36,13 @@ export function Footer() {
           </nav>
 
           <div className="flex gap-5">
-            <a href="#" aria-label="Instagram" className="w-8 h-8 rounded-full border border-white/80 flex items-center justify-center text-white hover:bg-white hover:text-brand-taupe transition-colors">
+            <a href="https://www.instagram.com/goodveen.uz/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="w-8 h-8 rounded-full border border-white/80 flex items-center justify-center text-white hover:bg-white hover:text-brand-taupe transition-colors">
               <Instagram size={14} strokeWidth={1.5} />
             </a>
-            <a href="#" aria-label="Telegram" className="w-8 h-8 rounded-full border border-white/80 flex items-center justify-center text-white hover:bg-white hover:text-brand-taupe transition-colors">
+            <a href="https://t.me/goodveenuz" target="_blank" rel="noopener noreferrer" aria-label="Telegram" className="w-8 h-8 rounded-full border border-white/80 flex items-center justify-center text-white hover:bg-white hover:text-brand-taupe transition-colors">
               <Send size={14} strokeWidth={1.5} />
             </a>
-            <a href="#" aria-label="Facebook" className="w-8 h-8 rounded-full border border-white/80 flex items-center justify-center text-white hover:bg-white hover:text-brand-taupe transition-colors">
+            <a href="https://www.facebook.com/goodveenflowershouse" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="w-8 h-8 rounded-full border border-white/80 flex items-center justify-center text-white hover:bg-white hover:text-brand-taupe transition-colors">
               <Facebook size={14} strokeWidth={1.5} />
             </a>
           </div>

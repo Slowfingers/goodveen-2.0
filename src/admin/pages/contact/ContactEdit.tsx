@@ -41,6 +41,7 @@ export function ContactEdit() {
         openHours: data.openHours,
         instagram: data.instagram,
         facebook: data.facebook,
+        telegram: data.telegram,
       });
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Ошибка сохранения');
@@ -181,6 +182,13 @@ export function ContactEdit() {
                 value={data.facebook ?? ''}
                 onChange={(e) => setData({ ...data, facebook: e.target.value || null })}
                 placeholder="https://facebook.com/goodveen"
+              />
+            </Field>
+            <Field label="Telegram URL">
+              <Input
+                value={data.telegram ?? ''}
+                onChange={(e) => setData({ ...data, telegram: e.target.value || null })}
+                placeholder="https://t.me/goodveenuz"
               />
             </Field>
           </div>

@@ -21,10 +21,10 @@ const FALLBACK_IMG =
   'https://images.unsplash.com/photo-1549007628-9418af83b544?q=80&w=2400&auto=format&fit=crop';
 
 const STATIC_DELIVERY = [
-  'Same-day delivery in Tashkent (orders before 14:00)',
-  'Hand-delivered in signature Goodveen wrap',
-  'Optional handwritten card included',
-  'Live tracking via Telegram bot',
+  'Доставка в день заказа по Ташкенту (заказы до 14:00)',
+  'Доставка вручную в фирменной упаковке Goodveen',
+  'Опциональная рукописная открытка',
+  'Отслеживание в реальном времени через Telegram бот',
 ];
 
 interface RelatedItem {
@@ -46,7 +46,7 @@ export function Product() {
   const [color, setColor] = useState<string>('');
   const [qty, setQty] = useState(1);
   const [openAccordion, setOpenAccordion] = useState<'composition' | 'care' | 'delivery' | null>(
-    'composition',
+    'care',
   );
   const [wishlisted, setWishlisted] = useState(false);
   const cartUI = useCartUI();
@@ -132,7 +132,7 @@ export function Product() {
   if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center text-[12px] tracking-[0.2em] uppercase text-brand-gray-light">
-        Loading…
+        Загрузка…
       </div>
     );
   }
@@ -140,13 +140,13 @@ export function Product() {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center px-5 text-center gap-4">
         <h2 className="text-[28px] md:text-[40px] font-light tracking-[0.02em] text-brand-gray">
-          Product not found
+          Товар не найден
         </h2>
         <Link
           to="/catalog"
           className="text-[12px] tracking-[0.2em] uppercase text-brand-gray-light hover:text-brand-gray"
         >
-          ← Back to catalog
+          ← Вернуться в каталог
         </Link>
       </div>
     );
@@ -162,7 +162,7 @@ export function Product() {
           </Link>
           <ArrowRight size={12} className="mx-3 opacity-50" />
           <Link to="/catalog" className="hover:text-brand-gray transition-colors">
-            {product.category?.name ?? 'Catalog'}
+            {product.category?.name ?? 'Каталог'}
           </Link>
           <ArrowRight size={12} className="mx-3 opacity-50" />
           <span className="text-brand-gray truncate">{product.name}</span>
@@ -171,10 +171,10 @@ export function Product() {
 
       {/* ===== PRODUCT HERO ===== */}
       <section className="w-full border-b border-brand-border">
-        <div className="max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-[1fr_560px]">
+        <div className="max-w-[1440px] mx-auto flex flex-col lg:flex-row">
           {/* Gallery */}
-          <div className="relative bg-[#F7F5F2] order-2 lg:order-1">
-            <div className="relative w-full h-[420px] md:h-[640px] lg:h-[860px] overflow-hidden">
+          <div className="relative bg-[#F7F5F2] order-1 lg:order-1 lg:flex-1">
+            <div className="relative w-full h-[420px] md:h-[640px] lg:h-[1000px] overflow-hidden">
               <img
                 src={images[activeImg]}
                 alt={product.name}
@@ -183,7 +183,7 @@ export function Product() {
               {/* Wishlist */}
               <button
                 onClick={() => setWishlisted((v) => !v)}
-                aria-label="Add to wishlist"
+                aria-label="Добавить в избранное"
                 className="absolute top-5 right-5 md:top-8 md:right-8 w-12 h-12 bg-white/85 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-colors"
               >
                 <Heart
@@ -195,20 +195,24 @@ export function Product() {
 
               {/* Arrows (mobile) */}
               <button
-                aria-label="Previous image"
+                aria-label="Предыдущее изображение"
                 onClick={() =>
                   setActiveImg((i) => (i - 1 + images.length) % images.length)
                 }
-                className="md:hidden absolute left-2 top-1/2 -translate-y-1/2 w-9 h-[80px] border border-white/60 bg-white/70 backdrop-blur-sm flex items-center justify-center"
+                className="md:hidden absolute left-0 top-1/2 -translate-y-1/2 w-8 h-[60px] flex items-center justify-center bg-white/70 backdrop-blur-sm hover:bg-white transition-colors"
               >
-                <ArrowLeft size={20} strokeWidth={1.25} className="text-brand-gray" />
+                <svg width="16" height="41" viewBox="0 0 16 41" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M14.6094 0.286621L0.609375 20.2864L14.6094 40.2866" stroke="#D0D0D0"/>
+                </svg>
               </button>
               <button
-                aria-label="Next image"
+                aria-label="Следующее изображение"
                 onClick={() => setActiveImg((i) => (i + 1) % images.length)}
-                className="md:hidden absolute right-2 top-1/2 -translate-y-1/2 w-9 h-[80px] border border-white/60 bg-white/70 backdrop-blur-sm flex items-center justify-center"
+                className="md:hidden absolute right-0 top-1/2 -translate-y-1/2 w-8 h-[60px] flex items-center justify-center bg-white/70 backdrop-blur-sm hover:bg-white transition-colors"
               >
-                <ArrowRight size={20} strokeWidth={1.25} className="text-brand-gray" />
+                <svg width="16" height="41" viewBox="0 0 16 41" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ transform: 'scaleX(-1)' }}>
+                  <path d="M14.6094 0.286621L0.609375 20.2864L14.6094 40.2866" stroke="#D0D0D0"/>
+                </svg>
               </button>
 
               {/* Counter */}
@@ -235,58 +239,89 @@ export function Product() {
           </div>
 
           {/* Info column */}
-          <div className="order-1 lg:order-2 lg:border-l border-brand-border flex flex-col">
-            <div className="px-5 md:px-10 py-8 md:py-12 flex flex-col gap-8 md:gap-10 border-b border-brand-border">
-              <div className="flex flex-col gap-3 md:gap-4">
-                <span className="text-[11px] md:text-[12px] tracking-[0.25em] uppercase text-brand-gray-light">
-                  {product.category?.name ?? product.flowerTypes[0] ?? 'Arrangement'}
-                </span>
-                <h1 className="text-[44px] md:text-[64px] leading-[1.05] tracking-[0.01em] font-light text-brand-gray">
+          <div className="order-2 lg:order-2 lg:border-l border-brand-border flex flex-col lg:w-[600px] lg:flex-shrink-0">
+            <div className="px-5 md:px-10 py-8 md:py-[80px] flex flex-col gap-5 border-b border-brand-border">
+
+              {/* 1. Название + описание */}
+              <div className="flex flex-col gap-5">
+                <h1 className="text-[40px] md:text-[48px] leading-[1.0] tracking-[0.02em] font-light text-brand-gray">
                   {product.name}
                 </h1>
-                <p className="text-[14px] md:text-[15px] leading-[22px] md:leading-[24px] text-brand-gray-light">
+                <p className="text-[14px] md:text-[16px] leading-[22px] text-brand-gray">
                   {product.description}
                 </p>
               </div>
 
-              {/* Color */}
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] md:text-[12px] tracking-[0.2em] uppercase text-brand-gray-light">
-                    Palette
+              {/* 2. Аккордеон «Состав» */}
+              <div className="border border-[#D0D0D0]">
+                <button
+                  onClick={() => setOpenAccordion((v) => (v === 'composition' ? null : 'composition'))}
+                  className="w-full px-5 h-[60px] md:h-[80px] flex items-center justify-between"
+                >
+                  <span className="text-[20px] md:text-[24px] leading-[32px] tracking-[0.02em] text-brand-gray">
+                    Состав
                   </span>
-                  <span className="text-[12px] text-brand-gray">{color}</span>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {product.colors.map((c) => {
-                    const active = c === color;
-                    return (
-                      <button
-                        key={c}
-                        onClick={() => setColor(c)}
-                        aria-label={c}
-                        className={`px-4 py-2 text-[11px] tracking-[0.15em] uppercase border transition-all ${
-                          active
-                            ? 'border-brand-gray bg-brand-gray text-white'
-                            : 'border-brand-border text-brand-gray hover:border-brand-gray'
-                        }`}
-                      >
-                        {c}
-                      </button>
-                    );
-                  })}
-                </div>
+                  <span className="text-[#D0D0D0]">
+                    {openAccordion === 'composition'
+                      ? <Minus size={20} strokeWidth={1} />
+                      : <Plus size={20} strokeWidth={1} />}
+                  </span>
+                </button>
+                {openAccordion === 'composition' && (
+                  <div className="px-5 pb-5">
+                    <ul className="flex flex-col gap-2">
+                      {product.composition.map((c) => (
+                        <li key={c} className="flex items-start gap-2 text-[14px] md:text-[16px] leading-[22px] text-brand-gray">
+                          <Check size={14} strokeWidth={1.5} className="text-brand-taupe mt-1 shrink-0" />
+                          {c}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
 
-              {/* Size */}
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] md:text-[12px] tracking-[0.2em] uppercase text-brand-gray-light">
-                    Size
+              {/* 3. Аккордеон «Советы по уходу» */}
+              <div className="border border-[#D0D0D0]">
+                <button
+                  onClick={() => setOpenAccordion((v) => (v === 'care' ? null : 'care'))}
+                  className="w-full px-5 h-[60px] md:h-[80px] flex items-center justify-between"
+                >
+                  <span className="text-[20px] md:text-[24px] leading-[32px] tracking-[0.02em] text-brand-gray">
+                    Советы по уходу
                   </span>
-                  <span className="text-[12px] text-brand-gray-light">{activeSize?.height}</span>
-                </div>
-                <div className="grid grid-cols-4 border border-brand-border">
+                  <span className="text-[#D0D0D0]">
+                    {openAccordion === 'care'
+                      ? <Minus size={20} strokeWidth={1} />
+                      : <Plus size={20} strokeWidth={1} />}
+                  </span>
+                </button>
+                {openAccordion === 'care' && (
+                  <div className="px-5 pb-5">
+                    <ul className="flex flex-col gap-2">
+                      {product.careTips.length > 0
+                        ? product.careTips.map((c) => (
+                            <li key={c} className="text-[14px] md:text-[16px] leading-[22px] text-brand-gray">{c}</li>
+                          ))
+                        : STATIC_DELIVERY.map((c) => (
+                            <li key={c} className="text-[14px] md:text-[16px] leading-[22px] text-brand-gray">{c}</li>
+                          ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+
+              {/* 4. Бейджи */}
+              <div className="flex flex-col gap-3">
+                <Badge icon={<Sparkles size={16} strokeWidth={1.25} />} label="Ручная работа" />
+                <Badge icon={<Leaf size={16} strokeWidth={1.25} />} label="Свежие ежедневно" />
+                <Badge icon={<Truck size={16} strokeWidth={1.25} />} label="Доставка в день заказа" />
+                <Badge icon={<ShieldCheck size={16} strokeWidth={1.25} />} label="Собственный сад" />
+              </div>
+
+              {/* 5. Карточки размеров */}
+              <div className="flex flex-col gap-2">
+                <div className="grid grid-cols-3 gap-2">
                   {sizes.map((s) => {
                     const active = s.id === selectedSizeId;
                     return (
@@ -294,17 +329,24 @@ export function Product() {
                         key={s.id}
                         onClick={() => setSelectedSizeId(s.id)}
                         disabled={!s.isAvailable}
-                        className={`flex flex-col items-center justify-center gap-1 py-3 md:py-4 border-r last:border-r-0 border-brand-border transition-colors ${
+                        className={`flex flex-col items-center justify-center gap-1 py-4 transition-all ${
                           !s.isAvailable
-                            ? 'opacity-35 cursor-not-allowed text-brand-gray'
+                            ? 'opacity-35 cursor-not-allowed border border-[#EEEEEE]'
                             : active
-                            ? 'bg-brand-gray text-white'
-                            : 'text-brand-gray hover:bg-brand-border/40'
+                            ? 'border-2 border-[#303030] bg-white'
+                            : 'border border-[#EEEEEE] hover:border-[#D0D0D0]'
                         }`}
                       >
-                        <span className="text-[18px] md:text-[20px] font-light">{s.name}</span>
+                        <span className={`text-[18px] md:text-[20px] leading-[26px] tracking-[0.02em] ${
+                          active ? 'text-brand-gray' : 'text-brand-gray'
+                        }`}>{s.name}</span>
+                        <span className={`text-[14px] md:text-[16px] leading-[22px] tracking-[0.02em] ${
+                          active ? 'text-brand-gray' : 'text-[#808080]'
+                        }`}>
+                          {s.price.toLocaleString()}
+                        </span>
                         {s.height && (
-                          <span className="text-[10px] md:text-[11px] tracking-[0.15em] uppercase opacity-80">
+                          <span className="text-[11px] md:text-[12px] tracking-[0.02em] text-[#808080]">
                             {s.height}
                           </span>
                         )}
@@ -312,119 +354,16 @@ export function Product() {
                     );
                   })}
                 </div>
-              </div>
 
-              {/* Quantity + Price */}
-              <div className="flex items-end justify-between gap-4">
-                <div className="flex flex-col gap-2">
-                  <span className="text-[11px] md:text-[12px] tracking-[0.2em] uppercase text-brand-gray-light">
-                    Quantity
-                  </span>
-                  <div className="flex items-center border border-brand-border">
-                    <button
-                      onClick={() => setQty((q) => Math.max(1, q - 1))}
-                      className="w-10 h-10 flex items-center justify-center hover:bg-brand-border/40"
-                      aria-label="Decrease"
-                    >
-                      <Minus size={14} strokeWidth={1.5} />
-                    </button>
-                    <span className="w-12 text-center text-[14px]">{qty}</span>
-                    <button
-                      onClick={() => setQty((q) => Math.min(99, q + 1))}
-                      className="w-10 h-10 flex items-center justify-center hover:bg-brand-border/40"
-                      aria-label="Increase"
-                    >
-                      <Plus size={14} strokeWidth={1.5} />
-                    </button>
-                  </div>
-                </div>
-                <div className="flex flex-col gap-1 items-end">
-                  <span className="text-[11px] md:text-[12px] tracking-[0.2em] uppercase text-brand-gray-light">
-                    Total
-                  </span>
-                  <span className="text-[28px] md:text-[32px] font-light leading-none text-brand-gray">
-                    {totalPrice.toLocaleString()}<span className="text-brand-gray-light text-[14px] ml-1">000 UZS</span>
-                  </span>
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex flex-col gap-3">
+                {/* 6. Кнопка добавить в корзину */}
                 <button
                   onClick={addToCart}
-                  className="w-full h-14 bg-brand-gray text-white flex items-center justify-center gap-3 uppercase tracking-[0.25em] text-[12px] hover:bg-black transition-colors"
+                  className="w-full h-14 bg-[#303030] text-white flex items-center justify-center uppercase tracking-[0.2em] text-[14px] hover:bg-black transition-colors"
                 >
-                  Add to cart
-                  <ShoppingBag size={16} strokeWidth={1.25} />
+                  Добавить в корзину
                 </button>
-                <Link
-                  to="/checkout"
-                  className="w-full h-14 border border-brand-gray text-brand-gray flex items-center justify-center uppercase tracking-[0.25em] text-[12px] hover:bg-brand-border/40 transition-colors"
-                >
-                  Buy now
-                </Link>
               </div>
 
-              {/* Badges */}
-              <div className="grid grid-cols-2 gap-x-6 gap-y-4 pt-4 border-t border-brand-border">
-                <Badge icon={<Sparkles size={16} strokeWidth={1.25} />} label="Hand-arranged" />
-                <Badge icon={<Leaf size={16} strokeWidth={1.25} />} label="Fresh daily" />
-                <Badge icon={<Truck size={16} strokeWidth={1.25} />} label="Same-day delivery" />
-                <Badge icon={<ShieldCheck size={16} strokeWidth={1.25} />} label="Freshness guarantee" />
-              </div>
-            </div>
-
-            {/* Accordions */}
-            <div className="flex flex-col">
-              <Accordion
-                title="Composition"
-                open={openAccordion === 'composition'}
-                onClick={() =>
-                  setOpenAccordion((v) => (v === 'composition' ? null : 'composition'))
-                }
-              >
-                <ul className="flex flex-col gap-2">
-                  {product.composition.map((c) => (
-                    <li
-                      key={c}
-                      className="flex items-start gap-2 text-[14px] text-brand-gray-light"
-                    >
-                      <Check
-                        size={14}
-                        strokeWidth={1.5}
-                        className="text-brand-taupe mt-1 shrink-0"
-                      />
-                      {c}
-                    </li>
-                  ))}
-                </ul>
-              </Accordion>
-              <Accordion
-                title="Care tips"
-                open={openAccordion === 'care'}
-                onClick={() => setOpenAccordion((v) => (v === 'care' ? null : 'care'))}
-              >
-                <ul className="flex flex-col gap-2">
-                  {product.careTips.map((c) => (
-                    <li key={c} className="text-[14px] text-brand-gray-light">
-                      — {c}
-                    </li>
-                  ))}
-                </ul>
-              </Accordion>
-              <Accordion
-                title="Delivery"
-                open={openAccordion === 'delivery'}
-                onClick={() => setOpenAccordion((v) => (v === 'delivery' ? null : 'delivery'))}
-              >
-                <ul className="flex flex-col gap-2">
-                  {STATIC_DELIVERY.map((c) => (
-                    <li key={c} className="text-[14px] text-brand-gray-light">
-                      — {c}
-                    </li>
-                  ))}
-                </ul>
-              </Accordion>
             </div>
           </div>
         </div>
@@ -438,121 +377,147 @@ export function Product() {
           </span>
           <span className="text-[18px] font-light text-brand-gray">
             {totalPrice.toLocaleString()}
-            <span className="text-brand-gray-light text-[12px] ml-1">000 UZS</span>
+            <span className="text-brand-gray-light text-[12px] ml-1">сум</span>
           </span>
         </div>
         <button
           onClick={addToCart}
           className="h-12 px-5 bg-brand-gray text-white flex items-center gap-2 uppercase tracking-[0.2em] text-[12px] hover:bg-black transition-colors shrink-0"
         >
-          Add to cart
+          Добавить в корзину
           <ShoppingBag size={16} strokeWidth={1.25} />
         </button>
       </div>
 
-      {/* ===== STORY ===== */}
-      <section className="w-full flex justify-center py-[60px] md:py-[120px] px-5 md:px-10 border-b border-brand-border">
-        <div className="w-full max-w-[1360px] grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-20 items-center">
-          <div className="flex flex-col gap-6 md:gap-8">
-            <span className="text-[11px] md:text-[12px] tracking-[0.25em] uppercase text-brand-gray-light">
-              The Story
-            </span>
-            <h2 className="text-[40px] md:text-[64px] leading-[1.05] tracking-[0.01em] font-light text-brand-gray">
-              Tonal harmony,<br />sculpted by hand.
-            </h2>
-            <p className="text-[15px] md:text-[16px] leading-[24px] md:leading-[26px] text-brand-gray-light max-w-[520px]">
-              {product.description}
-            </p>
-            <Link
-              to="/workshop"
-              className="self-start flex items-center gap-3 text-[12px] tracking-[0.2em] uppercase text-brand-gray hover:text-brand-taupe transition-colors"
-            >
-              Visit the Workshop
-              <ArrowRight size={18} strokeWidth={1.25} />
-            </Link>
+      {/* ===== COMPLEMENTARY (Эта коллекция идеально дополняет) ===== */}
+      {related.length > 0 && (
+        <section className="w-full px-5 md:px-10 py-[40px] border-b border-brand-border">
+          <div className="max-w-[1440px] mx-auto flex flex-col md:flex-row items-center gap-10 md:gap-10">
+            {/* 3 small cards */}
+            <div className="flex flex-row gap-0 flex-shrink-0">
+              {related.slice(0, 3).map((p) => (
+                <Link
+                  key={p.slug}
+                  to={`/product/${p.slug}`}
+                  className="relative flex flex-col justify-end p-5 gap-2 w-[200px] md:w-[280px] h-[280px] overflow-hidden group flex-shrink-0"
+                >
+                  <img
+                    src={p.img}
+                    alt={p.title}
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/48 via-transparent to-transparent" />
+                  <h4 className="relative z-10 text-white text-[12px] md:text-[14px] tracking-[0.2em] uppercase truncate">
+                    {p.title}
+                  </h4>
+                  <p className="relative z-10 text-white text-[11px] md:text-[12px] leading-[14px] opacity-90 line-clamp-2">
+                    {p.desc}
+                  </p>
+                </Link>
+              ))}
+            </div>
+            {/* Text */}
+            <h3 className="text-[28px] md:text-[36px] leading-[1.0] tracking-[0.02em] text-brand-gray">
+              Эта коллекция идеально дополняет
+            </h3>
           </div>
-          <div className="relative h-[320px] md:h-[560px] overflow-hidden">
-            <img
-              src={images[1] ?? images[0]}
-              alt="In the interior"
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ===== IN INTERIOR ===== */}
-      <section className="w-full flex justify-center py-[60px] md:py-[120px] px-5 md:px-10 border-b border-brand-border">
-        <div className="w-full max-w-[1360px] flex flex-col gap-6 md:gap-10">
-          <div className="flex flex-col items-center text-center">
-            <h2 className="text-[40px] md:text-[64px] font-light leading-[1.05] tracking-[0.01em] text-brand-gray">
-              In the interior
+      <section className="w-full px-5 md:px-10 py-[80px] border-b border-brand-border">
+        <div className="max-w-[1440px] mx-auto flex flex-col gap-10">
+          <div className="flex flex-col gap-2">
+            <h2 className="text-[40px] md:text-[48px] leading-[1.0] tracking-[0.02em] text-brand-gray">
+              В интерьере
             </h2>
-            <p className="text-[12px] md:text-[14px] tracking-[0.2em] text-brand-gray-light uppercase mt-2">
-              How Wild Serenity lives in real spaces
+            <p className="text-[12px] md:text-[14px] tracking-[0.2em] text-brand-gray-light uppercase">
+              Посмотрите, как цветы выглядят в реальных пространствах
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-10 md:h-[640px]">
-            {images.slice(0, 4).map((img) => (
-              <div key={img} className="relative h-[280px] md:h-full overflow-hidden">
-                <img src={img} alt="" className="absolute inset-0 w-full h-full object-cover" />
-              </div>
-            ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 h-auto md:h-[800px]">
+            <div className="relative h-[320px] md:h-full overflow-hidden">
+              <img
+                src={images[0]}
+                alt="В интерьере"
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+            </div>
+            <div className="relative h-[320px] md:h-full overflow-hidden">
+              <img
+                src={images[1] ?? images[0]}
+                alt="В интерьере"
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+            </div>
           </div>
         </div>
       </section>
 
       {/* ===== RELATED ===== */}
-      <section className="w-full flex justify-center py-[60px] md:py-[120px] px-5 md:px-10">
-        <div className="w-full max-w-[1360px] flex flex-col gap-6 md:gap-10">
-          <div className="flex items-end justify-between gap-4">
-            <div>
-              <h2 className="text-[40px] md:text-[64px] font-light leading-[1.05] tracking-[0.01em] text-brand-gray">
-                You may also like
-              </h2>
-              <p className="text-[12px] md:text-[14px] tracking-[0.2em] text-brand-gray-light uppercase mt-2">
-                More from {product.category?.name ?? 'the collection'}
-              </p>
+      {related.length > 0 && (
+        <section className="w-full px-5 md:px-10 py-[80px]">
+          <div className="max-w-[1440px] mx-auto flex flex-col gap-10">
+            <h2 className="text-[40px] md:text-[48px] leading-[1.0] tracking-[0.02em] text-brand-gray">
+              Вам также может понравиться
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-10 h-auto md:h-[400px]">
+              {related.map((p, idx) => {
+                const hasBorder = idx % 2 === 0;
+                return hasBorder ? (
+                  <Link
+                    key={p.slug}
+                    to={`/product/${p.slug}`}
+                    className="group flex flex-col border border-brand-gray/30 overflow-hidden h-[340px] md:h-full"
+                  >
+                    <div className="flex-1 relative overflow-hidden">
+                      <img
+                        src={p.img}
+                        alt={p.title}
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                    </div>
+                    <div className="p-5 flex flex-col gap-2 border-t border-brand-gray/30">
+                      <h4 className="text-[12px] md:text-[14px] tracking-[0.2em] uppercase text-brand-gray truncate">
+                        {p.title}
+                      </h4>
+                      <p className="text-[11px] md:text-[12px] leading-[14px] text-brand-gray line-clamp-2">
+                        {p.desc}
+                      </p>
+                    </div>
+                  </Link>
+                ) : (
+                  <Link
+                    key={p.slug}
+                    to={`/product/${p.slug}`}
+                    className="relative group overflow-hidden flex flex-col justify-end p-5 h-[340px] md:h-full"
+                  >
+                    <img
+                      src={p.img}
+                      alt={p.title}
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-transparent" />
+                    <h4 className="relative z-10 text-white text-[12px] md:text-[14px] tracking-[0.2em] uppercase mb-2 truncate">
+                      {p.title}
+                    </h4>
+                    <p className="relative z-10 text-white text-[11px] md:text-[12px] leading-[14px] opacity-90 line-clamp-2">
+                      {p.desc}
+                    </p>
+                  </Link>
+                );
+              })}
             </div>
             <Link
               to="/catalog"
-              className="hidden md:flex items-center gap-3 text-[12px] tracking-[0.2em] uppercase text-brand-gray hover:text-brand-taupe transition-colors"
+              className="self-start flex items-center gap-3 text-[12px] tracking-[0.2em] uppercase text-brand-gray hover:text-brand-taupe transition-colors"
             >
-              Explore the full collection
+              Смотреть всю коллекцию
               <ArrowRight size={18} strokeWidth={1.25} />
             </Link>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-5 md:gap-10 md:h-[480px]">
-            {related.map((p) => (
-              <Link
-                key={p.slug}
-                to={`/product/${p.slug}`}
-                className="relative group overflow-hidden flex flex-col justify-end p-3 md:p-5 h-[260px] md:h-full"
-              >
-                <img
-                  src={p.img}
-                  alt={p.title}
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-transparent" />
-                <h4 className="relative z-10 text-white text-[11px] md:text-[12px] tracking-[0.2em] uppercase mb-1 md:mb-2 truncate">
-                  {p.title}
-                </h4>
-                <p className="relative z-10 text-white text-[11px] md:text-[12px] leading-[14px] md:leading-[16px] opacity-90 line-clamp-2">
-                  {p.desc}
-                </p>
-              </Link>
-            ))}
-          </div>
-          <Link
-            to="/catalog"
-            className="md:hidden self-center flex items-center gap-3 text-[12px] tracking-[0.2em] uppercase text-brand-gray"
-          >
-            Explore the full collection
-            <ArrowRight size={18} strokeWidth={1.25} />
-          </Link>
-        </div>
-      </section>
+        </section>
+      )}
     </div>
   );
 }

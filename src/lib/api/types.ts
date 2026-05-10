@@ -188,4 +188,5 @@ export interface ContactSettings {
   openHours: string;
   instagram: string | null;
   facebook: string | null;
+  telegram: string | null;
 }

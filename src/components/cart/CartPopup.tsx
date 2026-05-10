@@ -6,7 +6,7 @@ import { useCartUI, type CartItem } from './CartContext';
 export function CartPopup() {
   const { isOpen, close, items, updateQty, removeItem } = useCartUI();
   const navigate = useNavigate();
-  const [agreed, setAgreed] = useState(true);
+  const [agreed, setAgreed] = useState(false);
   const [promo, setPromo] = useState('');
   const [promoApplied, setPromoApplied] = useState(false);
 
@@ -48,16 +48,16 @@ export function CartPopup() {
         {/* Header */}
         <div className="flex items-center justify-between px-5 md:px-10 h-[64px] md:h-[80px] border-b border-brand-border shrink-0">
           <h2 className="text-[24px] md:text-[32px] font-light leading-none tracking-[0.01em] text-brand-gray">
-            Cart
+            Корзина
             {!isEmpty && (
               <span className="text-brand-gray-light text-[14px] md:text-[16px] tracking-[0.2em] uppercase ml-3 md:ml-4">
-                {items.length} {items.length === 1 ? 'item' : 'items'}
+                {items.length} {items.length === 1 ? 'товар' : items.length < 5 ? 'товара' : 'товаров'}
               </span>
             )}
           </h2>
           <button
             onClick={close}
-            aria-label="Close cart"
+            aria-label="Закрыть корзину"
             className="w-10 h-10 flex items-center justify-center text-brand-gray-light hover:text-brand-gray transition-colors"
           >
             <X size={22} strokeWidth={1.25} />
@@ -72,10 +72,10 @@ export function CartPopup() {
             </div>
             <div className="flex flex-col gap-3 max-w-[420px]">
               <h3 className="text-[24px] md:text-[32px] font-light leading-none tracking-[0.01em] text-brand-gray">
-                Your cart is empty
+                Ваша корзина пуста
               </h3>
               <p className="text-[14px] text-brand-gray-light leading-[22px]">
-                Discover handcrafted bouquets, plants and accessories — each made to order in our atelier.
+                Откройте для себя букеты ручной работы, растения и аксессуары — каждый создан на заказ в нашей студии.
               </p>
             </div>
             <Link
@@ -83,7 +83,7 @@ export function CartPopup() {
               onClick={close}
               className="h-12 px-8 bg-brand-gray text-white flex items-center gap-3 uppercase tracking-[0.25em] text-[12px] hover:bg-black transition-colors"
             >
-              View catalog
+Посмотреть каталог
               <ArrowRight size={16} strokeWidth={1.25} />
             </Link>
           </div>
@@ -93,7 +93,7 @@ export function CartPopup() {
               <div className="flex flex-col">
                 {items.map((item) => (
                   <CartRow
-                    key={item.id}
+                    key={`${item.id}-${item.size}`}
                     item={item}
                     onInc={() => inc(item.id, item.size)}
                     onDec={() => dec(item.id, item.size)}
@@ -108,7 +108,7 @@ export function CartPopup() {
                 <div className="flex items-stretch border border-brand-border max-w-[380px]">
                   <input
                     type="text"
-                    placeholder="Promo code"
+                    placeholder="Промокод"
                     value={promo}
                     onChange={(e) => setPromo(e.target.value)}
                     className="flex-1 px-4 text-[13px] outline-none placeholder:text-brand-gray-light"
@@ -117,22 +117,22 @@ export function CartPopup() {
                     onClick={() => setPromoApplied(promo.trim().length > 0)}
                     className="h-11 px-4 bg-brand-gray text-white text-[11px] tracking-[0.2em] uppercase hover:bg-black transition-colors"
                   >
-                    Apply
+Применить
                   </button>
                 </div>
 
                 <div className="flex flex-col gap-2 max-w-[380px] md:self-end md:items-end md:w-[320px] pt-2">
-                  <Row label="Subtotal" value={`${subtotal.toLocaleString()} UZS`} />
+                  <Row label="Промежуточный итог" value={`${subtotal.toLocaleString()} UZS`} />
                   {promoApplied && (
                     <Row
-                      label="Promo (-10%)"
+                      label="Промо (-10%)"
                       value={`− ${discount.toLocaleString()} UZS`}
                       accent
                     />
                   )}
                   <Row
-                    label="Delivery"
-                    value={delivery === 0 ? 'Free' : `${delivery.toLocaleString()} UZS`}
+                    label="Доставка"
+                    value={delivery === 0 ? 'Бесплатно' : `${delivery.toLocaleString()} UZS`}
                   />
                 </div>
               </div>
@@ -141,7 +141,7 @@ export function CartPopup() {
             {/* Footer */}
             <div className="border-t border-brand-border px-5 md:px-10 py-5 md:py-6 flex flex-col gap-4 shrink-0 bg-white">
               <div className="flex items-center justify-between">
-                <span className="text-[12px] tracking-[0.2em] uppercase text-brand-gray">Total</span>
+                <span className="text-[12px] tracking-[0.2em] uppercase text-brand-gray">Итого</span>
                 <span className="text-[24px] md:text-[28px] font-light text-brand-gray">
                   {total.toLocaleString()}
                   <span className="text-brand-gray-light text-[14px] ml-1">UZS</span>
@@ -164,7 +164,7 @@ export function CartPopup() {
                   onChange={(e) => setAgreed(e.target.checked)}
                 />
                 <span className="text-[12px] leading-[16px] text-brand-gray-light">
-                  I agree with the personal data processing policy and Goodveen terms.
+Я согласен с политикой обработки персональных данных и условиями Goodveen.
                 </span>
               </label>
 
@@ -173,7 +173,7 @@ export function CartPopup() {
                   onClick={close}
                   className="text-[12px] tracking-[0.2em] uppercase text-brand-gray-light hover:text-brand-gray transition-colors h-11 px-4"
                 >
-                  Continue shopping
+Продолжить покупки
                 </button>
                 <button
                   onClick={goCheckout}
@@ -184,7 +184,7 @@ export function CartPopup() {
                       : 'bg-brand-border text-brand-gray-light cursor-not-allowed'
                   }`}
                 >
-                  Proceed to checkout
+Оформить заказ
                   <ArrowRight size={16} strokeWidth={1.25} />
                 </button>
               </div>
@@ -222,7 +222,7 @@ function CartRow({ item, onInc, onDec, onRemove, onClose }: CartRowProps) {
               {item.name}
             </Link>
             <p className="text-[12px] md:text-[13px] text-brand-gray-light">
-              Size {item.size}
+Размер {item.size}
             </p>
             <p className="text-[12px] md:text-[13px] text-brand-gray-light">
               {item.price.toLocaleString()} UZS
@@ -230,7 +230,7 @@ function CartRow({ item, onInc, onDec, onRemove, onClose }: CartRowProps) {
           </div>
           <button
             onClick={onRemove}
-            aria-label="Remove"
+            aria-label="Удалить"
             className="w-7 h-7 flex items-center justify-center text-brand-gray-light hover:text-brand-gray transition-colors shrink-0"
           >
             <X size={18} strokeWidth={1.25} />
@@ -241,7 +241,7 @@ function CartRow({ item, onInc, onDec, onRemove, onClose }: CartRowProps) {
             <button
               onClick={onDec}
               className="w-9 md:w-10 h-full flex items-center justify-center hover:bg-brand-border/40"
-              aria-label="Decrease"
+              aria-label="Уменьшить"
             >
               <Minus size={14} strokeWidth={1.5} />
             </button>
@@ -249,7 +249,7 @@ function CartRow({ item, onInc, onDec, onRemove, onClose }: CartRowProps) {
             <button
               onClick={onInc}
               className="w-9 md:w-10 h-full flex items-center justify-center hover:bg-brand-border/40"
-              aria-label="Increase"
+              aria-label="Увеличить"
             >
               <Plus size={14} strokeWidth={1.5} />
             </button>

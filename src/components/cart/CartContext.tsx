@@ -24,9 +24,20 @@ interface CartUI {
 
 const CartUIContext = createContext<CartUI | null>(null);
 
+const CART_KEY = 'goodveen-cart';
+
+function loadCart(): CartItem[] {
+  try {
+    const raw = localStorage.getItem(CART_KEY);
+    return raw ? (JSON.parse(raw) as CartItem[]) : [];
+  } catch {
+    return [];
+  }
+}
+
 export function CartUIProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [items, setItems] = useState<CartItem[]>([]);
+  const [items, setItems] = useState<CartItem[]>(loadCart);
 
   const open = useCallback(() => setIsOpen(true), []);
   const close = useCallback(() => setIsOpen(false), []);
@@ -51,14 +62,27 @@ export function CartUIProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const updateQty = useCallback((id: string, size: string, qty: number) => {
-    setItems((prev) =>
-      prev.map((i) => (i.id === id && i.size === size ? { ...i, qty: Math.max(0, qty) } : i))
-    );
+    if (qty <= 0) {
+      setItems((prev) => prev.filter((i) => !(i.id === id && i.size === size)));
+    } else {
+      setItems((prev) =>
+        prev.map((i) => (i.id === id && i.size === size ? { ...i, qty } : i))
+      );
+    }
   }, []);
 
   const clearCart = useCallback(() => {
     setItems([]);
   }, []);
+
+  // Persist cart to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(CART_KEY, JSON.stringify(items));
+    } catch {
+      /* ignore quota errors */
+    }
+  }, [items]);
 
   // Lock body scroll while open
   useEffect(() => {

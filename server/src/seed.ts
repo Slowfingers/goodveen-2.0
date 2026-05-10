@@ -72,6 +72,22 @@ async function main() {
   // About singleton
   await prisma.aboutPage.upsert({ where: { id: 'about' }, update: {}, create: { id: 'about' } });
 
+  // Contact settings with social media links
+  await prisma.contactSettings.upsert({
+    where: { id: 'contact' },
+    update: {
+      instagram: 'https://www.instagram.com/goodveen.uz/',
+      facebook: 'https://www.facebook.com/goodveenflowershouse',
+      telegram: 'https://t.me/goodveenuz',
+    },
+    create: {
+      id: 'contact',
+      instagram: 'https://www.instagram.com/goodveen.uz/',
+      facebook: 'https://www.facebook.com/goodveenflowershouse',
+      telegram: 'https://t.me/goodveenuz',
+    },
+  });
+
   // Page settings
   const pages = [
     { pageKey: 'home', title: 'Goodveen', subtitle: 'A creative floral studio' },

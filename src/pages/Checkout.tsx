@@ -19,10 +19,10 @@ import {
 type Step = 'contact' | 'delivery' | 'payment' | 'confirm';
 
 const STEPS: { key: Step; label: string }[] = [
-  { key: 'contact', label: 'Contact' },
-  { key: 'delivery', label: 'Delivery' },
-  { key: 'payment', label: 'Payment' },
-  { key: 'confirm', label: 'Confirmation' },
+  { key: 'contact', label: 'Контакты' },
+  { key: 'delivery', label: 'Доставка' },
+  { key: 'payment', label: 'Оплата' },
+  { key: 'confirm', label: 'Подтверждение' },
 ];
 
 type Delivery = 'pickup' | 'courier-day' | 'courier-fast';
@@ -47,17 +47,14 @@ export function Checkout() {
 
   const signIn = () => {
     if (!/\S+@\S+\.\S+/.test(email)) {
-      setSigninError('Enter a valid email');
+      setSigninError('Введите корректный email');
       return;
     }
-    if (signinPassword.length < 4) {
-      setSigninError('Password is too short');
+    if (signinPassword.length < 6) {
+      setSigninError('Пароль должен быть не менее 6 символов');
       return;
     }
     setSigninError(null);
-    // mock account profile
-    if (!name) setName('Alexander Goodveen');
-    if (!phone) setPhone('+998 90 123 45 67');
     setLoggedIn(true);
   };
   const signOut = () => {
@@ -79,7 +76,7 @@ export function Checkout() {
   const [cardCvv, setCardCvv] = useState('');
   const [cardName, setCardName] = useState('');
 
-  const [agreed, setAgreed] = useState(true);
+  const [agreed, setAgreed] = useState(false);
   const [mobileSummaryOpen, setMobileSummaryOpen] = useState(false);
 
   const subtotal = cartUI.items.reduce((s, i) => s + i.price * i.qty, 0);
@@ -114,10 +111,10 @@ export function Checkout() {
           </Link>
           <ArrowRight size={12} className="mx-3 opacity-50" />
           <Link to="/cart" className="hover:text-brand-gray transition-colors">
-            Cart
+            Корзина
           </Link>
           <ArrowRight size={12} className="mx-3 opacity-50" />
-          <span className="text-brand-gray">Checkout</span>
+          <span className="text-brand-gray">Оформление</span>
         </div>
       </div>
 
@@ -125,7 +122,7 @@ export function Checkout() {
         <div className="w-full max-w-[1360px] flex flex-col gap-8 md:gap-12">
           <div className="flex flex-col gap-6 md:gap-10">
             <h1 className="text-[40px] md:text-[80px] leading-none tracking-[0.01em] font-light text-brand-gray">
-              Checkout
+              Оформление заказа
             </h1>
             <Stepper current={stepIdx} onJump={(idx) => idx <= stepIdx && setStep(STEPS[idx].key)} />
           </div>
@@ -138,7 +135,7 @@ export function Checkout() {
                 className="w-full flex items-center justify-between gap-4 px-5 h-14"
               >
                 <div className="flex items-center gap-3 text-[12px] tracking-[0.2em] uppercase text-brand-gray">
-                  <span>Order summary</span>
+                  <span>Итого по заказу</span>
                   {mobileSummaryOpen ? (
                     <ChevronUp size={16} strokeWidth={1.25} className="text-brand-gray-light" />
                   ) : (
@@ -155,7 +152,7 @@ export function Checkout() {
                   <div className="flex flex-col">
                     {cartUI.items.map((it) => (
                       <div
-                        key={it.id}
+                        key={`${it.id}-${it.size}`}
                         className="flex items-center gap-3 py-2 border-b last:border-b-0 border-brand-border"
                       >
                         <div className="relative w-12 h-12 overflow-hidden bg-brand-border shrink-0">
@@ -176,11 +173,11 @@ export function Checkout() {
                     ))}
                   </div>
                   <div className="flex flex-col gap-1 text-[13px]">
-                    <Row label="Subtotal" value={`${subtotal.toLocaleString()} UZS`} />
+                    <Row label="Промежуточный итог" value={`${subtotal.toLocaleString()} UZS`} />
                     <Row
-                      label="Delivery"
+                      label="Доставка"
                       value={
-                        deliveryFee === 0 ? 'Free' : `${deliveryFee.toLocaleString()} UZS`
+                        deliveryFee === 0 ? 'Бесплатно' : `${deliveryFee.toLocaleString()} UZS`
                       }
                     />
                   </div>
@@ -193,7 +190,7 @@ export function Checkout() {
             {/* Form column */}
             <div className="flex flex-col gap-8 md:gap-12 pb-24 lg:pb-0">
               {step === 'contact' && (
-                <SectionBlock title="Contact information">
+                <SectionBlock title="Контактная информация">
                   {/* Toggle hidden once signed in (checkout-1440-2 logged-in state) */}
                   {!loggedIn && (
                     <div className="flex border border-brand-border self-start text-[12px] tracking-[0.2em] uppercase">
@@ -210,7 +207,7 @@ export function Checkout() {
                               : 'text-brand-gray-light hover:text-brand-gray'
                           }`}
                         >
-                          {v === 'guest' ? 'New customer' : 'I have an account'}
+                          {v === 'guest' ? 'Новый покупатель' : 'У меня есть аккаунт'}
                         </button>
                       ))}
                     </div>
@@ -225,7 +222,7 @@ export function Checkout() {
                         </span>
                         <div className="flex flex-col min-w-0">
                           <span className="text-[11px] tracking-[0.2em] uppercase text-brand-gray-light">
-                            Signed in
+                            Вы вошли
                           </span>
                           <span className="text-[14px] text-brand-gray truncate">
                             {name || 'Goodveen account'} · {email}
@@ -236,7 +233,7 @@ export function Checkout() {
                         onClick={signOut}
                         className="text-[11px] tracking-[0.2em] uppercase text-brand-gray-light hover:text-brand-gray transition-colors shrink-0"
                       >
-                        Log out
+                        Выйти
                       </button>
                     </div>
                   )}
@@ -245,7 +242,7 @@ export function Checkout() {
                   {!loggedIn && hasAccount === 'account' && (
                     <div className="flex flex-col gap-3">
                       <p className="text-[13px] text-brand-gray-light">
-                        Sign in to autofill your details and earn loyalty points.
+                        Войдите, чтобы автоматически заполнить данные и получать бонусы.
                       </p>
                       <Field
                         label="Email"
@@ -275,13 +272,13 @@ export function Checkout() {
                           to="/password-reset"
                           className="text-[12px] tracking-[0.2em] uppercase text-brand-gray-light hover:text-brand-gray transition-colors"
                         >
-                          Forgot password?
+                          Забыли пароль?
                         </Link>
                         <button
                           onClick={signIn}
                           className="h-11 px-6 bg-brand-gray text-white flex items-center justify-center gap-3 uppercase tracking-[0.25em] text-[12px] hover:bg-black transition-colors self-start md:self-auto"
                         >
-                          Sign in
+                          Войти
                           <ArrowRight size={16} strokeWidth={1.25} />
                         </button>
                       </div>
@@ -291,7 +288,7 @@ export function Checkout() {
                   {/* Guest fields OR pre-filled fields after sign-in */}
                   {(loggedIn || hasAccount === 'guest') && (
                     <div className="flex flex-col gap-3">
-                      <Field label="Your name" value={name} onChange={setName} placeholder="Alexander" />
+                      <Field label="Ваше имя" value={name} onChange={setName} placeholder="Александр" />
                       <Field
                         label="Email"
                         value={email}
@@ -300,7 +297,7 @@ export function Checkout() {
                         type="email"
                       />
                       <Field
-                        label="Phone number"
+                        label="Номер телефона"
                         value={phone}
                         onChange={setPhone}
                         placeholder="+998 90 123 45 67"
@@ -312,28 +309,28 @@ export function Checkout() {
 
               {step === 'delivery' && (
                 <>
-                  <SectionBlock title="Delivery method">
+                  <SectionBlock title="Способ доставки">
                     <div className="flex flex-col gap-3">
                       <DeliveryOption
                         icon={<Store size={20} strokeWidth={1.25} />}
-                        label="Pickup from atelier"
-                        desc="Tashkent, Mirobod 12 · today after 14:00"
-                        price="Free"
+                        label="Самовывоз из студии"
+                        desc="Ташкент, Миробод 12 · сегодня после 14:00"
+                        price="Бесплатно"
                         active={delivery === 'pickup'}
                         onClick={() => setDelivery('pickup')}
                       />
                       <DeliveryOption
                         icon={<Truck size={20} strokeWidth={1.25} />}
-                        label="Same-day courier"
-                        desc="Within Tashkent ring road · 2 hour window"
-                        price="Free over 1 000 000"
+                        label="Курьер в день заказа"
+                        desc="В пределах ТКАД · 2-часовое окно"
+                        price="Бесплатно от 1 000 000"
                         active={delivery === 'courier-day'}
                         onClick={() => setDelivery('courier-day')}
                       />
                       <DeliveryOption
                         icon={<Sparkles size={20} strokeWidth={1.25} />}
-                        label="Express within 90 min"
-                        desc="Priority delivery, hand-arrived"
+                        label="Экспресс за 90 минут"
+                        desc="Приоритетная доставка вручную"
                         price="80 000 UZS"
                         active={delivery === 'courier-fast'}
                         onClick={() => setDelivery('courier-fast')}
@@ -342,18 +339,18 @@ export function Checkout() {
                   </SectionBlock>
 
                   {delivery !== 'pickup' && (
-                    <SectionBlock title="Address">
-                      <Field label="City" value={city} onChange={setCity} />
+                    <SectionBlock title="Адрес">
+                      <Field label="Город" value={city} onChange={setCity} />
                       <Field
-                        label="Street, building, apartment"
+                        label="Улица, дом, квартира"
                         value={address}
                         onChange={setAddress}
                         placeholder="Mirobod 12, apt 4"
                       />
                       <div className="grid grid-cols-2 gap-3">
-                        <Field label="Date" value={date} onChange={setDate} type="date" />
+                        <Field label="Дата" value={date} onChange={setDate} type="date" />
                         <SelectField
-                          label="Time"
+                          label="Время"
                           value={time}
                           onChange={setTime}
                           options={[
@@ -366,10 +363,10 @@ export function Checkout() {
                         />
                       </div>
                       <Textarea
-                        label="Comment for the courier"
+                        label="Комментарий для курьера"
                         value={comment}
                         onChange={setComment}
-                        placeholder="Code for the gate, wishes…"
+                        placeholder="Код домофона, пожелания…"
                       />
                     </SectionBlock>
                   )}
@@ -377,11 +374,11 @@ export function Checkout() {
               )}
 
               {step === 'payment' && (
-                <SectionBlock title="Payment">
+                <SectionBlock title="Оплата">
                   <div className="flex flex-col gap-3">
                     <DeliveryOption
                       icon={<CreditCard size={20} strokeWidth={1.25} />}
-                      label="Bank card"
+                      label="Банковская карта"
                       desc="Visa · Mastercard · UzCard · Humo"
                       active={payment === 'card'}
                       onClick={() => setPayment('card')}
@@ -395,8 +392,8 @@ export function Checkout() {
                     />
                     <DeliveryOption
                       icon={<Banknote size={20} strokeWidth={1.25} />}
-                      label="Cash on delivery"
-                      desc="Pay the courier in UZS"
+                      label="Наличными при получении"
+                      desc="Оплата курьеру в сумах"
                       active={payment === 'cash'}
                       onClick={() => setPayment('cash')}
                     />
@@ -405,14 +402,14 @@ export function Checkout() {
                   {payment === 'card' && (
                     <div className="flex flex-col gap-3 pt-2">
                       <Field
-                        label="Card number"
+                        label="Номер карты"
                         value={cardNumber}
                         onChange={(v) => setCardNumber(formatCard(v))}
                         placeholder="0000 0000 0000 0000"
                       />
                       <div className="grid grid-cols-2 gap-3">
                         <Field
-                          label="Expiry"
+                          label="Срок"
                           value={cardExp}
                           onChange={(v) => setCardExp(formatExp(v))}
                           placeholder="MM/YY"
@@ -424,7 +421,7 @@ export function Checkout() {
                           placeholder="•••"
                         />
                       </div>
-                      <Field label="Cardholder name" value={cardName} onChange={setCardName} placeholder="ALEXANDER GOODVEEN" />
+                      <Field label="Имя владельца карты" value={cardName} onChange={setCardName} placeholder="ALEXANDER GOODVEEN" />
                     </div>
                   )}
                 </SectionBlock>
@@ -446,9 +443,9 @@ export function Checkout() {
                   >
                     <ArrowLeft size={16} strokeWidth={1.25} />
                     {stepIdx === 0 ? (
-                      <Link to="/cart">Back to cart</Link>
+                      <Link to="/cart">Вернуться в корзину</Link>
                     ) : (
-                      <span>Back</span>
+                      <span>Назад</span>
                     )}
                   </button>
                   <button
@@ -466,7 +463,7 @@ export function Checkout() {
                         : 'bg-brand-border text-brand-gray-light cursor-not-allowed'
                     }`}
                   >
-                    {step === 'payment' ? 'Place order' : 'Continue'}
+                    {step === 'payment' ? 'Оформить заказ' : 'Продолжить'}
                     <ArrowRight size={16} strokeWidth={1.25} />
                   </button>
                 </div>
@@ -477,13 +474,13 @@ export function Checkout() {
             <aside className="hidden lg:flex flex-col gap-6 lg:sticky lg:top-[80px] lg:self-start">
               <div className="border border-brand-border bg-white p-6 md:p-8 flex flex-col gap-5">
                 <h2 className="text-[20px] md:text-[24px] font-light text-brand-gray tracking-[0.01em]">
-                  Your order
+                  Ваш заказ
                 </h2>
 
                 <div className="flex flex-col">
                   {cartUI.items.map((it) => (
                     <div
-                      key={it.id}
+                      key={`${it.id}-${it.size}`}
                       className="flex items-center gap-4 py-3 border-b last:border-b-0 border-brand-border"
                     >
                       <div className="relative w-16 h-16 overflow-hidden bg-brand-border shrink-0">
@@ -494,7 +491,7 @@ export function Checkout() {
                           {it.name}
                         </p>
                         <p className="text-[12px] text-brand-gray-light">
-                          Size {it.size} · ×{it.qty}
+                          Размер {it.size} · ×{it.qty}
                         </p>
                       </div>
                       <span className="text-[13px] text-brand-gray shrink-0">
@@ -505,15 +502,15 @@ export function Checkout() {
                 </div>
 
                 <div className="flex flex-col gap-2 pt-2">
-                  <Row label="Subtotal" value={`${subtotal.toLocaleString()} UZS`} />
+                  <Row label="Промежуточный итог" value={`${subtotal.toLocaleString()} UZS`} />
                   <Row
-                    label="Delivery"
-                    value={deliveryFee === 0 ? 'Free' : `${deliveryFee.toLocaleString()} UZS`}
+                    label="Доставка"
+                    value={deliveryFee === 0 ? 'Бесплатно' : `${deliveryFee.toLocaleString()} UZS`}
                   />
                 </div>
 
                 <div className="flex items-center justify-between pt-3 border-t border-brand-border">
-                  <span className="text-[12px] tracking-[0.2em] uppercase text-brand-gray">Total</span>
+                  <span className="text-[12px] tracking-[0.2em] uppercase text-brand-gray">Итого</span>
                   <span className="text-[24px] md:text-[28px] font-light text-brand-gray">
                     {total.toLocaleString()}
                     <span className="text-brand-gray-light text-[14px] ml-1">UZS</span>
@@ -537,7 +534,7 @@ export function Checkout() {
                       onChange={(e) => setAgreed(e.target.checked)}
                     />
                     <span className="text-[12px] leading-[16px] text-brand-gray-light">
-                      I agree with the personal data processing policy and Goodveen terms.
+                      Я согласен с политикой обработки персональных данных и условиями Goodveen.
                     </span>
                   </label>
                 )}
@@ -554,7 +551,7 @@ export function Checkout() {
             {/* Close (returns to checkout review) */}
             <button
               onClick={() => setStep('payment')}
-              aria-label="Close"
+              aria-label="Закрыть"
               className="absolute top-4 right-4 md:top-6 md:right-6 w-10 h-10 flex items-center justify-center text-brand-gray-light hover:text-brand-gray transition-colors z-10"
             >
               <X size={22} strokeWidth={1.25} />
@@ -567,29 +564,28 @@ export function Checkout() {
 
               <div className="flex flex-col gap-3">
                 <span className="text-[12px] tracking-[0.25em] uppercase text-brand-gray-light">
-                  Order #GV-2026-0428
+                  Заказ принят
                 </span>
                 <h2 className="text-[28px] md:text-[40px] font-light leading-[1.1] tracking-[0.01em] text-brand-gray">
-                  Thank you, {name || 'Goodveen friend'}.
+                  Спасибо, {name || 'друг Goodveen'}.
                 </h2>
                 <p className="text-[14px] md:text-[15px] text-brand-gray-light leading-[22px] md:leading-[24px] max-w-[520px]">
-                  We've received your order and started arranging it by hand. A Telegram update with
-                  live tracking will arrive shortly.
+                  Мы получили ваш заказ и начали создавать его вручную. Уведомление в Telegram с отслеживанием придёт в ближайшее время.
                 </p>
               </div>
 
               <dl className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-4 text-[14px] py-2 border-t border-b border-brand-border md:py-6">
-                <Detail label="Delivery">{deliveryLabel(delivery)}</Detail>
-                <Detail label="Payment">{paymentLabel(payment)}</Detail>
-                <Detail label="Recipient">{name || '—'}</Detail>
-                <Detail label="Phone">{phone || '—'}</Detail>
-                {delivery !== 'pickup' && <Detail label="Address">{address || '—'}</Detail>}
+                <Detail label="Доставка">{deliveryLabel(delivery)}</Detail>
+                <Detail label="Оплата">{paymentLabel(payment)}</Detail>
+                <Detail label="Получатель">{name || '—'}</Detail>
+                <Detail label="Телефон">{phone || '—'}</Detail>
+                {delivery !== 'pickup' && <Detail label="Адрес">{address || '—'}</Detail>}
                 {date && (
-                  <Detail label="When">
+                  <Detail label="Когда">
                     {date} · {time}
                   </Detail>
                 )}
-                <Detail label="Total">
+                <Detail label="Итого">
                   {total.toLocaleString()} UZS
                 </Detail>
               </dl>
@@ -599,14 +595,14 @@ export function Checkout() {
                   to="/cabinet?tab=orders"
                   className="h-12 px-8 bg-brand-gray text-white flex items-center justify-center gap-3 uppercase tracking-[0.25em] text-[12px] hover:bg-black transition-colors"
                 >
-                  Track this order
+                  Отследить заказ
                   <ArrowRight size={16} strokeWidth={1.25} />
                 </Link>
                 <Link
                   to="/catalog"
                   className="h-12 px-8 border border-brand-gray text-brand-gray flex items-center justify-center uppercase tracking-[0.25em] text-[12px] hover:bg-brand-border/40 transition-colors"
                 >
-                  Continue shopping
+                  Продолжить покупки
                 </Link>
               </div>
             </div>
@@ -620,7 +616,7 @@ export function Checkout() {
           {stepIdx > 0 && (
             <button
               onClick={goPrev}
-              aria-label="Back"
+              aria-label="Назад"
               className="w-12 h-12 border border-brand-border flex items-center justify-center text-brand-gray hover:bg-brand-border/40 transition-colors shrink-0"
             >
               <ArrowLeft size={18} strokeWidth={1.25} />
@@ -628,7 +624,7 @@ export function Checkout() {
           )}
           <div className="flex-1 flex flex-col leading-tight">
             <span className="text-[10px] tracking-[0.2em] uppercase text-brand-gray-light">
-              Total
+              Итого
             </span>
             <span className="text-[18px] font-light text-brand-gray">
               {total.toLocaleString()}
@@ -650,7 +646,7 @@ export function Checkout() {
                 : 'bg-brand-border text-brand-gray-light cursor-not-allowed'
             }`}
           >
-            {step === 'payment' ? 'Place order' : 'Continue'}
+            {step === 'payment' ? 'Оформить заказ' : 'Продолжить'}
             <ArrowRight size={16} strokeWidth={1.25} />
           </button>
         </div>

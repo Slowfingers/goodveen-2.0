@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Clock, MapPin, Phone, Instagram, Send, Facebook } from 'lucide-react';
+import { pagesApi } from '../lib/api';
 
 export function Contact() {
   useEffect(() => {
@@ -10,12 +11,17 @@ export function Contact() {
     window.scrollTo(0, 0);
   }, []);
 
+  const [contactData, setContactData] = useState<any>(null);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [message, setMessage] = useState('');
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    pagesApi.getContact().then(setContactData).catch(console.error);
+  }, []);
 
   const submit = () => {
     if (name.trim().length < 2) return setError('Enter your name');
@@ -68,15 +74,21 @@ export function Contact() {
 
               {/* Social Links */}
               <div className="flex items-center gap-5 pl-12">
-                <a href="https://www.instagram.com/goodveen.uz/" target="_blank" rel="noopener noreferrer" className="text-[#303030] hover:text-[#F5A5C8] transition-colors">
-                  <Instagram size={32} strokeWidth={1.25} />
-                </a>
-                <a href="https://t.me/goodveenuz" target="_blank" rel="noopener noreferrer" className="text-[#303030] hover:text-[#F5A5C8] transition-colors">
-                  <Send size={32} strokeWidth={1.25} />
-                </a>
-                <a href="https://www.facebook.com/goodveenflowershouse/?locale=ru_RU" target="_blank" rel="noopener noreferrer" className="text-[#303030] hover:text-[#F5A5C8] transition-colors">
-                  <Facebook size={32} strokeWidth={1.25} />
-                </a>
+                {contactData?.instagram && (
+                  <a href={contactData.instagram} target="_blank" rel="noopener noreferrer" className="text-[#303030] hover:text-[#F5A5C8] transition-colors">
+                    <Instagram size={32} strokeWidth={1.25} />
+                  </a>
+                )}
+                {contactData?.telegram && (
+                  <a href={contactData.telegram} target="_blank" rel="noopener noreferrer" className="text-[#303030] hover:text-[#F5A5C8] transition-colors">
+                    <Send size={32} strokeWidth={1.25} />
+                  </a>
+                )}
+                {contactData?.facebook && (
+                  <a href={contactData.facebook} target="_blank" rel="noopener noreferrer" className="text-[#303030] hover:text-[#F5A5C8] transition-colors">
+                    <Facebook size={32} strokeWidth={1.25} />
+                  </a>
+                )}
               </div>
             </div>
 

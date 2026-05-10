@@ -420,7 +420,7 @@ export function Catalog() {
         <section className="w-full flex justify-center py-10 md:py-[40px] px-5 md:px-10 border-b border-brand-border">
           <div className="flex">
             <PageBtn
-              ariaLabel="Previous"
+              ariaLabel="Предыдущая"
               disabled={currentPage === 1}
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
             >
@@ -458,7 +458,7 @@ export function Catalog() {
               </PageBtn>
             )}
             <PageBtn
-              ariaLabel="Next"
+              ariaLabel="Следующая"
               disabled={currentPage === totalPages}
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
             >
@@ -473,10 +473,10 @@ export function Catalog() {
         <div className="w-full max-w-[1360px] flex flex-col gap-6 md:gap-10">
           <div className="flex flex-col w-full">
             <h2 className="text-[40px] md:text-[80px] font-normal leading-[1] md:leading-[80px] tracking-[0.02em] text-brand-gray">
-              Crafted by hand
+              Создано вручную
             </h2>
             <p className="text-[12px] md:text-[14px] tracking-[0.2em] text-brand-gray-light uppercase mt-1">
-              Every bouquet is made by hand in our workshop
+              Каждый букет создан вручную в нашей мастерской
             </p>
           </div>
 
@@ -503,7 +503,7 @@ export function Catalog() {
                 <span className="absolute right-0 bottom-0 h-[60%] w-px bg-[#D0D0D0] hidden md:block" />
                 <span className="absolute right-0 bottom-0 w-[80%] h-px bg-[#D0D0D0] hidden md:block" />
                 <span className="relative z-10 ml-auto flex items-center gap-3 md:gap-4 text-[12px] tracking-[0.2em] uppercase text-brand-gray group-hover:text-brand-taupe transition-colors">
-                  Visit the Workshop
+                  Посетить мастерскую
                   <ArrowRight size={20} strokeWidth={1.25} />
                 </span>
               </Link>
@@ -623,7 +623,7 @@ export function Catalog() {
 interface CatalogRowProps { row: Product[]; key?: string | number }
 function CatalogRow({ row }: CatalogRowProps) {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-5 md:gap-10 md:h-[400px]">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-[8px] md:gap-10 md:h-[400px]">
       {row.map((p) => (
         <ProductCard key={p.id} product={p} />
       ))}
@@ -636,20 +636,20 @@ function ProductCard({ product }: ProductCardProps) {
   return (
     <Link
       to={`/product/${product.slug}`}
-      className="border border-brand-border flex flex-col group hover:shadow-md transition-shadow h-[240px] md:h-full"
+      className="border border-[#D0D0D0] flex flex-col group hover:shadow-md transition-shadow h-[300px] md:h-full"
     >
-      <div className="flex-1 overflow-hidden border-b border-brand-border relative">
+      <div className="flex-1 overflow-hidden border-b border-[#D0D0D0] relative">
         <img
           src={product.img}
           alt={product.title}
           className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
         />
       </div>
-      <div className="p-3 md:p-5 bg-white h-[100px] md:h-[120px] flex flex-col">
-        <h4 className="text-brand-gray text-[11px] md:text-[12px] tracking-[0.2em] uppercase mb-1 md:mb-2 truncate">
+      <div className="px-4 py-0 bg-white h-[52px] md:h-[92px] flex flex-col justify-center gap-1 md:gap-2 md:px-5 md:py-5">
+        <h4 className="text-brand-gray text-[11px] md:text-[14px] tracking-[0.2em] uppercase truncate">
           {product.title}
         </h4>
-        <p className="text-brand-gray-light text-[11px] md:text-[12px] leading-[14px] md:leading-[16px] line-clamp-2">
+        <p className="hidden md:block text-brand-gray text-[11px] md:text-[12px] leading-[14px] line-clamp-2">
           {product.desc}
         </p>
       </div>

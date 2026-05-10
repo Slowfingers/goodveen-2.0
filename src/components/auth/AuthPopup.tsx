@@ -57,13 +57,10 @@ function LoginView({ onSwitch }: { onSwitch: (m: 'register' | 'password-reset') 
       await signIn(email, password);
       close();
     } catch (e: any) {
-      console.log('Login error:', e);
-      console.log('Error status:', e.status);
-      console.log('Error message:', e.message);
       if (e.status === 401 || e.status === 409) {
         setError('Неверный email или пароль');
       } else {
-        setError(e.message || 'Ошибка входа');
+        setError('Ошибка входа. Попробуйте позже.');
       }
     } finally {
       setLoading(false);
@@ -95,7 +92,7 @@ function LoginView({ onSwitch }: { onSwitch: (m: 'register' | 'password-reset') 
           type="email"
         />
         <Field
-          label="Password"
+          label="Пароль"
           value={password}
           onChange={(v) => {
             setPassword(v);
@@ -137,9 +134,6 @@ function LoginView({ onSwitch }: { onSwitch: (m: 'register' | 'password-reset') 
         </button>
       </form>
 
-      <Divider>или продолжить через</Divider>
-      <SocialRow />
-
       <Footer>
         Впервые в Goodveen?{' '}
         <button
@@ -177,13 +171,10 @@ function RegisterView({ onSwitch }: { onSwitch: (m: 'login') => void }) {
       await signIn(email, password);
       close();
     } catch (e: any) {
-      console.log('Register error:', e);
-      console.log('Error status:', e.status);
-      console.log('Error message:', e.message);
       if (e.status === 409) {
         setError('Этот email уже зарегистрирован');
       } else {
-        setError(e.message || 'Ошибка регистрации');
+        setError('Ошибка регистрации. Попробуйте позже.');
       }
     } finally {
       setLoading(false);
@@ -272,9 +263,6 @@ function RegisterView({ onSwitch }: { onSwitch: (m: 'login') => void }) {
           <ArrowRight size={16} strokeWidth={1.25} />
         </button>
       </form>
-
-      <Divider>или продолжить через</Divider>
-      <SocialRow />
 
       <Footer>
         Уже есть аккаунт?{' '}

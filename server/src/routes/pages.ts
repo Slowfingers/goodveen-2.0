@@ -85,6 +85,7 @@ const contactSchema = z.object({
   openHours: z.string().optional(),
   instagram: z.string().optional().nullable(),
   facebook: z.string().optional().nullable(),
+  telegram: z.string().optional().nullable(),
 });
 
 pagesRouter.put('/contact', requireAdmin, async (req, res) => {
@@ -102,6 +103,7 @@ pagesRouter.put('/contact', requireAdmin, async (req, res) => {
       ...(data.openHours !== undefined && { openHours: data.openHours }),
       ...(data.instagram !== undefined && { instagram: data.instagram }),
       ...(data.facebook !== undefined && { facebook: data.facebook }),
+      ...(data.telegram !== undefined && { telegram: data.telegram }),
     },
     create: {
       id: 'contact',
@@ -113,6 +115,7 @@ pagesRouter.put('/contact', requireAdmin, async (req, res) => {
       openHours: data.openHours || 'Every day · 09:00 — 21:00',
       instagram: data.instagram,
       facebook: data.facebook,
+      telegram: data.telegram,
     },
   });
   const phones = JSON.parse(contact.phones || '[]');

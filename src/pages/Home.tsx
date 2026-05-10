@@ -128,12 +128,12 @@ export function Home() {
             type="button"
             onClick={toggleMute}
             aria-label={isMuted ? 'Unmute' : 'Mute'}
-            className="absolute bottom-5 right-5 md:bottom-10 md:right-10 z-20 w-8 h-8 md:w-12 md:h-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all"
+            className="absolute bottom-[25px] right-5 md:bottom-[75px] md:right-10 z-20 w-6 h-6 md:w-8 md:h-8 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all"
           >
             {isMuted ? (
-              <VolumeX className="w-4 h-4 md:w-6 md:h-6" strokeWidth={1.5} />
+              <VolumeX className="w-3 h-3 md:w-4 md:h-4" strokeWidth={1.5} />
             ) : (
-              <Volume2 className="w-4 h-4 md:w-6 md:h-6" strokeWidth={1.5} />
+              <Volume2 className="w-3 h-3 md:w-4 md:h-4" strokeWidth={1.5} />
             )}
           </button>
         )}
@@ -144,10 +144,10 @@ export function Home() {
         <div className="w-full max-w-[1360px] flex flex-col gap-6 md:gap-10">
           <div className="flex flex-col w-full items-end">
             <h2 className="text-[48px] md:text-[80px] font-normal leading-[1] md:leading-[80px] tracking-[0.02em] text-right w-full text-brand-gray">
-              Discover
+              Откройте для себя
             </h2>
             <p className="text-[12px] md:text-[14px] tracking-[0.2em] text-brand-gray-light uppercase text-right w-full mt-1">
-              A world of goodveen
+              Мир Goodveen
             </p>
           </div>
 
@@ -195,24 +195,23 @@ export function Home() {
         <div className="w-full max-w-[1360px] flex flex-col gap-6 md:gap-10">
           <div className="flex flex-col w-full">
             <h2 className="text-[40px] md:text-[80px] font-normal leading-[1] md:leading-[80px] tracking-[0.02em] text-brand-gray">
-              Crafted by hand
+              Создано вручную
             </h2>
             <p className="text-[12px] md:text-[14px] tracking-[0.2em] text-brand-gray-light uppercase mt-1">
-              Shaped by passion, and inspired by art
+              Сформировано страстью, вдохновлено искусством
             </p>
           </div>
 
           {/* Grid 4 cols */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-5 md:gap-10 md:auto-rows-[400px]">
             {featuredProducts.slice(0, 7).map((product, index) => (
-              <div key={product.slug || index}>
-                <CardWhite
-                  slug={product.slug ?? '#'}
-                  title={product.name ?? ''}
-                  desc={product.description ?? ''}
-                  img={product.img ?? ''}
-                />
-              </div>
+              <CardWhite
+                key={product.slug || index}
+                slug={product.slug ?? '#'}
+                title={product.name ?? ''}
+                desc={product.description ?? ''}
+                img={product.img ?? ''}
+              />
             ))}
             <Link
               to="/catalog"
@@ -221,7 +220,7 @@ export function Home() {
               <span className="absolute right-0 bottom-0 h-[180px] w-px bg-[#D0D0D0] hidden md:block" />
               <span className="absolute right-0 bottom-0 w-[80%] h-px bg-[#D0D0D0] hidden md:block" />
               <span className="relative z-10 text-right text-[12px] tracking-[0.2em] uppercase text-brand-gray group-hover:text-brand-taupe transition-colors">
-                Explore the full collection
+                Смотреть всю коллекцию
               </span>
             </Link>
           </div>
@@ -233,10 +232,10 @@ export function Home() {
         <div className="w-full max-w-[1360px] flex flex-col gap-6 md:gap-10 items-center">
           <div className="flex flex-col items-center">
             <h2 className="text-[48px] md:text-[80px] font-normal leading-[1] md:leading-[80px] tracking-[0.02em] text-brand-gray text-center">
-              Highlights
+              Избранное
             </h2>
             <p className="text-[12px] md:text-[14px] tracking-[0.2em] text-brand-gray-light uppercase text-center mt-1">
-              From past and upcoming events
+              Прошедшие и предстоящие события
             </p>
           </div>
 
@@ -311,21 +310,21 @@ function CardImage({
   );
 }
 
-function CardWhite({ slug, title, desc, img }: { slug: string; title: string; desc: string; img: string }) {
+function CardWhite({ slug, title, desc, img }: { slug: string; title: string; desc: string; img: string; key?: string | number }) {
   return (
     <Link
       to={slug !== '#' ? `/product/${slug}` : '/catalog'}
-      className="border border-brand-border flex flex-col group hover:shadow-md transition-shadow h-[240px] md:h-full"
+      className="border border-[#D0D0D0] flex flex-col group hover:shadow-md transition-shadow md:h-full"
     >
-      <div className="flex-1 overflow-hidden border-b border-brand-border relative min-h-[160px]">
+      <div className="relative overflow-hidden border-b border-[#D0D0D0] aspect-[4/3] md:aspect-auto md:flex-1">
         <img
           src={img || FALLBACK_PRODUCTS[0].img}
           alt={title}
           className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
         />
       </div>
-      <div className="p-5 bg-white h-[120px] flex flex-col">
-        <h4 className="text-brand-gray text-[12px] tracking-[0.2em] uppercase mb-2 truncate">{title}</h4>
+      <div className="p-5 bg-white flex flex-col gap-2 md:h-[120px]">
+        <h4 className="text-brand-gray text-[12px] tracking-[0.2em] uppercase truncate">{title}</h4>
         <p className="text-brand-gray-light text-[12px] leading-[16px] line-clamp-2">{desc}</p>
       </div>
     </Link>

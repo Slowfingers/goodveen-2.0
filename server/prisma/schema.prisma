@@ -345,6 +345,7 @@ model ContactSettings {
   openHours   String   @default("Every day · 09:00 — 21:00")
   instagram   String?
   facebook    String?
+  telegram    String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

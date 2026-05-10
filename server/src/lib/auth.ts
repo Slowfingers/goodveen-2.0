@@ -3,8 +3,12 @@ import jwt from 'jsonwebtoken';
 import type { NextFunction, Request, Response } from 'express';
 import { prisma } from './prisma.js';
 
+if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
+  console.error('[auth] JWT_SECRET must be set in production. Aborting.');
+  process.exit(1);
+}
 const SECRET = process.env.JWT_SECRET || 'dev-only-secret-change-me';
-const TOKEN_TTL = '30d';
+const TOKEN_TTL = '7d';
 
 export interface JwtPayload {
   sub: string;
