@@ -148,7 +148,7 @@ export function ProductEdit() {
         setImages(fresh.images ?? []);
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to save');
+      setError(e instanceof Error ? e.message : 'Ошибка сохранения');
     } finally {
       setSaving(false);
     }
@@ -235,7 +235,7 @@ export function ProductEdit() {
 
   if (loading) {
     return (
-      <div className="text-[12px] uppercase tracking-[0.2em] text-[#808080]">Loading…</div>
+      <div className="text-[12px] uppercase tracking-[0.2em] text-[#808080]">Загрузка…</div>
     );
   }
 
@@ -361,7 +361,7 @@ export function ProductEdit() {
                       updateSizeField(s.id, { isAvailable: v });
                       persistSize({ ...s, isAvailable: v });
                     }}
-                    label="In stock"
+                    label="В наличии"
                   />
                   <button
                     type="button"

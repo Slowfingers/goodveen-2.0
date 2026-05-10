@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, Navigate } from 'react-router-dom';
-import { ChevronDown, ChevronRight, Check } from 'lucide-react';
+import { ChevronDown, Check } from 'lucide-react';
 import { useAuth } from '../components/auth/AuthContext';
+import { authApi, ordersApi } from '../lib/api';
+import { ApiError } from '../lib/api/client';
+import type { Order } from '../lib/api/types';
 
 type Tab = 'personal' | 'delivery' | 'orders';
 
 export function Cabinet() {
-  const { user, loading, signOut } = useAuth();
+  const { user, loading, signOut, refreshUser } = useAuth();
   const [params, setParams] = useSearchParams();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -135,7 +138,7 @@ export function Cabinet() {
 
       {/* Body */}
       <section className="max-w-[1440px] mx-auto px-5 md:px-10 py-10 md:py-20">
-        {tab === 'personal' && <PersonalTab user={user!} />}
+        {tab === 'personal' && <PersonalTab user={user!} onRefresh={refreshUser} />}
         {tab === 'delivery' && <DeliveryTab />}
         {tab === 'orders' && <OrdersTab />}
       </section>
@@ -144,15 +147,60 @@ export function Cabinet() {
 }
 
 /* ============= PERSONAL INFORMATION ============= */
-function PersonalTab({ user }: { user: any }) {
+function PersonalTab({ user, onRefresh }: { user: any; onRefresh: () => Promise<void> }) {
   const [name, setName] = useState(user.name || '');
-  const [email, setEmail] = useState(user.email || '');
   const [phone, setPhone] = useState(user.phone || '');
+  const [nameFocused, setNameFocused] = useState(false);
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [profileMsg, setProfileMsg] = useState<{ ok: boolean; text: string } | null>(null);
+
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [nameFocused, setNameFocused] = useState(false);
-  const [passwordError, setPasswordError] = useState(false);
+  const [pwSaving, setPwSaving] = useState(false);
+  const [pwMsg, setPwMsg] = useState<{ ok: boolean; text: string } | null>(null);
+
+  const saveProfile = async () => {
+    setProfileSaving(true);
+    setProfileMsg(null);
+    try {
+      await authApi.updateProfile({ name: name.trim() || undefined, phone: phone.trim() || null });
+      await onRefresh();
+      setProfileMsg({ ok: true, text: 'Изменения сохранены' });
+    } catch {
+      setProfileMsg({ ok: false, text: 'Ошибка сохранения. Попробуйте позже.' });
+    } finally {
+      setProfileSaving(false);
+    }
+  };
+
+  const changePassword = async () => {
+    if (newPassword !== confirmPassword) {
+      setPwMsg({ ok: false, text: 'Пароли не совпадают' });
+      return;
+    }
+    if (newPassword.length < 6) {
+      setPwMsg({ ok: false, text: 'Новый пароль должен быть не менее 6 символов' });
+      return;
+    }
+    setPwSaving(true);
+    setPwMsg(null);
+    try {
+      await authApi.changePassword(currentPassword, newPassword);
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setPwMsg({ ok: true, text: 'Пароль успешно изменён' });
+    } catch (e: any) {
+      if (e instanceof ApiError && e.status === 401) {
+        setPwMsg({ ok: false, text: 'Неверный текущий пароль' });
+      } else {
+        setPwMsg({ ok: false, text: 'Ошибка смены пароля. Попробуйте позже.' });
+      }
+    } finally {
+      setPwSaving(false);
+    }
+  };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-20">
@@ -171,18 +219,15 @@ function PersonalTab({ user }: { user: any }) {
             <label className="text-[12px] leading-[14px] tracking-[0.02em] text-brand-gray-light">
               Ваше имя
             </label>
-            <div className="flex items-center gap-0.5">
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                onFocus={() => setNameFocused(true)}
-                onBlur={() => setNameFocused(false)}
-                className="flex-1 text-[14px] leading-[16px] tracking-[0.02em] text-brand-gray outline-none bg-transparent"
-                placeholder="Александр"
-              />
-              {name && <span className="w-px h-[15px] bg-brand-border" />}
-            </div>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              onFocus={() => setNameFocused(true)}
+              onBlur={() => setNameFocused(false)}
+              className="flex-1 text-[14px] leading-[16px] tracking-[0.02em] text-brand-gray outline-none bg-transparent"
+              placeholder="Александр"
+            />
           </div>
 
           {/* Phone Field */}
@@ -199,101 +244,95 @@ function PersonalTab({ user }: { user: any }) {
             />
           </div>
 
-          {/* Email Field */}
-          <div className="flex flex-col justify-center px-4 py-[10px] pb-[6px] gap-1 h-14 bg-white border border-brand-border">
+          {/* Email Field (read-only) */}
+          <div className="flex flex-col justify-center px-4 py-[10px] pb-[6px] gap-1 h-14 bg-white border border-brand-border opacity-60">
             <label className="text-[12px] leading-[14px] tracking-[0.02em] text-brand-gray-light">
               Email
             </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="text-[14px] leading-[16px] tracking-[0.02em] text-brand-gray outline-none bg-transparent"
-              placeholder="alexander@samplemail.com"
-            />
+            <span className="text-[14px] leading-[16px] tracking-[0.02em] text-brand-gray">
+              {user.email}
+            </span>
           </div>
 
-          <button className="h-14 px-10 mt-3 bg-brand-gray text-white text-[14px] leading-[16px] tracking-[0.2em] uppercase hover:bg-black transition-colors self-start">
-            Сохранить изменения
+          {profileMsg && (
+            <p className={`text-[12px] ${profileMsg.ok ? 'text-emerald-700' : 'text-red-600'}`}>
+              {profileMsg.text}
+            </p>
+          )}
+
+          <button
+            onClick={saveProfile}
+            disabled={profileSaving}
+            className="h-14 px-10 mt-3 bg-brand-gray text-white text-[14px] leading-[16px] tracking-[0.2em] uppercase hover:bg-black transition-colors self-start disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {profileSaving ? 'Сохранение…' : 'Сохранить изменения'}
           </button>
         </div>
       </div>
 
       {/* Right column - Change password */}
-      <div className="flex flex-col gap-5 relative">
+      <div className="flex flex-col gap-5">
         <h2 className="text-[24px] md:text-[36px] leading-[32px] md:leading-[36px] tracking-[0.02em] text-brand-gray">
           Смена пароля
         </h2>
         <div className="flex flex-col gap-3">
-          {/* Current Password Field */}
-          <div
-            className={`flex flex-col justify-center px-4 py-2 pb-[6px] gap-1 h-14 bg-white border ${
-              passwordError ? 'border-brand-taupe' : 'border-brand-border'
-            }`}
-          >
+          <div className="flex flex-col justify-center px-4 py-2 pb-[6px] gap-1 h-14 bg-white border border-brand-border">
             <label className="text-[12px] leading-[14px] tracking-[0.02em] text-brand-gray-light">
               Текущий пароль
             </label>
             <input
               type="password"
               value={currentPassword}
-              onChange={(e) => {
-                setCurrentPassword(e.target.value);
-                setPasswordError(false);
-              }}
-              onBlur={() => {
-                if (currentPassword && currentPassword.length < 6) {
-                  setPasswordError(true);
-                }
-              }}
+              onChange={(e) => { setCurrentPassword(e.target.value); setPwMsg(null); }}
               className="text-[14px] leading-[16px] tracking-[0.02em] text-brand-gray outline-none bg-transparent"
               placeholder="••••••••"
             />
           </div>
 
-          {/* New Password Field */}
           <div className="flex flex-col justify-center px-4 py-2 gap-1 h-14 bg-white border border-brand-border">
+            <label className="text-[12px] leading-[14px] tracking-[0.02em] text-brand-gray-light">
+              Новый пароль
+            </label>
             <input
               type="password"
               value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
+              onChange={(e) => { setNewPassword(e.target.value); setPwMsg(null); }}
               className="text-[14px] leading-[16px] tracking-[0.02em] text-brand-gray outline-none bg-transparent"
-              placeholder="Новый пароль"
+              placeholder="Минимум 6 символов"
             />
           </div>
 
-          {/* Confirm Password Field */}
           <div className="flex flex-col justify-center px-4 py-2 gap-1 h-14 bg-white border border-brand-border">
+            <label className="text-[12px] leading-[14px] tracking-[0.02em] text-brand-gray-light">
+              Повторите новый пароль
+            </label>
             <input
               type="password"
               value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              onChange={(e) => { setConfirmPassword(e.target.value); setPwMsg(null); }}
               className="text-[14px] leading-[16px] tracking-[0.02em] text-brand-gray outline-none bg-transparent"
-              placeholder="Повторите новый пароль"
+              placeholder="••••••••"
             />
           </div>
 
+          {pwMsg && (
+            <p className={`text-[12px] ${pwMsg.ok ? 'text-emerald-700' : 'text-red-600'}`}>
+              {pwMsg.text}
+            </p>
+          )}
+
           <button
+            onClick={changePassword}
+            disabled={pwSaving || !currentPassword || !newPassword || !confirmPassword}
             className={`h-14 px-10 mt-3 text-white text-[14px] leading-[16px] tracking-[0.2em] uppercase transition-colors self-start ${
-              currentPassword && newPassword && confirmPassword
+              currentPassword && newPassword && confirmPassword && !pwSaving
                 ? 'bg-brand-gray hover:bg-black'
                 : 'bg-brand-border cursor-not-allowed'
             }`}
-            disabled={!currentPassword || !newPassword || !confirmPassword}
           >
-            Сменить пароль
+            {pwSaving ? 'Сохранение…' : 'Сменить пароль'}
           </button>
         </div>
-
-        {/* Error Tooltip */}
-        {passwordError && (
-          <div className="absolute left-[670px] top-[144px] hidden lg:flex items-center gap-2 px-4 py-2 bg-brand-taupe shadow-lg">
-            <div className="absolute left-[-8px] top-1/2 -translate-y-1/2 w-0 h-0 border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent border-r-[8px] border-r-brand-taupe" />
-            <span className="text-[14px] leading-[16px] tracking-[0.02em] text-brand-gray whitespace-nowrap">
-              Это поле обязательно
-            </span>
-          </div>
-        )}
       </div>
     </div>
   );
@@ -301,116 +340,83 @@ function PersonalTab({ user }: { user: any }) {
 
 /* ============= PAYMENT AND DELIVERY ============= */
 function DeliveryTab() {
-  const [addresses] = useState([
-    {
-      id: '1',
-      label: 'Дом',
-      address: 'Ташкент, Чиланзарский район, улица Лутфий 16, кв. 58',
-      isDefault: true,
-    },
-    {
-      id: '2',
-      label: 'Работа',
-      address: 'Ташкент, Мирабад, улица Амира Темура 12, кв. 4',
-      isDefault: false,
-    },
-  ]);
-
   return (
     <div className="max-w-[800px]">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <h2 className="text-[24px] md:text-[36px] leading-[32px] md:leading-[36px] tracking-[0.02em] text-brand-gray">
-          Сохранённые адреса
-        </h2>
-        <button className="h-10 px-6 border border-brand-gray text-[12px] tracking-[0.2em] uppercase text-brand-gray hover:bg-brand-gray hover:text-white transition-colors self-start sm:self-auto">
-          Добавить новый
-        </button>
-      </div>
-
-      <div className="flex flex-col gap-4">
-        {addresses.map((addr) => (
-          <div key={addr.id} className="p-4 md:p-5 border border-brand-border flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-            <div className="flex flex-col gap-2 flex-1">
-              <div className="flex items-center gap-3 flex-wrap">
-                <span className="text-[14px] font-medium text-brand-gray">{addr.label}</span>
-                {addr.isDefault && (
-                  <span className="px-2 py-1 bg-brand-border text-[10px] tracking-[0.15em] uppercase text-brand-gray-light">
-                    По умолчанию
-                  </span>
-                )}
-              </div>
-              <p className="text-[13px] md:text-[14px] text-brand-gray-light leading-[18px] md:leading-[20px]">{addr.address}</p>
-            </div>
-            <div className="flex gap-4 md:gap-2 md:flex-col lg:flex-row">
-              <button className="text-[12px] tracking-[0.15em] uppercase text-brand-gray-light hover:text-brand-gray transition-colors">
-                Изменить
-              </button>
-              <button className="text-[12px] tracking-[0.15em] uppercase text-brand-gray-light hover:text-red-500 transition-colors">
-                Удалить
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+      <h2 className="text-[24px] md:text-[36px] leading-[32px] md:leading-[36px] tracking-[0.02em] text-brand-gray mb-6">
+        Оплата и доставка
+      </h2>
+      <p className="text-[14px] text-brand-gray-light leading-[22px]">
+        Адреса доставки сохраняются автоматически при оформлении заказа. История ваших адресов будет отображаться здесь в ближайшем обновлении.
+      </p>
     </div>
   );
 }
 
+const ORDER_STATUS_LABELS: Record<string, string> = {
+  PENDING: 'Ожидает',
+  CONFIRMED: 'Подтверждён',
+  PROCESSING: 'В обработке',
+  DELIVERING: 'В пути',
+  DELIVERED: 'Доставлен',
+  CANCELLED: 'Отменён',
+};
+
+const ORDER_STATUS_COLORS: Record<string, string> = {
+  PENDING: 'text-amber-600',
+  CONFIRMED: 'text-blue-600',
+  PROCESSING: 'text-blue-600',
+  DELIVERING: 'text-blue-600',
+  DELIVERED: 'text-emerald-600',
+  CANCELLED: 'text-red-600',
+};
+
 /* ============= ORDER HISTORY ============= */
 function OrdersTab() {
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
-  const [orders] = useState([
-    {
-      id: 'GV-2026-0428',
-      date: '28 апреля 2026, 11:02',
-      status: 'В пути',
-      total: 1560000,
-      items: [
-        {
-          name: 'Дикая безмятежность',
-          size: 'L',
-          qty: 1,
-          price: 780000,
-          img: 'https://images.unsplash.com/photo-1549007628-9418af83b544?q=80&w=400&auto=format&fit=crop',
-        },
-        {
-          name: 'Городская поэзия',
-          size: 'M',
-          qty: 2,
-          price: 390000,
-          img: 'https://images.unsplash.com/photo-1490750967868-88aa4486c946?q=80&w=400&auto=format&fit=crop',
-        },
-      ],
-    },
-    {
-      id: 'GV-2025-1011',
-      date: '11 октября 2025, 14:57',
-      status: 'Доставлен',
-      total: 600000,
-      items: [
-        {
-          name: 'Багровое сердце',
-          size: 'L',
-          qty: 1,
-          price: 600000,
-          img: 'https://images.unsplash.com/photo-1510076857177-7470076d4098?q=80&w=400&auto=format&fit=crop',
-        },
-      ],
-    },
-    {
-      id: 'GV-2025-1004',
-      date: '4 октября 2025, 14:57',
-      status: 'Отменён',
-      total: 450000,
-      items: [],
-    },
-  ]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    ordersApi.listMine()
+      .then((data) => { if (active) setOrders(data); })
+      .catch(() => { if (active) setError('Не удалось загрузить заказы.'); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="max-w-[1000px]">
+        <h2 className="text-[24px] md:text-[36px] leading-[32px] md:leading-[36px] tracking-[0.02em] text-brand-gray mb-6">
+          Ваши заказы
+        </h2>
+        <p className="text-[14px] text-brand-gray-light">Загрузка…</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-[1000px]">
+        <h2 className="text-[24px] md:text-[36px] leading-[32px] md:leading-[36px] tracking-[0.02em] text-brand-gray mb-6">
+          Ваши заказы
+        </h2>
+        <p className="text-[13px] text-red-600">{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-[1000px]">
       <h2 className="text-[24px] md:text-[36px] leading-[32px] md:leading-[36px] tracking-[0.02em] text-brand-gray mb-6">
         Ваши заказы
       </h2>
+
+      {orders.length === 0 && (
+        <p className="text-[14px] text-brand-gray-light">У вас пока нет заказов.</p>
+      )}
 
       <div className="flex flex-col gap-3 md:gap-4">
         {orders.map((order) => (
@@ -422,20 +428,26 @@ function OrdersTab() {
             >
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-3 flex-wrap">
-                  <span className="text-[14px] font-medium text-brand-gray">{order.id}</span>
+                  <span className="text-[14px] font-medium text-brand-gray">
+                    #{order.orderNumber}
+                  </span>
                   <span
                     className={`text-[11px] md:text-[12px] tracking-[0.15em] uppercase ${
-                      order.status === 'В пути'
-                        ? 'text-blue-600'
-                        : order.status === 'Доставлен'
-                        ? 'text-green-600'
-                        : 'text-red-600'
+                      ORDER_STATUS_COLORS[order.status] ?? 'text-brand-gray-light'
                     }`}
                   >
-                    {order.status}
+                    {ORDER_STATUS_LABELS[order.status] ?? order.status}
                   </span>
                 </div>
-                <span className="text-[11px] md:text-[12px] text-brand-gray-light">{order.date}</span>
+                <span className="text-[11px] md:text-[12px] text-brand-gray-light">
+                  {new Date(order.createdAt).toLocaleString('ru-RU', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </span>
               </div>
               <div className="flex items-center justify-between sm:justify-end gap-4">
                 <span className="text-[15px] md:text-[16px] font-medium text-brand-gray">
@@ -452,24 +464,22 @@ function OrdersTab() {
             </button>
 
             {/* Order details */}
-            {expandedOrder === order.id && order.items.length > 0 && (
+            {expandedOrder === order.id && order.items && order.items.length > 0 && (
               <div className="border-t border-brand-border p-4 md:p-5 bg-brand-border/20">
                 <div className="flex flex-col gap-3 md:gap-4">
-                  {order.items.map((item, idx) => (
-                    <div key={idx} className="flex items-center gap-3 md:gap-4">
-                      <img
-                        src={item.img}
-                        alt={item.name}
-                        className="w-14 h-14 md:w-16 md:h-16 object-cover bg-brand-border flex-shrink-0"
-                      />
+                  {order.items.map((item) => (
+                    <div key={item.id} className="flex items-center gap-3 md:gap-4">
+                      <div className="w-14 h-14 md:w-16 md:h-16 bg-brand-border flex-shrink-0" />
                       <div className="flex-1 min-w-0">
-                        <p className="text-[13px] md:text-[14px] text-brand-gray truncate">{item.name}</p>
+                        <p className="text-[13px] md:text-[14px] text-brand-gray truncate">
+                          {item.productName}
+                        </p>
                         <p className="text-[11px] md:text-[12px] text-brand-gray-light">
-                          Размер: {item.size} · Кол-во: {item.qty}
+                          Размер: {item.sizeName} · Кол-во: {item.quantity}
                         </p>
                       </div>
                       <span className="text-[13px] md:text-[14px] text-brand-gray whitespace-nowrap">
-                        {(item.price * item.qty).toLocaleString()} UZS
+                        {(item.price * item.quantity).toLocaleString()} UZS
                       </span>
                     </div>
                   ))}

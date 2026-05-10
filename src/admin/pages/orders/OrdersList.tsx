@@ -14,6 +14,25 @@ const STATUS_COLORS: Record<Order['status'], string> = {
   CANCELLED: 'text-red-600',
 };
 
+const STATUS_LABELS: Record<Order['status'], string> = {
+  PENDING: 'Ожидает',
+  CONFIRMED: 'Подтверждён',
+  PROCESSING: 'В обработке',
+  DELIVERING: 'Доставляется',
+  DELIVERED: 'Доставлен',
+  CANCELLED: 'Отменён',
+};
+
+const PAYMENT_STATUS_LABELS: Record<Order['paymentStatus'], string> = {
+  PENDING: 'Ожидает оплаты',
+  PROCESSING: 'Обрабатывается',
+  COMPLETED: 'Оплачено',
+  FAILED: 'Ошибка',
+  CANCELLED: 'Отменено',
+  REFUNDED: 'Возвращено',
+  EXPIRED: 'Истекло',
+};
+
 export function OrdersList() {
   const [items, setItems] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -91,11 +110,11 @@ export function OrdersList() {
                   <span
                     className={`text-[11px] uppercase tracking-[0.18em] ${STATUS_COLORS[o.status]}`}
                   >
-                    {o.status}
+                    {STATUS_LABELS[o.status]}
                   </span>
                 </td>
                 <td className="px-6 py-3 text-[11px] uppercase tracking-[0.18em] text-[#808080]">
-                  {o.paymentStatus}
+                  {PAYMENT_STATUS_LABELS[o.paymentStatus] ?? o.paymentStatus}
                 </td>
               </tr>
             ))}

@@ -17,10 +17,10 @@ import {
 import { GalleryUpload, SingleImageUpload } from '../../ui/ImageUpload';
 import { slugify } from '../../ui/utils';
 
-const TAGS = ['Events', 'News', 'Photography', 'Press', 'Design', 'Workshop'];
+const TAGS = ['События', 'Новости', 'Фотография', 'Пресса', 'Дизайн', 'Мастерская'];
 const SIZES: { value: 'half' | 'full'; label: string }[] = [
-  { value: 'half', label: 'Half (1 column)' },
-  { value: 'full', label: 'Full (2 columns)' },
+  { value: 'half', label: 'Половина (1 колонка)' },
+  { value: 'full', label: 'Полная (2 колонки)' },
 ];
 
 interface FormState {
@@ -125,7 +125,7 @@ export function EventEdit() {
   };
 
   if (loading)
-    return <div className="text-[12px] uppercase tracking-[0.2em] text-[#808080]">Loading…</div>;
+    return <div className="text-[12px] uppercase tracking-[0.2em] text-[#808080]">Загрузка…</div>;
 
   return (
     <div>
@@ -253,7 +253,7 @@ export function EventEdit() {
                   ))}
                 </Select>
               </Field>
-              <Field label="Grid size">
+              <Field label="Размер в сетке">
                 <Select
                   value={form.size}
                   onChange={(e) =>

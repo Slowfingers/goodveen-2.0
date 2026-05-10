@@ -31,6 +31,13 @@ export const authApi = {
       skipAuth: true,
     }),
   me: () => apiRequest<{ user: User }>('/api/auth/me'),
+  updateProfile: (data: { name?: string; phone?: string | null }) =>
+    apiRequest<{ user: User }>('/api/auth/profile', { method: 'PATCH', body: data }),
+  changePassword: (currentPassword: string, newPassword: string) =>
+    apiRequest<{ ok: boolean }>('/api/auth/password', {
+      method: 'PATCH',
+      body: { currentPassword, newPassword },
+    }),
 };
 
 // ============================================================
