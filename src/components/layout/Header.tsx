@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { User, ShoppingBag, Menu, X, ChevronDown } from 'lucide-react';
+import { User, ShoppingBag, Menu, X, ChevronDown, LogOut } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useCartUI } from '../cart/CartContext';
 import { useAuthUI, useAuth } from '../auth/AuthContext';
 import { categoriesApi } from '@/src/lib/api';
@@ -19,12 +19,14 @@ export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [catalogOpen, setCatalogOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
+  const userMenuRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
   const navigate = useNavigate();
   const cartUI = useCartUI();
   const authUI = useAuthUI();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const heroRoutes = ['/', '/catalog'];
   const isHero = heroRoutes.includes(location.pathname);
 
@@ -41,7 +43,20 @@ export function Header() {
   useEffect(() => {
     setMobileOpen(false);
     setCatalogOpen(false);
+    setUserMenuOpen(false);
   }, [location.pathname]);
+
+  // Close user menu when clicking outside
+  useEffect(() => {
+    if (!userMenuOpen) return;
+    const onClick = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', onClick);
+    return () => document.removeEventListener('mousedown', onClick);
+  }, [userMenuOpen]);
 
   // Close mobile menu on Escape
   useEffect(() => {
@@ -157,23 +172,46 @@ export function Header() {
           >
             RU
           </button>
-          <button
-            onClick={() => {
-              if (user) {
-                navigate('/cabinet');
-              } else {
-                authUI.open('login');
-              }
-            }}
-            className={cn(
-              'w-[60px] h-full flex items-center justify-center transition-colors border-r',
-              onLight ? 'border-[#EEEEEE]' : 'border-white/20',
-              onLight ? 'hover:bg-brand-border' : 'hover:bg-white/10'
+          <div className="relative" ref={userMenuRef}>
+            <button
+              onClick={() => {
+                if (user) {
+                  setUserMenuOpen(!userMenuOpen);
+                } else {
+                  authUI.open('login');
+                }
+              }}
+              className={cn(
+                'w-[60px] h-full flex items-center justify-center transition-colors border-r',
+                onLight ? 'border-[#EEEEEE]' : 'border-white/20',
+                onLight ? 'hover:bg-brand-border' : 'hover:bg-white/10'
+              )}
+              aria-label="Account"
+            >
+              <User size={20} strokeWidth={1.25} />
+            </button>
+            {user && userMenuOpen && (
+              <div className="absolute right-0 top-full mt-px w-[200px] bg-white border border-[#EEEEEE] shadow-lg z-50">
+                <Link
+                  to="/cabinet"
+                  className="block px-5 py-3 text-[12px] tracking-[0.2em] uppercase text-brand-gray hover:bg-brand-border transition-colors"
+                >
+                  Личный кабинет
+                </Link>
+                <button
+                  onClick={() => {
+                    signOut();
+                    setUserMenuOpen(false);
+                    navigate('/');
+                  }}
+                  className="w-full px-5 py-3 text-[12px] tracking-[0.2em] uppercase text-brand-gray-light hover:text-brand-gray hover:bg-brand-border transition-colors text-left flex items-center gap-2"
+                >
+                  <LogOut size={14} strokeWidth={1.25} />
+                  Выйти
+                </button>
+              </div>
             )}
-            aria-label="Account"
-          >
-            <User size={20} strokeWidth={1.25} />
-          </button>
+          </div>
           <button
             onClick={cartUI.open}
             className={cn(

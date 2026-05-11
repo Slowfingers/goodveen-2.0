@@ -62,8 +62,7 @@ export function Cabinet() {
         />
         
         {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/40" />
-        <div className="absolute bottom-0 left-0 right-0 h-[320px] bg-gradient-to-b from-transparent to-black/40" style={{ backdropFilter: 'blur(10px)' }} />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/60" />
 
         {/* Header Content */}
         <div className="absolute bottom-0 left-0 right-0 px-5 md:px-10 pb-10 md:pb-20">
