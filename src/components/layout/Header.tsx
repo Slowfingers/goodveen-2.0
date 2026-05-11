@@ -339,13 +339,13 @@ export function Header() {
 
             {/* Social icons */}
             <div className="flex items-center gap-10">
-              <a href="#" aria-label="Instagram" className="w-8 h-8 flex items-center justify-center text-brand-gray">
+              <a href="https://www.instagram.com/goodveen.uz/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="w-8 h-8 flex items-center justify-center text-brand-gray">
                 <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><rect x="6" y="6" width="20" height="20" rx="5" stroke="#303030" strokeWidth="1.5"/><circle cx="16" cy="16" r="5" stroke="#303030" strokeWidth="1.5"/><circle cx="22" cy="10" r="1" fill="#303030"/></svg>
               </a>
-              <a href="#" aria-label="Telegram" className="w-8 h-8 flex items-center justify-center text-brand-gray">
+              <a href="https://t.me/goodveenuz" target="_blank" rel="noopener noreferrer" aria-label="Telegram" className="w-8 h-8 flex items-center justify-center text-brand-gray">
                 <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><path d="M26 7L5 15.5L13 17.5L17 25L20 18L26 7Z" stroke="#303030" strokeWidth="1.5" strokeLinejoin="round"/><path d="M13 17.5L17 21.5" stroke="#303030" strokeWidth="1.5"/></svg>
               </a>
-              <a href="#" aria-label="Facebook" className="w-8 h-8 flex items-center justify-center text-brand-gray">
+              <a href="https://www.facebook.com/goodveenflowershouse" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="w-8 h-8 flex items-center justify-center text-brand-gray">
                 <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><path d="M18 6H15C13.3 6 12 7.3 12 9V13H9V17H12V26H16V17H19L20 13H16V9C16 8.4 16.4 8 17 8H20V6H18Z" stroke="#303030" strokeWidth="1.5" strokeLinejoin="round"/></svg>
               </a>
             </div>

@@ -27,7 +27,7 @@ for (const folder of ['products', 'events', 'pages', 'about']) {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 }
 
-const ALLOWED_ORIGINS = (process.env.CORS_ORIGINS || 'http://localhost:5173,http://localhost:4173')
+const ALLOWED_ORIGINS = (process.env.CORS_ORIGINS || 'http://localhost:5173,http://localhost:4173,http://localhost:3000')
   .split(',')
   .map((s) => s.trim())
   .filter(Boolean);
@@ -37,6 +37,8 @@ app.use(
     origin: (origin, callback) => {
       // allow server-to-server (no origin) or whitelisted origins
       if (!origin || ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+      // Allow 127.0.0.1 with any port (for browser preview proxy)
+      if (origin && origin.match(/^http:\/\/127\.0\.0\.1:\d+$/)) return callback(null, true);
       callback(new Error('Not allowed by CORS'));
     },
     credentials: true,
