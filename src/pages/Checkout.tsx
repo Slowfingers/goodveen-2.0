@@ -1,6 +1,7 @@
 import { useState, useEffect, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useCartUI } from '../components/cart/CartContext';
+import { useAuth } from '../components/auth/AuthContext';
 import {
   ArrowRight,
   ArrowLeft,
@@ -30,6 +31,7 @@ type Payment = 'card' | 'apple' | 'cash';
 
 export function Checkout() {
   const cartUI = useCartUI();
+  const { user, signIn: authSignIn } = useAuth();
   const [step, setStep] = useState<Step>('contact');
 
   useEffect(() => {
@@ -37,15 +39,24 @@ export function Checkout() {
   }, []);
 
   // form state
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
+  const [name, setName] = useState(user?.name || '');
+  const [email, setEmail] = useState(user?.email || '');
+  const [phone, setPhone] = useState(user?.phone || '');
   const [hasAccount, setHasAccount] = useState<'guest' | 'account'>('guest');
-  const [loggedIn, setLoggedIn] = useState(false);
   const [signinPassword, setSigninPassword] = useState('');
   const [signinError, setSigninError] = useState<string | null>(null);
+  const [signinLoading, setSigninLoading] = useState(false);
 
-  const signIn = () => {
+  // Sync form with user data when logged in
+  useEffect(() => {
+    if (user) {
+      setName(user.name || '');
+      setEmail(user.email);
+      setPhone(user.phone || '');
+    }
+  }, [user]);
+
+  const signIn = async () => {
     if (!/\S+@\S+\.\S+/.test(email)) {
       setSigninError('Введите корректный email');
       return;
@@ -55,12 +66,15 @@ export function Checkout() {
       return;
     }
     setSigninError(null);
-    setLoggedIn(true);
-  };
-  const signOut = () => {
-    setLoggedIn(false);
-    setSigninPassword('');
-    setHasAccount('guest');
+    setSigninLoading(true);
+    try {
+      await authSignIn(email, signinPassword);
+      setSigninPassword('');
+    } catch (err: any) {
+      setSigninError(err?.message || 'Неверный email или пароль');
+    } finally {
+      setSigninLoading(false);
+    }
   };
 
   const [delivery, setDelivery] = useState<Delivery>('courier-day');
@@ -192,7 +206,7 @@ export function Checkout() {
               {step === 'contact' && (
                 <SectionBlock title="Контактная информация">
                   {/* Toggle hidden once signed in (checkout-1440-2 logged-in state) */}
-                  {!loggedIn && (
+                  {!user && (
                     <div className="flex border border-brand-border self-start text-[12px] tracking-[0.2em] uppercase">
                       {(['guest', 'account'] as const).map((v) => (
                         <button
@@ -214,7 +228,7 @@ export function Checkout() {
                   )}
 
                   {/* Signed-in summary card */}
-                  {loggedIn && (
+                  {user && (
                     <div className="flex items-center justify-between gap-4 p-4 md:p-5 border border-brand-gray bg-brand-border/30">
                       <div className="flex items-center gap-3 min-w-0">
                         <span className="w-9 h-9 rounded-full bg-brand-gray text-white flex items-center justify-center shrink-0">
@@ -229,17 +243,40 @@ export function Checkout() {
                           </span>
                         </div>
                       </div>
-                      <button
-                        onClick={signOut}
+                      <Link
+                        to="/cabinet"
                         className="text-[11px] tracking-[0.2em] uppercase text-brand-gray-light hover:text-brand-gray transition-colors shrink-0"
                       >
-                        Выйти
-                      </button>
+                        Кабинет
+                      </Link>
+                    </div>
+                  )}
+
+                  {/* Guest fields */}
+                  {!user && hasAccount === 'guest' && (
+                    <div className="flex flex-col gap-3">
+                      <p className="text-[13px] text-brand-gray-light">
+                        Войдите, чтобы автоматически заполнить данные и получать бонусы.
+                      </p>
+                      <Field label="Ваше имя" value={name} onChange={setName} placeholder="Александр" />
+                      <Field
+                        label="Email"
+                        value={email}
+                        onChange={setEmail}
+                        placeholder="alexander@goodveen.com"
+                        type="email"
+                      />
+                      <Field
+                        label="Номер телефона"
+                        value={phone}
+                        onChange={setPhone}
+                        placeholder="+998 90 123 45 67"
+                      />
                     </div>
                   )}
 
                   {/* Sign-in form */}
-                  {!loggedIn && hasAccount === 'account' && (
+                  {!user && hasAccount === 'account' && (
                     <div className="flex flex-col gap-3">
                       <p className="text-[13px] text-brand-gray-light">
                         Войдите, чтобы автоматически заполнить данные и получать бонусы.
@@ -276,32 +313,13 @@ export function Checkout() {
                         </Link>
                         <button
                           onClick={signIn}
-                          className="h-11 px-6 bg-brand-gray text-white flex items-center justify-center gap-3 uppercase tracking-[0.25em] text-[12px] hover:bg-black transition-colors self-start md:self-auto"
+                          disabled={signinLoading}
+                          className="h-11 px-6 bg-brand-gray text-white flex items-center justify-center gap-3 uppercase tracking-[0.25em] text-[12px] hover:bg-black transition-colors self-start md:self-auto disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          Войти
+                          {signinLoading ? 'Вход…' : 'Войти'}
                           <ArrowRight size={16} strokeWidth={1.25} />
                         </button>
                       </div>
-                    </div>
-                  )}
-
-                  {/* Guest fields OR pre-filled fields after sign-in */}
-                  {(loggedIn || hasAccount === 'guest') && (
-                    <div className="flex flex-col gap-3">
-                      <Field label="Ваше имя" value={name} onChange={setName} placeholder="Александр" />
-                      <Field
-                        label="Email"
-                        value={email}
-                        onChange={setEmail}
-                        placeholder="alexander@goodveen.com"
-                        type="email"
-                      />
-                      <Field
-                        label="Номер телефона"
-                        value={phone}
-                        onChange={setPhone}
-                        placeholder="+998 90 123 45 67"
-                      />
                     </div>
                   )}
                 </SectionBlock>

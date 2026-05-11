@@ -38,6 +38,18 @@ export const authApi = {
       method: 'PATCH',
       body: { currentPassword, newPassword },
     }),
+  requestPasswordReset: (email: string) =>
+    apiRequest<{ ok: boolean }>('/api/auth/request-reset', {
+      method: 'POST',
+      body: { email },
+      skipAuth: true,
+    }),
+  resetPassword: (token: string, newPassword: string) =>
+    apiRequest<{ ok: boolean }>('/api/auth/reset-password', {
+      method: 'POST',
+      body: { token, newPassword },
+      skipAuth: true,
+    }),
 };
 
 // ============================================================

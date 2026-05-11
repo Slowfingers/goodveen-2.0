@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { z } from 'zod';
+import crypto from 'crypto';
 import { prisma } from '../lib/prisma.js';
 import {
   comparePassword,
@@ -88,5 +89,53 @@ authRouter.patch('/password', requireAuth, async (req, res) => {
   if (!ok) return res.status(401).json({ error: 'Incorrect current password' });
   const hashed = await hashPassword(parsed.data.newPassword);
   await prisma.user.update({ where: { id: req.user!.id }, data: { password: hashed } });
+  res.json({ ok: true });
+});
+
+authRouter.post('/request-reset', async (req, res) => {
+  const parsed = z.object({ email: z.string().email() }).safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const user = await prisma.user.findUnique({ where: { email: parsed.data.email } });
+  // Always return success to avoid email enumeration
+  if (!user) return res.json({ ok: true });
+  // Generate token
+  const token = crypto.randomBytes(32).toString('hex');
+  const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+  const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
+  await prisma.passwordResetToken.create({
+    data: { userId: user.id, tokenHash, expiresAt },
+  });
+  // TODO: Send email with reset link containing token
+  // For now, log it (in production, use email service)
+  console.log(`Password reset token for ${user.email}: ${token}`);
+  console.log(`Reset link: ${process.env.PUBLIC_BASE_URL || 'http://localhost:3000'}/reset-password?token=${token}`);
+  res.json({ ok: true });
+});
+
+authRouter.post('/reset-password', async (req, res) => {
+  const parsed = z
+    .object({
+      token: z.string().min(1),
+      newPassword: z.string().min(6),
+    })
+    .safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const tokenHash = crypto.createHash('sha256').update(parsed.data.token).digest('hex');
+  const resetToken = await prisma.passwordResetToken.findUnique({
+    where: { tokenHash },
+    include: { user: true },
+  });
+  if (!resetToken || resetToken.usedAt || resetToken.expiresAt < new Date()) {
+    return res.status(400).json({ error: 'Invalid or expired token' });
+  }
+  const hashed = await hashPassword(parsed.data.newPassword);
+  await prisma.user.update({
+    where: { id: resetToken.userId },
+    data: { password: hashed },
+  });
+  await prisma.passwordResetToken.update({
+    where: { id: resetToken.id },
+    data: { usedAt: new Date() },
+  });
   res.json({ ok: true });
 });

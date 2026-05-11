@@ -32,6 +32,7 @@ import { EventDetails } from './pages/EventDetails';
 import { Contact } from './pages/Contact';
 import { Workshop } from './pages/Workshop';
 import { About } from './pages/About';
+import { ResetPassword } from './pages/ResetPassword';
 import { adminRouteTree } from './admin/AdminRoutes';
 
 function App() {
@@ -40,6 +41,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           {adminRouteTree()}
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/" element={<Layout />}>
             <Route index element={<Home />} />
             <Route path="catalog" element={<Catalog />} />

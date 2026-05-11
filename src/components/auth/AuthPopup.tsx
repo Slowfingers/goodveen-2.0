@@ -282,11 +282,20 @@ function ResetView({ onSwitch }: { onSwitch: (m: 'login') => void }) {
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const submit = () => {
+  const submit = async () => {
     if (!/\S+@\S+\.\S+/.test(email)) return setError('Введите корректный email');
     setError(null);
-    setSent(true);
+    setLoading(true);
+    try {
+      await authApi.requestPasswordReset(email);
+      setSent(true);
+    } catch {
+      setError('Ошибка отправки. Попробуйте позже.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (sent) {
@@ -347,10 +356,11 @@ function ResetView({ onSwitch }: { onSwitch: (m: 'login') => void }) {
 
         <button
           type="submit"
-          className="h-12 mt-3 bg-brand-gray text-white flex items-center justify-center gap-3 uppercase tracking-[0.25em] text-[12px] hover:bg-black transition-colors"
+          disabled={loading}
+          className="h-12 mt-3 bg-brand-gray text-white flex items-center justify-center gap-3 uppercase tracking-[0.25em] text-[12px] hover:bg-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Отправить ссылку
-          <ArrowRight size={16} strokeWidth={1.25} />
+          {loading ? 'Отправка…' : 'Отправить ссылку'}
+          {!loading && <ArrowRight size={16} strokeWidth={1.25} />}
         </button>
       </form>
 
