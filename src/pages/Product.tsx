@@ -100,17 +100,25 @@ export function Product() {
 
         const all = await productsApi.list({ onlyActive: true });
         if (!active) return;
-        setRelated(
-          all
-            .filter((x) => x.id !== p!.id && x.categoryId === p!.categoryId)
-            .slice(0, 4)
-            .map((x) => ({
-              slug: x.slug,
-              title: x.name,
-              desc: x.description ?? '',
-              img: x.images?.[0]?.url ?? FALLBACK_IMG,
-            })),
-        );
+        
+        // Find products with similar colors (color palette recommendations)
+        const colorMatches = all
+          .filter((x) => x.id !== p!.id)
+          .map((x) => {
+            const matchingColors = x.colors?.filter((c) => p!.colors?.includes(c)) ?? [];
+            return { product: x, matchCount: matchingColors.length };
+          })
+          .filter((x) => x.matchCount > 0)
+          .sort((a, b) => b.matchCount - a.matchCount)
+          .slice(0, 8)
+          .map((x) => ({
+            slug: x.product.slug,
+            title: x.product.name,
+            desc: x.product.description ?? '',
+            img: x.product.images?.[0]?.url ?? FALLBACK_IMG,
+          }));
+        
+        setRelated(colorMatches);
       } finally {
         if (active) setLoading(false);
       }
@@ -424,43 +432,18 @@ export function Product() {
         </section>
       )}
 
-      {/* ===== IN INTERIOR ===== */}
-      <section className="w-full px-5 md:px-10 py-[80px] border-b border-brand-border">
-        <div className="max-w-[1440px] mx-auto flex flex-col gap-10">
-          <div className="flex flex-col gap-2">
-            <h2 className="text-[40px] md:text-[48px] leading-[1.0] tracking-[0.02em] text-brand-gray">
-              В интерьере
-            </h2>
-            <p className="text-[12px] md:text-[14px] tracking-[0.2em] text-brand-gray-light uppercase">
-              Посмотрите, как цветы выглядят в реальных пространствах
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 h-auto md:h-[800px]">
-            <div className="relative h-[320px] md:h-full overflow-hidden">
-              <img
-                src={images[0]}
-                alt="В интерьере"
-                className="absolute inset-0 w-full h-full object-cover"
-              />
-            </div>
-            <div className="relative h-[320px] md:h-full overflow-hidden">
-              <img
-                src={images[1] ?? images[0]}
-                alt="В интерьере"
-                className="absolute inset-0 w-full h-full object-cover"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ===== RELATED ===== */}
+      {/* ===== RELATED (Color Palette Recommendations) ===== */}
       {related.length > 0 && (
         <section className="w-full px-5 md:px-10 py-[80px]">
           <div className="max-w-[1440px] mx-auto flex flex-col gap-10">
-            <h2 className="text-[40px] md:text-[48px] leading-[1.0] tracking-[0.02em] text-brand-gray">
-              Вам также может понравиться
-            </h2>
+            <div className="flex flex-col gap-2">
+              <h2 className="text-[40px] md:text-[48px] leading-[1.0] tracking-[0.02em] text-brand-gray">
+                Похожая цветовая палитра
+              </h2>
+              <p className="text-[12px] md:text-[14px] tracking-[0.2em] text-brand-gray-light uppercase">
+                Товары с теми же оттенками
+              </p>
+            </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-10 h-auto md:h-[400px]">
               {related.map((p, idx) => {
                 const hasBorder = idx % 2 === 0;
