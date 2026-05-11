@@ -1,6 +1,7 @@
 import { apiRequest } from './client';
 import type {
   AboutPage,
+  Address,
   Category,
   ContactSettings,
   Event,
@@ -50,6 +51,19 @@ export const authApi = {
       body: { token, newPassword },
       skipAuth: true,
     }),
+};
+
+// ============================================================
+// ADDRESSES
+// ============================================================
+export const addressesApi = {
+  list: () => apiRequest<Address[]>('/api/addresses'),
+  create: (data: Omit<Address, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) =>
+    apiRequest<Address>('/api/addresses', { method: 'POST', body: data }),
+  update: (id: string, data: Partial<Omit<Address, 'id' | 'userId' | 'createdAt' | 'updatedAt'>>) =>
+    apiRequest<Address>(`/api/addresses/${id}`, { method: 'PATCH', body: data }),
+  delete: (id: string) =>
+    apiRequest<void>(`/api/addresses/${id}`, { method: 'DELETE' }),
 };
 
 // ============================================================

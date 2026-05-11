@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import { useSearchParams, Navigate } from 'react-router-dom';
 import { ChevronDown, Check } from 'lucide-react';
 import { useAuth } from '../components/auth/AuthContext';
-import { authApi, ordersApi } from '../lib/api';
+import { authApi, ordersApi, addressesApi } from '../lib/api';
 import { ApiError } from '../lib/api/client';
-import type { Order } from '../lib/api/types';
+import type { Order, Address } from '../lib/api/types';
 
 type Tab = 'personal' | 'delivery' | 'orders';
 
@@ -340,14 +340,238 @@ function PersonalTab({ user, onRefresh }: { user: any; onRefresh: () => Promise<
 
 /* ============= PAYMENT AND DELIVERY ============= */
 function DeliveryTab() {
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [editing, setEditing] = useState<string | null>(null);
+  const [creating, setCreating] = useState(false);
+
+  const [formData, setFormData] = useState({
+    title: '',
+    street: '',
+    city: 'Tashkent',
+    district: '',
+    zipCode: '',
+    isDefault: false,
+  });
+
+  useEffect(() => {
+    loadAddresses();
+  }, []);
+
+  const loadAddresses = async () => {
+    setLoading(true);
+    try {
+      const data = await addressesApi.list();
+      setAddresses(data);
+    } catch {
+      setError('Не удалось загрузить адреса');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const startCreate = () => {
+    setFormData({
+      title: '',
+      street: '',
+      city: 'Tashkent',
+      district: '',
+      zipCode: '',
+      isDefault: addresses.length === 0,
+    });
+    setCreating(true);
+    setEditing(null);
+  };
+
+  const startEdit = (addr: Address) => {
+    setFormData({
+      title: addr.title,
+      street: addr.street,
+      city: addr.city,
+      district: addr.district || '',
+      zipCode: addr.zipCode || '',
+      isDefault: addr.isDefault,
+    });
+    setEditing(addr.id);
+    setCreating(false);
+  };
+
+  const cancelEdit = () => {
+    setEditing(null);
+    setCreating(false);
+  };
+
+  const saveAddress = async () => {
+    if (!formData.title.trim() || !formData.street.trim()) {
+      alert('Заполните название и адрес');
+      return;
+    }
+    try {
+      if (editing) {
+        await addressesApi.update(editing, formData);
+      } else {
+        await addressesApi.create(formData);
+      }
+      await loadAddresses();
+      cancelEdit();
+    } catch {
+      alert('Ошибка сохранения адреса');
+    }
+  };
+
+  const deleteAddress = async (id: string) => {
+    if (!confirm('Удалить этот адрес?')) return;
+    try {
+      await addressesApi.delete(id);
+      await loadAddresses();
+    } catch {
+      alert('Ошибка удаления адреса');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="max-w-[800px]">
+        <h2 className="text-[24px] md:text-[36px] leading-[32px] md:leading-[36px] tracking-[0.02em] text-brand-gray mb-6">
+          Адреса доставки
+        </h2>
+        <p className="text-[14px] text-brand-gray-light">Загрузка…</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-[800px]">
+        <h2 className="text-[24px] md:text-[36px] leading-[32px] md:leading-[36px] tracking-[0.02em] text-brand-gray mb-6">
+          Адреса доставки
+        </h2>
+        <p className="text-[13px] text-red-600">{error}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-[800px]">
-      <h2 className="text-[24px] md:text-[36px] leading-[32px] md:leading-[36px] tracking-[0.02em] text-brand-gray mb-6">
-        Оплата и доставка
-      </h2>
-      <p className="text-[14px] text-brand-gray-light leading-[22px]">
-        Адреса доставки сохраняются автоматически при оформлении заказа. История ваших адресов будет отображаться здесь в ближайшем обновлении.
-      </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <h2 className="text-[24px] md:text-[36px] leading-[32px] md:leading-[36px] tracking-[0.02em] text-brand-gray">
+          Адреса доставки
+        </h2>
+        {!creating && !editing && (
+          <button
+            onClick={startCreate}
+            className="h-10 px-6 border border-brand-gray text-[12px] tracking-[0.2em] uppercase text-brand-gray hover:bg-brand-gray hover:text-white transition-colors self-start sm:self-auto"
+          >
+            Добавить новый
+          </button>
+        )}
+      </div>
+
+      {(creating || editing) && (
+        <div className="p-5 border border-brand-gray bg-brand-border/20 mb-4 flex flex-col gap-3">
+          <h3 className="text-[14px] uppercase tracking-[0.2em] text-brand-gray">
+            {editing ? 'Редактировать адрес' : 'Новый адрес'}
+          </h3>
+          <input
+            type="text"
+            placeholder="Название (например, Дом)"
+            value={formData.title}
+            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            className="h-12 px-4 border border-brand-border text-[14px] text-brand-gray outline-none"
+          />
+          <input
+            type="text"
+            placeholder="Улица и номер дома"
+            value={formData.street}
+            onChange={(e) => setFormData({ ...formData, street: e.target.value })}
+            className="h-12 px-4 border border-brand-border text-[14px] text-brand-gray outline-none"
+          />
+          <div className="grid grid-cols-2 gap-3">
+            <input
+              type="text"
+              placeholder="Город"
+              value={formData.city}
+              onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+              className="h-12 px-4 border border-brand-border text-[14px] text-brand-gray outline-none"
+            />
+            <input
+              type="text"
+              placeholder="Район (опционально)"
+              value={formData.district}
+              onChange={(e) => setFormData({ ...formData, district: e.target.value })}
+              className="h-12 px-4 border border-brand-border text-[14px] text-brand-gray outline-none"
+            />
+          </div>
+          <label className="flex items-center gap-2 text-[13px] text-brand-gray">
+            <input
+              type="checkbox"
+              checked={formData.isDefault}
+              onChange={(e) => setFormData({ ...formData, isDefault: e.target.checked })}
+              className="w-4 h-4"
+            />
+            Использовать по умолчанию
+          </label>
+          <div className="flex gap-3">
+            <button
+              onClick={saveAddress}
+              className="h-10 px-6 bg-brand-gray text-white text-[12px] tracking-[0.2em] uppercase hover:bg-black transition-colors"
+            >
+              Сохранить
+            </button>
+            <button
+              onClick={cancelEdit}
+              className="h-10 px-6 border border-brand-border text-[12px] tracking-[0.2em] uppercase text-brand-gray-light hover:text-brand-gray transition-colors"
+            >
+              Отмена
+            </button>
+          </div>
+        </div>
+      )}
+
+      {addresses.length === 0 && !creating && (
+        <p className="text-[14px] text-brand-gray-light">
+          У вас пока нет сохранённых адресов. Добавьте первый адрес для быстрого оформления заказов.
+        </p>
+      )}
+
+      <div className="flex flex-col gap-4">
+        {addresses.map((addr) => (
+          <div
+            key={addr.id}
+            className="p-4 md:p-5 border border-brand-border flex flex-col md:flex-row md:items-start md:justify-between gap-4"
+          >
+            <div className="flex flex-col gap-2 flex-1">
+              <div className="flex items-center gap-3 flex-wrap">
+                <span className="text-[14px] font-medium text-brand-gray">{addr.title}</span>
+                {addr.isDefault && (
+                  <span className="px-2 py-1 bg-brand-border text-[10px] tracking-[0.15em] uppercase text-brand-gray-light">
+                    По умолчанию
+                  </span>
+                )}
+              </div>
+              <p className="text-[13px] md:text-[14px] text-brand-gray-light leading-[18px] md:leading-[20px]">
+                {addr.street}, {addr.city}
+                {addr.district && `, ${addr.district}`}
+              </p>
+            </div>
+            <div className="flex gap-4 md:gap-2 md:flex-col lg:flex-row">
+              <button
+                onClick={() => startEdit(addr)}
+                className="text-[12px] tracking-[0.15em] uppercase text-brand-gray-light hover:text-brand-gray transition-colors"
+              >
+                Изменить
+              </button>
+              <button
+                onClick={() => deleteAddress(addr.id)}
+                className="text-[12px] tracking-[0.15em] uppercase text-brand-gray-light hover:text-red-500 transition-colors"
+              >
+                Удалить
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

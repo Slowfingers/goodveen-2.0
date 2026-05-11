@@ -16,6 +16,7 @@ import { usersRouter } from './routes/users.js';
 import { filtersRouter } from './routes/filters.js';
 import { pagesRouter } from './routes/pages.js';
 import { uploadsRouter } from './routes/uploads.js';
+import { addressesRouter } from './routes/addresses.js';
 
 const app = express();
 const port = Number(process.env.PORT || 3001);
@@ -78,6 +79,7 @@ app.use('/api/categories', categoriesRouter);
 app.use('/api/events', eventsRouter);
 app.use('/api/orders', ordersRouter);
 app.use('/api/users', usersRouter);
+app.use('/api/addresses', addressesRouter);
 app.use('/api/filters', filtersRouter);
 app.use('/api/pages', pagesRouter);
 app.use('/api/uploads', uploadsRouter);
