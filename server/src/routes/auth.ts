@@ -1,14 +1,11 @@
+import express from 'express';
 import { Router } from 'express';
 import { z } from 'zod';
 import crypto from 'crypto';
 import { prisma } from '../lib/prisma.js';
-import {
-  comparePassword,
-  hashPassword,
-  requireAuth,
-  signToken,
-} from '../lib/auth.js';
+import { hashPassword, comparePassword, signToken, requireAuth } from '../lib/auth.js';
 import { serializeUser } from '../lib/serializers.js';
+import { sendPasswordResetEmail } from '../lib/email.js';
 
 export const authRouter = Router();
 
@@ -105,10 +102,8 @@ authRouter.post('/request-reset', async (req, res) => {
   await prisma.passwordResetToken.create({
     data: { userId: user.id, tokenHash, expiresAt },
   });
-  // TODO: Send email with reset link containing token
-  // For now, log it (in production, use email service)
-  console.log(`Password reset token for ${user.email}: ${token}`);
-  console.log(`Reset link: ${process.env.PUBLIC_BASE_URL || 'http://localhost:3000'}/reset-password?token=${token}`);
+  // Send email with reset link
+  await sendPasswordResetEmail(user.email, token);
   res.json({ ok: true });
 });
 
