@@ -58,10 +58,12 @@ app.use(
   }),
 );
 
-// Strict rate limit for auth endpoints: 10 requests per 15 minutes per IP
+// Strict rate limit for auth endpoints
+// Development: 50 requests per 15 minutes
+// Production: 10 requests per 15 minutes
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 10,
+  max: process.env.NODE_ENV === 'production' ? 10 : 50,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many authentication attempts, please try again later.' },
