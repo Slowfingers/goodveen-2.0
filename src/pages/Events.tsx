@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ArrowLeft, Check, X } from 'lucide-react';
-import { eventsApi } from '../lib/api';
-import type { Event as ApiEvent } from '../lib/api/types';
+import { eventsApi, pagesApi } from '../lib/api';
+import type { Event as ApiEvent, PageSetting } from '../lib/api/types';
 
 type Tag = string;
 
@@ -122,6 +122,7 @@ export function Events() {
   const [sortOpen, setSortOpen] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [pageSetting, setPageSetting] = useState<PageSetting | null>(null);
   const itemsPerPage = 6;
 
   useEffect(() => {
@@ -132,9 +133,14 @@ export function Events() {
     let active = true;
     (async () => {
       try {
-        const data = await eventsApi.list({ onlyPublished: true });
+        const [data, settings] = await Promise.all([
+          eventsApi.list({ onlyPublished: true }),
+          pagesApi.listSettings().catch(() => []),
+        ]);
         if (!active) return;
         setItems(data.length ? data.map(mapApiToItem) : FALLBACK_EVENTS);
+        const eventsSetting = settings.find((s) => s.pageKey === 'events');
+        setPageSetting(eventsSetting || null);
       } catch {
         if (active) setItems(FALLBACK_EVENTS);
       } finally {
@@ -197,6 +203,10 @@ export function Events() {
   }
   if (buf.length) rows.push(buf);
 
+  const heroImage = pageSetting?.heroImage || 'https://images.unsplash.com/photo-1507290439931-a861cf509832?q=80&w=2400&auto=format&fit=crop';
+  const title = pageSetting?.title || 'Events';
+  const subtitle = pageSetting?.subtitle || 'stories from the studio and beyond';
+
   return (
     <div className="w-full relative bg-white">
       {/* ===== HERO ===== */}
@@ -204,8 +214,7 @@ export function Events() {
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
-            backgroundImage:
-              "url('https://images.unsplash.com/photo-1507290439931-a861cf509832?q=80&w=2400&auto=format&fit=crop')",
+            backgroundImage: `url('${heroImage}')`,
           }}
         />
         <div className="absolute inset-x-0 top-0 h-[120px] bg-gradient-to-b from-black/60 to-transparent" />
@@ -215,10 +224,10 @@ export function Events() {
         <div className="relative z-10 mt-auto w-full max-w-[1440px] mx-auto px-5 md:px-10 pb-10 md:pb-0 flex flex-col gap-6 md:gap-10">
           <div className="flex flex-col items-start gap-3 md:gap-4">
             <h1 className="text-white text-[48px] md:text-[72px] leading-[1.05] tracking-[0.01em] font-light">
-              Events
+              {title}
             </h1>
             <p className="text-white/85 text-[12px] md:text-[14px] tracking-[0.25em] uppercase">
-              stories from the studio and beyond
+              {subtitle}
             </p>
           </div>
 

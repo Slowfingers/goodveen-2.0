@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Clock, MapPin, Phone, Instagram, Send, Facebook } from 'lucide-react';
 import { pagesApi } from '../lib/api';
+import type { PageSetting } from '../lib/api/types';
 
 export function Contact() {
   useEffect(() => {
@@ -12,6 +13,7 @@ export function Contact() {
   }, []);
 
   const [contactData, setContactData] = useState<any>(null);
+  const [pageSetting, setPageSetting] = useState<PageSetting | null>(null);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -20,7 +22,14 @@ export function Contact() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    pagesApi.getContact().then(setContactData).catch(console.error);
+    Promise.all([
+      pagesApi.getContact().catch(() => null),
+      pagesApi.listSettings().catch(() => []),
+    ]).then(([contact, settings]) => {
+      setContactData(contact);
+      const contactSetting = settings.find((s) => s.pageKey === 'contacts');
+      setPageSetting(contactSetting || null);
+    });
   }, []);
 
   const submit = () => {
@@ -32,14 +41,18 @@ export function Contact() {
     setTimeout(() => setSent(false), 3000);
   };
 
+  const heroImage = pageSetting?.heroImage || 'https://images.unsplash.com/photo-1487530811176-3780de880c2d?q=80&w=2400&auto=format&fit=crop';
+  const title = pageSetting?.title || 'Contact us';
+  const subtitle = pageSetting?.subtitle || 'Get in touch';
+
   return (
     <div className="w-full bg-white">
       {/* Hero Section */}
-      <section className="relative h-[480px] md:h-[680px] -mt-[60px] bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1487530811176-3780de880c2d?q=80&w=2400&auto=format&fit=crop')" }}>
+      <section className="relative h-[480px] md:h-[680px] -mt-[60px] bg-cover bg-center" style={{ backgroundImage: `url('${heroImage}')` }}>
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/60" />
         <div className="absolute inset-x-0 bottom-0 flex flex-col px-5 md:px-10 py-10 md:py-20 gap-2">
-          <h1 className="text-[48px] md:text-[80px] leading-[48px] md:leading-[80px] tracking-[0.02em] text-white">Contact us</h1>
-          <p className="text-[14px] leading-[16px] tracking-[0.2em] uppercase text-white">Get in touch</p>
+          <h1 className="text-[48px] md:text-[80px] leading-[48px] md:leading-[80px] tracking-[0.02em] text-white">{title}</h1>
+          <p className="text-[14px] leading-[16px] tracking-[0.2em] uppercase text-white">{subtitle}</p>
         </div>
       </section>
 

@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { ArrowRight, ArrowLeft, SlidersHorizontal, Check, X, ShoppingBag } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { filtersApi, productsApi, categoriesApi } from '../lib/api';
-import type { Product as ApiProduct, Category } from '../lib/api/types';
+import { filtersApi, productsApi, categoriesApi, pagesApi } from '../lib/api';
+import type { Product as ApiProduct, Category, PageSetting } from '../lib/api/types';
 import { useCartUI } from '../components/cart/CartContext';
 
 type FilterKey = 'color' | 'flower' | 'price' | 'event';
@@ -87,6 +87,7 @@ export function Catalog() {
   const [colorOptions, setColorOptions] = useState<{ name: string; hex: string }[]>(FALLBACK_COLORS);
   const [flowerOptions, setFlowerOptions] = useState<string[]>(FALLBACK_FLOWERS);
   const [currentCategory, setCurrentCategory] = useState<Category | null>(null);
+  const [pageSetting, setPageSetting] = useState<PageSetting | null>(null);
 
   useEffect(() => {
     document.title = currentCategory ? `Goodveen - ${currentCategory.name}` : 'Goodveen - Каталог';
@@ -97,10 +98,11 @@ export function Catalog() {
     (async () => {
       try {
         setLoading(true);
-        const [categories, colors, flowers] = await Promise.all([
+        const [categories, colors, flowers, settings] = await Promise.all([
           categoriesApi.list(true).catch(() => []),
           filtersApi.listColors().catch(() => []),
           filtersApi.listFlowerTypes().catch(() => []),
+          pagesApi.listSettings().catch(() => []),
         ]);
         
         let categoryId: string | undefined;
@@ -124,6 +126,8 @@ export function Catalog() {
           );
         if (flowers.length)
           setFlowerOptions(flowers.filter((f) => f.isActive).map((f) => f.name));
+        const catalogSetting = settings.find((s) => s.pageKey === 'catalog');
+        setPageSetting(catalogSetting || null);
       } finally {
         if (active) setLoading(false);
       }
@@ -216,6 +220,10 @@ export function Catalog() {
 
   const sortLabel = SORT_OPTIONS.find((o) => o.value === sort)?.label ?? 'Сортировка';
 
+  const heroImage = pageSetting?.heroImage || 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?q=80&w=2400&auto=format&fit=crop';
+  const title = currentCategory ? currentCategory.name : (pageSetting?.title || 'Каталог');
+  const subtitle = currentCategory?.description || (pageSetting?.subtitle || 'эмоции в цветах');
+
   return (
     <div className="w-full relative">
       {/* ===== HERO ===== */}
@@ -223,8 +231,7 @@ export function Catalog() {
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
-            backgroundImage:
-              "url('https://images.unsplash.com/photo-1561181286-d3fee7d55364?q=80&w=2400&auto=format&fit=crop')",
+            backgroundImage: `url('${heroImage}')`,
           }}
         />
         <div className="absolute inset-x-0 top-0 h-[120px] bg-gradient-to-b from-black/60 to-transparent" />
@@ -237,10 +244,10 @@ export function Catalog() {
         <div className="relative z-10 mt-auto w-full max-w-[1440px] mx-auto px-5 md:px-10 pb-10 md:pb-0 flex flex-col gap-6 md:gap-10">
           <div className="flex flex-col items-start gap-3 md:gap-4">
             <h1 className="text-white text-[48px] md:text-[72px] leading-[1.05] tracking-[0.01em] font-light">
-              {currentCategory ? currentCategory.name : 'Каталог'}
+              {title}
             </h1>
             <p className="text-white/85 text-[12px] md:text-[14px] tracking-[0.25em] uppercase mt-1">
-              {currentCategory?.description || 'эмоции в цветах'}
+              {subtitle}
             </p>
           </div>
 
