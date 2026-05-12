@@ -115,7 +115,7 @@ export function About() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-10">
             {spaceImages.slice(0, 2).map((img, idx) => (
-              <div key={idx} className="relative overflow-hidden h-[280px] md:h-[480px]">
+              <div key={`space-${img}-${idx}`} className="relative overflow-hidden h-[280px] md:h-[480px]">
                 <img
                   src={img}
                   alt={`Our space ${idx + 1}`}
@@ -167,7 +167,7 @@ export function About() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-10">
             {workshopPhotos.slice(0, 3).map((img, idx) => (
-              <div key={idx} className="relative overflow-hidden h-[240px] md:h-[360px]">
+              <div key={`workshop-${img}-${idx}`} className="relative overflow-hidden h-[240px] md:h-[360px]">
                 <img
                   src={img}
                   alt={`Workshop ${idx + 1}`}

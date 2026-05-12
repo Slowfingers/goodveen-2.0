@@ -12,6 +12,7 @@ import {
   Info,
   Mail,
   LogOut,
+  Layers,
 } from 'lucide-react';
 import { useAdminAuth } from './AdminAuthContext';
 
@@ -26,6 +27,7 @@ const NAV: { to: string; label: string; icon: ComponentType<{ size?: number }>; 
   { to: '/admin/pages', label: 'Обложки страниц', icon: ImageIcon },
   { to: '/admin/about', label: 'Страница О нас', icon: Info },
   { to: '/admin/contact', label: 'Контакты', icon: Mail },
+  { to: '/admin/workshop', label: 'Workshop Tabs', icon: Layers },
 ];
 
 export function AdminLayout() {

@@ -116,7 +116,7 @@ export function ContactEdit() {
           </div>
           <div className="space-y-3">
             {data.phones.map((phone, idx) => (
-              <div key={idx} className="flex items-center gap-2">
+              <div key={`phone-${phone}-${idx}`} className="flex items-center gap-2">
                 <Input
                   value={phone}
                   onChange={(e) => updatePhone(idx, e.target.value)}

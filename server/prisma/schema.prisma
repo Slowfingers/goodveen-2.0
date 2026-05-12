@@ -351,3 +351,50 @@ model ContactSettings {
 
   @@map("contact_settings")
 }
+
+// ==================== WORKSHOP TABS ====================
+model WorkshopTab {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  description String?
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  portfolioImages WorkshopPortfolioImage[]
+  contentBlocks   WorkshopContentBlock[]
+
+  @@map("workshop_tabs")
+}
+
+model WorkshopPortfolioImage {
+  id        String   @id @default(cuid())
+  tabId     String
+  url       String
+  caption   String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tab WorkshopTab @relation(fields: [tabId], references: [id], onDelete: Cascade)
+
+  @@index([tabId])
+  @@map("workshop_portfolio_images")
+}
+
+model WorkshopContentBlock {
+  id        String   @id @default(cuid())
+  tabId     String
+  title     String?
+  content   String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tab WorkshopTab @relation(fields: [tabId], references: [id], onDelete: Cascade)
+
+  @@index([tabId])
+  @@map("workshop_content_blocks")
+}

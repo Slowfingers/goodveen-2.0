@@ -117,6 +117,10 @@ export function ProductEdit() {
 
   // === Save / persist ===
   const onSave = async () => {
+    if (!form.categoryId) {
+      setError('Пожалуйста, выберите категорию');
+      return;
+    }
     setSaving(true);
     setError(null);
     try {

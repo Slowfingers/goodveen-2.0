@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { ImagePlus, Loader2, Trash2 } from 'lucide-react';
 import { apiUpload } from '../../lib/api/client';
 
-type Folder = 'products' | 'events' | 'pages' | 'about';
+type Folder = 'products' | 'events' | 'pages' | 'about' | 'workshop';
 
 // ============================================================
 // Single image upload (with preview)

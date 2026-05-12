@@ -173,7 +173,7 @@ export function EventDetails() {
                 if (b.type === 'h2') {
                   return (
                     <h2
-                      key={idx}
+                      key={`h2-${idx}`}
                       className="text-[24px] md:text-[32px] font-light leading-[1.2] tracking-[0.01em] text-brand-gray pt-4 md:pt-6"
                     >
                       {b.text}
@@ -183,7 +183,7 @@ export function EventDetails() {
                 if (b.type === 'quote') {
                   return (
                     <blockquote
-                      key={idx}
+                      key={`quote-${idx}`}
                       className="border-l-2 border-brand-taupe pl-5 md:pl-8 py-2 md:py-4 text-[18px] md:text-[24px] leading-[28px] md:leading-[34px] font-light text-brand-gray italic"
                     >
                       {b.text}
@@ -192,7 +192,7 @@ export function EventDetails() {
                 }
                 return (
                   <p
-                    key={idx}
+                    key={`p-${idx}`}
                     className="text-[15px] md:text-[17px] leading-[24px] md:leading-[28px] text-brand-gray-light whitespace-pre-line"
                   >
                     {b.text}

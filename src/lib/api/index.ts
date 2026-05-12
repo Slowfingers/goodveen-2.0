@@ -13,6 +13,9 @@ import type {
   ProductImage,
   ProductSize,
   User,
+  WorkshopTab,
+  WorkshopPortfolioImage,
+  WorkshopContentBlock,
 } from './types';
 
 // ============================================================
@@ -183,4 +186,38 @@ export const pagesApi = {
   getContact: () => apiRequest<ContactSettings>('/api/pages/contact'),
   updateContact: (input: Partial<ContactSettings>) =>
     apiRequest<ContactSettings>('/api/pages/contact', { method: 'PUT', body: input }),
+};
+
+// ============================================================
+// WORKSHOP
+// ============================================================
+export const workshopApi = {
+  // Public
+  listTabs: () => apiRequest<WorkshopTab[]>('/api/workshop/tabs'),
+  getTabBySlug: (slug: string) => apiRequest<WorkshopTab>(`/api/workshop/tabs/${slug}`),
+
+  // Admin - Tabs
+  listAllTabs: () => apiRequest<WorkshopTab[]>('/api/workshop/admin/tabs'),
+  createTab: (input: { slug: string; title: string; description?: string; sortOrder?: number; isActive?: boolean }) =>
+    apiRequest<WorkshopTab>('/api/workshop/admin/tabs', { method: 'POST', body: input }),
+  updateTab: (id: string, input: Partial<{ slug: string; title: string; description: string | null; sortOrder: number; isActive: boolean }>) =>
+    apiRequest<WorkshopTab>(`/api/workshop/admin/tabs/${id}`, { method: 'PATCH', body: input }),
+  deleteTab: (id: string) =>
+    apiRequest<void>(`/api/workshop/admin/tabs/${id}`, { method: 'DELETE' }),
+
+  // Admin - Portfolio Images
+  addPortfolioImage: (input: { tabId: string; url: string; caption?: string; sortOrder?: number }) =>
+    apiRequest<WorkshopPortfolioImage>('/api/workshop/admin/portfolio-images', { method: 'POST', body: input }),
+  updatePortfolioImage: (id: string, input: Partial<{ url: string; caption: string | null; sortOrder: number }>) =>
+    apiRequest<WorkshopPortfolioImage>(`/api/workshop/admin/portfolio-images/${id}`, { method: 'PATCH', body: input }),
+  deletePortfolioImage: (id: string) =>
+    apiRequest<void>(`/api/workshop/admin/portfolio-images/${id}`, { method: 'DELETE' }),
+
+  // Admin - Content Blocks
+  addContentBlock: (input: { tabId: string; title?: string; content: string; sortOrder?: number }) =>
+    apiRequest<WorkshopContentBlock>('/api/workshop/admin/content-blocks', { method: 'POST', body: input }),
+  updateContentBlock: (id: string, input: Partial<{ title: string | null; content: string; sortOrder: number }>) =>
+    apiRequest<WorkshopContentBlock>(`/api/workshop/admin/content-blocks/${id}`, { method: 'PATCH', body: input }),
+  deleteContentBlock: (id: string) =>
+    apiRequest<void>(`/api/workshop/admin/content-blocks/${id}`, { method: 'DELETE' }),
 };

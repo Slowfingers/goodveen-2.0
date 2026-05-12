@@ -17,12 +17,13 @@ import { filtersRouter } from './routes/filters.js';
 import { pagesRouter } from './routes/pages.js';
 import { uploadsRouter } from './routes/uploads.js';
 import { addressesRouter } from './routes/addresses.js';
+import { workshopRouter } from './routes/workshop.js';
 
 const app = express();
 const port = Number(process.env.PORT || 3001);
 
 // Ensure upload folders exist
-for (const folder of ['products', 'events', 'pages', 'about']) {
+for (const folder of ['products', 'events', 'pages', 'about', 'workshop']) {
   const dir = path.join(process.cwd(), 'uploads', folder);
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 }
@@ -87,6 +88,7 @@ app.use('/api/addresses', addressesRouter);
 app.use('/api/filters', filtersRouter);
 app.use('/api/pages', pagesRouter);
 app.use('/api/uploads', uploadsRouter);
+app.use('/api/workshop', workshopRouter);
 
 // Error handler
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

@@ -311,16 +311,16 @@ export function Events() {
               No stories matching this filter.
             </div>
           ) : (
-            rows.map((row, idx) => {
+            rows.map((row) => {
               if (row.length === 1 && row[0].span === 'full') {
                 return (
-                  <div key={idx} className="w-full md:h-[600px]">
+                  <div key={`row-${row[0].id}`} className="w-full md:h-[600px]">
                     <EventCard event={row[0]} variant="full" />
                   </div>
                 );
               }
               return (
-                <div key={idx} className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-10 md:h-[480px]">
+                <div key={`row-${row[0]?.id || Math.random()}`} className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-10 md:h-[480px]">
                   {row.map((e) => (
                     <EventCard key={e.id} event={e} />
                   ))}

@@ -190,3 +190,36 @@ export interface ContactSettings {
   facebook: string | null;
   telegram: string | null;
 }
+
+export interface WorkshopPortfolioImage {
+  id: string;
+  tabId: string;
+  url: string;
+  caption: string | null;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface WorkshopContentBlock {
+  id: string;
+  tabId: string;
+  title: string | null;
+  content: string;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface WorkshopTab {
+  id: string;
+  slug: string;
+  title: string;
+  description: string | null;
+  sortOrder: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  portfolioImages: WorkshopPortfolioImage[];
+  contentBlocks: WorkshopContentBlock[];
+}

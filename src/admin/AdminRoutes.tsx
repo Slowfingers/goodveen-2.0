@@ -16,6 +16,7 @@ import { FiltersPage } from './pages/filters/FiltersPage';
 import { PageCoversPage } from './pages/pages/PageCoversPage';
 import { AboutPageEdit } from './pages/about/AboutPageEdit';
 import { ContactEdit } from './pages/contact/ContactEdit';
+import { WorkshopTabsPage } from './pages/workshop/WorkshopTabsPage';
 
 function AdminRoot() {
   return (
@@ -56,6 +57,7 @@ export function adminRouteTree() {
         <Route path="pages" element={<PageCoversPage />} />
         <Route path="about" element={<AboutPageEdit />} />
         <Route path="contact" element={<ContactEdit />} />
+        <Route path="workshop" element={<WorkshopTabsPage />} />
       </Route>
     </Route>
   );

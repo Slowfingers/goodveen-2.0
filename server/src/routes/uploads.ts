@@ -6,7 +6,7 @@ import { requireAdmin } from '../lib/auth.js';
 
 export const uploadsRouter = Router();
 
-const ALLOWED_FOLDERS = ['products', 'events', 'pages', 'about'] as const;
+const ALLOWED_FOLDERS = ['products', 'events', 'pages', 'about', 'workshop'] as const;
 type Folder = (typeof ALLOWED_FOLDERS)[number];
 
 const storage = multer.diskStorage({

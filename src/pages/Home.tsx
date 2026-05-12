@@ -12,15 +12,6 @@ const FALLBACK_CATEGORIES = [
   { id: 'plants', name: 'Plants', slug: 'plants', image: 'https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?q=80&w=2400&auto=format&fit=crop', description: null, isActive: true, sortOrder: 3, createdAt: '', updatedAt: '' },
 ] satisfies Category[];
 
-const FALLBACK_PRODUCTS = [
-  { slug: '#', name: 'Golden Hour Muse', description: 'Soft peach and champagne blooms glowing with sunset warmth.', img: 'https://images.unsplash.com/photo-1563241527-3004b7be0ffd?q=80&w=2400&auto=format&fit=crop' },
-  { slug: '#', name: 'Wild Serenity',    description: 'Lavender, peonies, and thistles — effortless harmony.',        img: 'https://images.unsplash.com/photo-1549007628-9418af83b544?q=80&w=2400&auto=format&fit=crop' },
-  { slug: '#', name: 'Urban Poetry',     description: 'Sculptural whites and silvers — modern, bold, poetic.',         img: 'https://images.unsplash.com/photo-1490750967868-88aa4486c946?q=80&w=2400&auto=format&fit=crop' },
-  { slug: '#', name: 'Whispered Bloom',  description: 'Soft pastels and trailing greenery — a quiet grace.',           img: 'https://images.unsplash.com/photo-1508784411316-02b8cd4d3a3a?q=80&w=2400&auto=format&fit=crop' },
-  { slug: '#', name: 'Midnight Reverie', description: 'Deep red roses and black calla lilies — nocturnal elegance.',    img: 'https://images.unsplash.com/photo-1549420078-d4469796bb82?q=80&w=2400&auto=format&fit=crop' },
-  { slug: '#', name: 'Wild Serenity II', description: 'Lavender, peonies, and thistles — effortless harmony.',        img: 'https://images.unsplash.com/photo-1510076857177-7470076d4098?q=80&w=2400&auto=format&fit=crop' },
-  { slug: '#', name: 'Golden Hour II',   description: 'Soft peach and champagne blooms glowing with sunset warmth.', img: 'https://images.unsplash.com/photo-1502422770281-2292f700eb1b?q=80&w=2400&auto=format&fit=crop' },
-] as const;
 
 type FeaturedProduct = { slug: string; name: string; description: string; img: string };
 
@@ -40,7 +31,7 @@ export function Home() {
   const [isMuted, setIsMuted] = useState(true);
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [categories, setCategories] = useState<Category[]>(FALLBACK_CATEGORIES);
-  const [featuredProducts, setFeaturedProducts] = useState<FeaturedProduct[]>([...FALLBACK_PRODUCTS]);
+  const [featuredProducts, setFeaturedProducts] = useState<FeaturedProduct[]>([]);
   const [highlights, setHighlights] = useState(FALLBACK_HIGHLIGHTS);
 
   useEffect(() => {
@@ -57,7 +48,7 @@ export function Home() {
             slug: p.slug,
             name: p.name,
             description: p.description ?? '',
-            img: p.images?.[0]?.url ?? FALLBACK_PRODUCTS[0].img,
+            img: p.images?.[0]?.url ?? '',
           })),
         );
       if (evts.length)
@@ -206,23 +197,25 @@ export function Home() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-5 md:gap-10 md:auto-rows-[400px]">
             {featuredProducts.slice(0, 7).map((product, index) => (
               <CardWhite
-                key={product.slug || index}
+                key={`product-${product.slug}-${index}`}
                 slug={product.slug ?? '#'}
                 title={product.name ?? ''}
                 desc={product.description ?? ''}
                 img={product.img ?? ''}
               />
             ))}
-            <Link
-              to="/catalog"
-              className="relative flex items-end justify-end p-5 group border border-transparent hover:border-brand-border transition-colors h-[240px] md:h-[400px]"
-            >
-              <span className="absolute right-0 bottom-0 h-[180px] w-px bg-[#D0D0D0] hidden md:block" />
-              <span className="absolute right-0 bottom-0 w-[80%] h-px bg-[#D0D0D0] hidden md:block" />
-              <span className="relative z-10 text-right text-[12px] tracking-[0.2em] uppercase text-brand-gray group-hover:text-brand-taupe transition-colors">
-                Смотреть всю коллекцию
-              </span>
-            </Link>
+            {featuredProducts.length > 0 && (
+              <Link
+                to="/catalog"
+                className="relative flex items-end justify-end p-5 group border border-transparent hover:border-brand-border transition-colors h-[240px] md:h-[400px]"
+              >
+                <span className="absolute right-0 bottom-0 h-[180px] w-px bg-[#D0D0D0] hidden md:block" />
+                <span className="absolute right-0 bottom-0 w-[80%] h-px bg-[#D0D0D0] hidden md:block" />
+                <span className="relative z-10 text-right text-[12px] tracking-[0.2em] uppercase text-brand-gray group-hover:text-brand-taupe transition-colors">
+                  Смотреть всю коллекцию
+                </span>
+              </Link>
+            )}
           </div>
         </div>
       </section>
@@ -242,7 +235,7 @@ export function Home() {
           <div className="relative w-full h-[280px] md:h-[480px] overflow-visible flex justify-center items-center">
             <div className="flex gap-5 md:gap-10 items-center justify-center w-max relative z-0">
               {highlights.map((e, i) => (
-                <div key={e.id || i}>
+                <div key={`highlight-${e.id}-${i}`}>
                   <HighlightCard
                     slug={e.slug}
                     muted={i !== 1}
@@ -297,7 +290,7 @@ function CardImage({
       className={`relative group overflow-hidden flex flex-col justify-end p-5 h-[280px] md:h-auto ${full ? 'md:h-full' : ''}`}
     >
       <img
-        src={img || FALLBACK_PRODUCTS[0].img}
+        src={img || 'https://images.unsplash.com/photo-1563241527-3004b7be0ffd?q=80&w=2400&auto=format&fit=crop'}
         alt={title}
         className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
       />
@@ -318,7 +311,7 @@ function CardWhite({ slug, title, desc, img }: { slug: string; title: string; de
     >
       <div className="relative overflow-hidden border-b border-[#D0D0D0] aspect-[4/3] md:aspect-auto md:flex-1">
         <img
-          src={img || FALLBACK_PRODUCTS[0].img}
+          src={img || 'https://images.unsplash.com/photo-1563241527-3004b7be0ffd?q=80&w=2400&auto=format&fit=crop'}
           alt={title}
           className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
         />

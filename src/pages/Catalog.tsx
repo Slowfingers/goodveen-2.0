@@ -5,7 +5,7 @@ import { filtersApi, productsApi, categoriesApi, pagesApi } from '../lib/api';
 import type { Product as ApiProduct, Category, PageSetting } from '../lib/api/types';
 import { useCartUI } from '../components/cart/CartContext';
 
-type FilterKey = 'color' | 'flower' | 'price' | 'event';
+type FilterKey = 'color' | 'flower';
 type SortValue = 'popular' | 'newest' | 'price-asc' | 'price-desc';
 
 const SORT_OPTIONS: { value: SortValue; label: string }[] = [
@@ -23,7 +23,6 @@ const FALLBACK_COLORS = [
   { name: 'Coral', hex: '#FF7F61' },
 ];
 const FALLBACK_FLOWERS = ['Roses', 'Peonies', 'Tulips', 'Lilies', 'Orchids'];
-const EVENT_OPTIONS = ['День рождения', 'Свадьба', 'Годовщина', 'Соболезнование', 'Просто так', 'Корпоратив'];
 
 type Product = {
   id: string;
@@ -35,6 +34,7 @@ type Product = {
   createdAt: string;
   colors: string[];
   flowerTypes: string[];
+  categoryId: string;
 };
 
 const FALLBACK_IMG =
@@ -53,6 +53,7 @@ function mapApi(p: ApiProduct): Product {
     createdAt: p.createdAt,
     colors: p.colors,
     flowerTypes: p.flowerTypes,
+    categoryId: p.categoryId,
   };
 }
 
@@ -76,8 +77,6 @@ export function Catalog() {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [selectedFlowers, setSelectedFlowers] = useState<string[]>([]);
-  const [selectedEvents, setSelectedEvents] = useState<string[]>([]);
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 100000]);
   const [sort, setSort] = useState<SortValue>('popular');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
@@ -144,12 +143,6 @@ export function Catalog() {
       list = list.filter((p) => selectedColors.some((c) => p.colors.includes(c)));
     if (selectedFlowers.length)
       list = list.filter((p) => selectedFlowers.some((f) => p.flowerTypes.includes(f)));
-    if (priceRange) {
-      list = list.filter((p) => {
-        if (p.price == null) return true;
-        return p.price >= priceRange[0] && p.price <= priceRange[1];
-      });
-    }
     const sorted = list.slice();
     switch (sort) {
       case 'newest':
@@ -165,12 +158,12 @@ export function Catalog() {
         break;
     }
     return sorted;
-  }, [products, selectedColors, selectedFlowers, priceRange, sort]);
+  }, [products, selectedColors, selectedFlowers, sort]);
 
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedColors, selectedFlowers, priceRange, sort]);
+  }, [selectedColors, selectedFlowers, sort]);
 
   // Pagination logic
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
@@ -262,16 +255,14 @@ export function Catalog() {
                 [
                   { key: 'color' as FilterKey, label: 'Цвет', count: selectedColors.length },
                   { key: 'flower' as FilterKey, label: 'Тип цветов', count: selectedFlowers.length },
-                  { key: 'price' as FilterKey, label: 'Цена', count: priceRange[0] !== 0 || priceRange[1] !== 100000 ? 1 : 0 },
-                  { key: 'event' as FilterKey, label: 'Событие', count: selectedEvents.length },
                 ]
-              ).map(({ key, label, count }) => (
+              ).map(({ key, label, count }, idx, arr) => (
                 <button
                   key={key}
                   onClick={() => toggleFilter(key)}
-                  className={`flex-1 h-[68px] px-6 flex items-center justify-between gap-3 text-white text-[12px] tracking-[0.2em] uppercase border-r border-white/20 transition-colors ${
-                    openFilter === key ? 'bg-white text-brand-gray' : 'hover:bg-white/10'
-                  }`}
+                  className={`flex-1 h-[68px] px-6 flex items-center justify-between gap-3 text-white text-[12px] tracking-[0.2em] uppercase transition-colors ${
+                    idx < arr.length - 1 ? 'border-r border-white/20' : ''
+                  } ${openFilter === key ? 'bg-white text-brand-gray' : 'hover:bg-white/10'}`}
                 >
                   <span>
                     {label}
@@ -354,29 +345,6 @@ export function Catalog() {
               </FilterPopover>
             )}
 
-            {openFilter === 'price' && (
-              <FilterPopover
-                anchor="left-1/2"
-                onApply={() => setOpenFilter(null)}
-                onReset={() => setPriceRange([0, 100000])}
-              >
-                <PriceRange value={priceRange} onChange={setPriceRange} />
-              </FilterPopover>
-            )}
-
-            {openFilter === 'event' && (
-              <FilterPopover
-                anchor="left-3/4"
-                onApply={() => setOpenFilter(null)}
-                onReset={() => setSelectedEvents([])}
-              >
-                <CheckboxList
-                  options={EVENT_OPTIONS}
-                  selected={selectedEvents}
-                  onToggle={(v) => setSelectedEvents((arr) => toggleIn(arr, v))}
-                />
-              </FilterPopover>
-            )}
 
             {/* Sort popover (desktop) */}
             {sortOpen && (
@@ -417,7 +385,7 @@ export function Catalog() {
               Нет товаров, соответствующих фильтрам.
             </div>
           ) : (
-            rows.map((row, idx) => <CatalogRow key={idx} row={row} />)
+            rows.map((row) => <CatalogRow key={`row-${row[0]?.id || Math.random()}`} row={row} />)
           )}
         </div>
       </section>
@@ -577,12 +545,8 @@ export function Catalog() {
         onClose={() => setMobileFiltersOpen(false)}
         selectedColors={selectedColors}
         selectedFlowers={selectedFlowers}
-        selectedEvents={selectedEvents}
-        priceRange={priceRange}
         setSelectedColors={setSelectedColors}
         setSelectedFlowers={setSelectedFlowers}
-        setSelectedEvents={setSelectedEvents}
-        setPriceRange={setPriceRange}
         colorOptions={colorOptions}
         flowerOptions={flowerOptions}
       />
@@ -760,59 +724,13 @@ function CheckboxList({ options, selected, onToggle }: CheckboxListProps) {
   );
 }
 
-interface PriceRangeProps {
-  value: [number, number];
-  onChange: (v: [number, number]) => void;
-}
-function PriceRangeControl({ value, onChange }: PriceRangeProps) {
-  const [min, max] = value;
-  return (
-    <div className="flex flex-col gap-5">
-      <div className="flex items-center gap-3">
-        <label className="flex-1 flex flex-col gap-1">
-          <span className="text-[11px] tracking-[0.2em] uppercase text-brand-gray-light">От</span>
-          <input
-            type="number"
-            value={min}
-            min={0}
-            max={max}
-            onChange={(e) => onChange([Number(e.target.value), max])}
-            className="h-10 px-3 border border-brand-border text-[16px] focus:outline-none focus:border-brand-gray"
-          />
-        </label>
-        <span className="text-brand-gray-light pt-5">—</span>
-        <label className="flex-1 flex flex-col gap-1">
-          <span className="text-[11px] tracking-[0.2em] uppercase text-brand-gray-light">До</span>
-          <input
-            type="number"
-            value={max}
-            min={min}
-            max={5000}
-            onChange={(e) => onChange([min, Number(e.target.value)])}
-            className="h-10 px-3 border border-brand-border text-[16px] focus:outline-none focus:border-brand-gray"
-          />
-        </label>
-      </div>
-      <div className="text-[12px] text-brand-gray-light tracking-[0.05em]">
-        {min.toLocaleString()} — {max.toLocaleString()} 000 UZS
-      </div>
-    </div>
-  );
-}
-// re-exported under expected name
-const PriceRange = PriceRangeControl;
-
 interface MobileFiltersDrawerProps {
   open: boolean;
   onClose: () => void;
   selectedColors: string[];
   selectedFlowers: string[];
-  selectedEvents: string[];
-  priceRange: [number, number];
   setSelectedColors: (v: string[]) => void;
   setSelectedFlowers: (v: string[]) => void;
-  setSelectedEvents: (v: string[]) => void;
-  setPriceRange: (v: [number, number]) => void;
   colorOptions: { name: string; hex: string }[];
   flowerOptions: string[];
 }
@@ -821,12 +739,8 @@ function MobileFiltersDrawer({
   onClose,
   selectedColors,
   selectedFlowers,
-  selectedEvents,
-  priceRange,
   setSelectedColors,
   setSelectedFlowers,
-  setSelectedEvents,
-  setPriceRange,
   colorOptions,
   flowerOptions,
 }: MobileFiltersDrawerProps) {
@@ -875,24 +789,12 @@ function MobileFiltersDrawer({
               onToggle={(v) => setSelectedFlowers(toggle(selectedFlowers, v))}
             />
           </Section>
-          <Section title="Диапазон цен">
-            <PriceRangeControl value={priceRange} onChange={setPriceRange} />
-          </Section>
-          <Section title="Событие">
-            <CheckboxList
-              options={EVENT_OPTIONS}
-              selected={selectedEvents}
-              onToggle={(v) => setSelectedEvents(toggle(selectedEvents, v))}
-            />
-          </Section>
         </div>
         <div className="flex border-t border-brand-border">
           <button
             onClick={() => {
               setSelectedColors([]);
               setSelectedFlowers([]);
-              setSelectedEvents([]);
-              setPriceRange([0, 100000]);
             }}
             className="flex-1 h-14 text-[12px] tracking-[0.2em] uppercase text-brand-gray-light"
           >
