@@ -41,7 +41,10 @@ mkdir -p /opt/goodveen
 cd /opt/goodveen
 
 echo "📥 Cloning repository..."
-git clone https://github.com/Slowfingers/goodveen-2.0.git .
+git clone https://github.com/Slowfingers/goodveen-2.0.git . || {
+    echo "⚠️ Clone failed, trying with git protocol..."
+    git clone git://github.com/Slowfingers/goodveen-2.0.git .
+}
 
 echo "⚙️ Setting up environment..."
 cat > .env << 'EOF'
