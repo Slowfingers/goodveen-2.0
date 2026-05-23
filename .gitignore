@@ -8,6 +8,7 @@ build
 .env
 .env.local
 .env.*.local
+.env.production
 
 # server (dev only)
 server/dev.db
