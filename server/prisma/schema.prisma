@@ -1,5 +1,4 @@
-// Goodveen — Prisma schema (SQLite for development).
-// For production migration: change provider to "postgresql" and DATABASE_URL.
+// Goodveen — Prisma schema (PostgreSQL for production).
 // String[] arrays are stored as JSON-encoded TEXT (helpers in src/lib/json.ts).
 // Enums are validated as plain strings (constants in src/lib/enums.ts).
 
@@ -8,7 +7,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
