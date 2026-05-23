@@ -21,7 +21,7 @@ FROM node:20-alpine
 WORKDIR /app
 
 # Install nginx and openssl for Prisma
-RUN apk add --no-cache nginx openssl1.1-compat
+RUN apk add --no-cache nginx openssl-dev
 
 # Copy backend
 COPY --from=backend-builder /app /app/server
