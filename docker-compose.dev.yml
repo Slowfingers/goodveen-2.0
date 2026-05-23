@@ -1,0 +1,51 @@
+version: '3.8'
+
+# Development configuration with hot reload
+# Usage: docker-compose -f docker-compose.dev.yml up
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: goodveen-db-dev
+    environment:
+      POSTGRES_DB: goodveen
+      POSTGRES_USER: goodveen
+      POSTGRES_PASSWORD: dev_password
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: goodveen-app-dev
+    depends_on:
+      - db
+    ports:
+      - "80:80"
+      - "3001:3001"
+      - "5173:5173"  # Vite dev server
+    environment:
+      DATABASE_URL: postgresql://goodveen:dev_password@db:5432/goodveen
+      JWT_SECRET: dev-secret-change-in-production
+      ADMIN_EMAIL: admin@goodveen.com
+      ADMIN_PASSWORD: admin123
+      CORS_ORIGINS: http://localhost,http://localhost:5173
+      NODE_ENV: development
+      PORT: 3001
+    volumes:
+      # Mount source code for hot reload
+      - ./src:/app/src
+      - ./server/src:/app/server/src
+      - ./server/prisma:/app/server/prisma
+      # Preserve node_modules
+      - /app/node_modules
+      - /app/server/node_modules
+    restart: unless-stopped
+
+volumes:
+  postgres_dev_data:
+    driver: local

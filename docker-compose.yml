@@ -1,14 +1,39 @@
 version: '3.8'
 
 services:
+  # PostgreSQL Database
+  db:
+    image: postgres:16-alpine
+    container_name: goodveen-db
+    environment:
+      POSTGRES_DB: goodveen
+      POSTGRES_USER: goodveen
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-goodveen_secure_password_2024}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U goodveen"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Application
   app:
     build: .
+    container_name: goodveen-app
+    depends_on:
+      db:
+        condition: service_healthy
     ports:
       - "80:80"
       - "3001:3001"
     environment:
-      # Database (Supabase)
-      DATABASE_URL: ${DATABASE_URL}
+      # Database (Local PostgreSQL)
+      DATABASE_URL: postgresql://goodveen:${DB_PASSWORD:-goodveen_secure_password_2024}@db:5432/goodveen
       
       # JWT
       JWT_SECRET: ${JWT_SECRET}
@@ -17,7 +42,7 @@ services:
       ADMIN_EMAIL: ${ADMIN_EMAIL}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
       
-      # Supabase Storage
+      # Supabase Storage (опционально)
       SUPABASE_URL: ${SUPABASE_URL}
       SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
       
@@ -34,3 +59,7 @@ services:
       timeout: 3s
       retries: 3
       start_period: 40s
+
+volumes:
+  postgres_data:
+    driver: local
