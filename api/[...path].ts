@@ -11,13 +11,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     app = createServer();
   }
 
-  // Vercel provides the full path in req.url
-  // We need to handle it with Express
+  // Clean up Vercel-specific headers that might cause issues
+  // Remove problematic X-Forwarded headers
+  delete req.headers['x-forwarded-host'];
+  delete req.headers['x-forwarded-proto'];
+  
+  // Ensure req.url starts with /api
+  if (req.url && !req.url.startsWith('/api')) {
+    req.url = '/api' + req.url;
+  }
+
+  // Handle the request with Express
   return new Promise((resolve, reject) => {
     app(req, res, (err: any) => {
       if (err) {
         console.error('[API Error]', err);
-        res.status(500).json({ error: 'Internal server error' });
+        if (!res.headersSent) {
+          res.status(500).json({ error: 'Internal server error' });
+        }
         return reject(err);
       }
       resolve(undefined);
