@@ -92,7 +92,7 @@ workshopRouter.patch('/admin/tabs/:id', requireAuth, async (req, res) => {
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
   const tab = await prisma.workshopTab.update({
-    where: { id: req.params.id },
+    where: { id: req.params.id as string },
     data: parsed.data,
   });
   res.json(tab);
@@ -101,7 +101,7 @@ workshopRouter.patch('/admin/tabs/:id', requireAuth, async (req, res) => {
 // Delete tab
 workshopRouter.delete('/admin/tabs/:id', requireAuth, async (req, res) => {
   await prisma.workshopTab.delete({
-    where: { id: req.params.id },
+    where: { id: req.params.id as string },
   });
   res.json({ ok: true });
 });
@@ -138,7 +138,7 @@ workshopRouter.patch('/admin/portfolio-images/:id', requireAuth, async (req, res
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
   const image = await prisma.workshopPortfolioImage.update({
-    where: { id: req.params.id },
+    where: { id: req.params.id as string },
     data: parsed.data,
   });
   res.json(image);
@@ -147,7 +147,7 @@ workshopRouter.patch('/admin/portfolio-images/:id', requireAuth, async (req, res
 // Delete portfolio image
 workshopRouter.delete('/admin/portfolio-images/:id', requireAuth, async (req, res) => {
   await prisma.workshopPortfolioImage.delete({
-    where: { id: req.params.id },
+    where: { id: req.params.id as string },
   });
   res.json({ ok: true });
 });
@@ -167,7 +167,12 @@ workshopRouter.post('/admin/content-blocks', requireAuth, async (req, res) => {
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
   const block = await prisma.workshopContentBlock.create({
-    data: parsed.data,
+    data: {
+      tabId: parsed.data.tabId,
+      content: parsed.data.content,
+      title: parsed.data.title || null,
+      sortOrder: parsed.data.sortOrder,
+    },
   });
   res.status(201).json(block);
 });
@@ -184,7 +189,7 @@ workshopRouter.patch('/admin/content-blocks/:id', requireAuth, async (req, res) 
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
   const block = await prisma.workshopContentBlock.update({
-    where: { id: req.params.id },
+    where: { id: req.params.id as string },
     data: parsed.data,
   });
   res.json(block);
@@ -193,7 +198,7 @@ workshopRouter.patch('/admin/content-blocks/:id', requireAuth, async (req, res) 
 // Delete content block
 workshopRouter.delete('/admin/content-blocks/:id', requireAuth, async (req, res) => {
   await prisma.workshopContentBlock.delete({
-    where: { id: req.params.id },
+    where: { id: req.params.id as string },
   });
   res.json({ ok: true });
 });
