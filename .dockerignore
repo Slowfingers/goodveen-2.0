@@ -1,0 +1,45 @@
+# Dependencies
+node_modules
+server/node_modules
+
+# Build artifacts
+dist
+build
+.cache
+
+# Development files
+.git
+.gitignore
+*.md
+!DOCKER_DEPLOY.md
+!README.md
+
+# Environment files
+.env
+.env.local
+.env.*.local
+.env.production
+
+# Development database
+server/dev.db
+server/dev.db-journal
+server/prisma/*.db
+server/prisma/*.db-journal
+
+# Uploads (будут в Supabase Storage)
+server/uploads/**
+!server/uploads/.gitkeep
+
+# Editor
+.DS_Store
+.vscode
+.idea
+*.log
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# CI/CD
+.github
