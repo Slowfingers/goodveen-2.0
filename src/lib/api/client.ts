@@ -28,15 +28,18 @@ interface RequestOptions {
   skipAuth?: boolean;
 }
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+
 function buildUrl(path: string, query?: RequestOptions['query']): string {
-  if (!query) return path;
+  const fullPath = API_BASE_URL + path;
+  if (!query) return fullPath;
   const qs = new URLSearchParams();
   for (const [k, v] of Object.entries(query)) {
     if (v === undefined || v === null) continue;
     qs.set(k, String(v));
   }
   const s = qs.toString();
-  return s ? `${path}?${s}` : path;
+  return s ? `${fullPath}?${s}` : fullPath;
 }
 
 export async function apiRequest<T = unknown>(
