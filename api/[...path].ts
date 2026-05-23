@@ -1,6 +1,6 @@
 // Catch-all API handler for Vercel
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { createServer } from '../server/src/index';
+import { createServer } from './server/src/index.js';
 
 // Cache the Express app instance
 let app: any = null;
