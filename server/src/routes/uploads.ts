@@ -3,6 +3,7 @@ import multer from 'multer';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { requireAdmin } from '../lib/auth.js';
+import { uploadFile } from '../lib/storage.js';
 
 export const uploadsRouter = Router();
 
@@ -35,11 +36,21 @@ uploadsRouter.post('/:folder', requireAdmin, (req, res, next) => {
   if (!ALLOWED_FOLDERS.includes(req.params.folder as Folder)) {
     return res.status(400).json({ error: 'Invalid folder' });
   }
-  upload.single('file')(req, res, (err) => {
+  upload.single('file')(req, res, async (err) => {
     if (err) return next(err);
     if (!req.file) return res.status(400).json({ error: 'No file' });
-    const baseUrl = process.env.PUBLIC_BASE_URL || `http://localhost:${process.env.PORT || 3001}`;
-    const url = `${baseUrl}/uploads/${req.params.folder}/${req.file.filename}`;
-    res.status(201).json({ url });
+    
+    try {
+      // Upload to Supabase Storage (or local in dev)
+      const url = await uploadFile(
+        req.params.folder as string,
+        req.file.filename,
+        req.file.path
+      );
+      
+      res.status(201).json({ url });
+    } catch (error) {
+      next(error);
+    }
   });
 });

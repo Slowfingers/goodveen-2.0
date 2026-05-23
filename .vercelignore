@@ -1,0 +1,38 @@
+# Vercel Ignore File
+
+# Development files
+*.md
+!README.md
+!VERCEL_DEPLOY.md
+
+# Local database
+server/prisma/dev.db
+server/prisma/dev.db-journal
+
+# Local uploads
+server/uploads/
+
+# Deployment scripts
+deploy.sh
+setup-*.sh
+goodveen-deploy.tar.gz
+
+# Documentation
+DEPLOY.md
+MANUAL_SETUP.md
+QUICK_DEPLOY.md
+SUPABASE_SETUP.md
+TESTING_GUIDE.md
+CHANGELOG.md
+
+# Backup files
+*.backup
+*.old
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db

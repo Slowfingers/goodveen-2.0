@@ -74,7 +74,7 @@ export function SingleImageUpload({
           onClick={() => inputRef.current?.click()}
           className="inline-flex items-center gap-2 px-3 py-1.5 border border-[#EEE] hover:border-[#303030] text-[12px] tracking-[0.18em] uppercase"
         >
-          <ImagePlus size={14} /> {value ? 'Replace' : 'Upload'}
+          <ImagePlus size={14} className="text-white" /> {value ? 'Replace' : 'Upload'}
         </button>
         {value && (
           <button
@@ -156,7 +156,7 @@ export function GalleryUpload({
           {busy ? (
             <Loader2 size={18} className="animate-spin text-[#303030]" />
           ) : (
-            <ImagePlus size={18} className="text-[#808080]" />
+            <ImagePlus size={18} className="text-white" />
           )}
           <span className="text-[10px] tracking-[0.2em] uppercase text-[#808080]">Добавить</span>
         </button>

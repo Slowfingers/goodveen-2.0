@@ -69,7 +69,7 @@ export async function apiRequest<T = unknown>(
 }
 
 export async function apiUpload(
-  folder: 'products' | 'events' | 'pages' | 'about',
+  folder: 'products' | 'events' | 'pages' | 'about' | 'workshop',
   file: File,
 ): Promise<string> {
   const token = getToken();
