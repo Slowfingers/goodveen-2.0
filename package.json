@@ -7,7 +7,7 @@
     "dev": "concurrently -k -n web,api -c cyan,magenta \"npm:dev:web\" \"npm:dev:api\"",
     "dev:web": "vite --port=3000 --host=0.0.0.0",
     "dev:api": "npm --prefix server run dev",
-    "build": "npx prisma generate && npm run server:install && npm run server:prisma && vite build",
+    "build": "npx prisma generate && npm run server:install && npm run server:prisma && cp -r server api/ && vite build",
     "preview": "vite preview",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit",
