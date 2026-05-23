@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { ArrowRight, ArrowLeft, SlidersHorizontal, Check, X, ShoppingBag } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { filtersApi, productsApi, categoriesApi, pagesApi } from '../lib/api';
-import type { Product as ApiProduct, Category, PageSetting } from '../lib/api/types';
+import { filtersApi, productsApi, categoriesApi, pagesApi, eventsApi } from '../lib/api';
+import type { Product as ApiProduct, Category, PageSetting, Event } from '../lib/api/types';
 import { useCartUI } from '../components/cart/CartContext';
 
 type FilterKey = 'color' | 'flower';
@@ -76,6 +76,7 @@ export function Catalog() {
   const [flowerOptions, setFlowerOptions] = useState<string[]>([]);
   const [currentCategory, setCurrentCategory] = useState<Category | null>(null);
   const [pageSetting, setPageSetting] = useState<PageSetting | null>(null);
+  const [events, setEvents] = useState<Event[]>([]);
 
   useEffect(() => {
     document.title = currentCategory ? `Goodveen - ${currentCategory.name}` : 'Goodveen - Каталог';
@@ -86,11 +87,12 @@ export function Catalog() {
     (async () => {
       try {
         setLoading(true);
-        const [categories, colors, flowers, settings] = await Promise.all([
+        const [categories, colors, flowers, settings, eventsData] = await Promise.all([
           categoriesApi.list(true).catch(() => []),
           filtersApi.listColors().catch(() => []),
           filtersApi.listFlowerTypes().catch(() => []),
           pagesApi.listSettings().catch(() => []),
+          eventsApi.list({ onlyPublished: true }).catch(() => []),
         ]);
         
         let categoryId: string | undefined;
@@ -116,6 +118,7 @@ export function Catalog() {
           setFlowerOptions(flowers.filter((f) => f.isActive).map((f) => f.name));
         const catalogSetting = settings.find((s) => s.pageKey === 'catalog');
         setPageSetting(catalogSetting || null);
+        setEvents(eventsData.slice(0, 3));
       } finally {
         if (active) setLoading(false);
       }
@@ -489,28 +492,26 @@ export function Catalog() {
           </div>
 
           <div className="relative w-full h-[280px] md:h-[480px] overflow-hidden flex justify-center items-center">
-            <div className="flex gap-5 md:gap-10 items-center justify-center w-max">
-              <HighlightCard
-                muted
-                title="Bloom & Craft Workshop"
-                desc="An intimate masterclass in creating artful floral compositions."
-                date="28 October 2025"
-                img="https://images.unsplash.com/photo-1510076857177-7470076d4098?q=80&w=2400&auto=format&fit=crop"
-              />
-              <HighlightCard
-                title="Goodveen at Art & Design Fair"
-                desc="Where floristry meets contemporary art and design."
-                date="28 October 2025"
-                img="https://images.unsplash.com/photo-1605388019623-66e8ad9c8141?q=80&w=2400&auto=format&fit=crop"
-              />
-              <HighlightCard
-                muted
-                title="Summer Collection Launch"
-                desc="A celebration of color, texture, and seasonal beauty."
-                date="15 September 2025"
-                img="https://images.unsplash.com/photo-1502422770281-2292f700eb1b?q=80&w=2400&auto=format&fit=crop"
-              />
-            </div>
+            {events.length > 0 ? (
+              <div className="flex gap-5 md:gap-10 items-center justify-center w-max">
+                {events.map((event, idx) => (
+                  <div key={event.id} className="shrink-0">
+                    <HighlightCard
+                      slug={event.slug}
+                      muted={idx !== 1}
+                      title={event.title}
+                      desc={event.description ?? ''}
+                      date={new Date(event.publishedAt).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}
+                      img={event.image ?? ''}
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center text-brand-gray-light">
+                <p>События скоро появятся</p>
+              </div>
+            )}
 
             <button
               aria-label="Previous"
@@ -811,12 +812,14 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 }
 
 function HighlightCard({
+  slug,
   title,
   desc,
   date,
   img,
   muted = false,
 }: {
+  slug?: string;
   title: string;
   desc: string;
   date: string;
@@ -825,7 +828,7 @@ function HighlightCard({
 }) {
   return (
     <Link
-      to="/events"
+      to={slug ? `/event/${slug}` : "/events"}
       className={`relative w-[280px] h-[280px] md:w-[800px] md:h-[480px] overflow-hidden flex flex-col justify-end p-5 shrink-0 ${
         muted ? 'opacity-25' : ''
       }`}
