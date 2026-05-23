@@ -1,7 +1,7 @@
 # Multi-stage build for production
 
 # Stage 1: Build frontend
-FROM node:20-alpine AS frontend-builder
+FROM node:20-slim AS frontend-builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
@@ -9,7 +9,7 @@ COPY . .
 RUN npm run build
 
 # Stage 2: Build backend
-FROM node:20-alpine AS backend-builder
+FROM node:20-slim AS backend-builder
 WORKDIR /app
 COPY server/package*.json ./
 RUN npm ci
@@ -17,11 +17,15 @@ COPY server/ ./
 RUN npx prisma generate
 
 # Stage 3: Production image
-FROM node:20-alpine
+FROM node:20-slim
 WORKDIR /app
 
-# Install nginx and openssl for Prisma
-RUN apk add --no-cache nginx openssl-dev
+# Install nginx and required libraries
+RUN apt-get update && apt-get install -y \
+    nginx \
+    openssl \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy backend
 COPY --from=backend-builder /app /app/server
