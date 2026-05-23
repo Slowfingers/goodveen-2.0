@@ -31,6 +31,9 @@ RUN apt-get update && apt-get install -y \
 COPY --from=backend-builder /app /app/server
 WORKDIR /app/server
 
+# Regenerate Prisma Client in production environment
+RUN npx prisma generate
+
 # Copy frontend build
 COPY --from=frontend-builder /app/dist /usr/share/nginx/html
 
