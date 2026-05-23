@@ -20,8 +20,8 @@ RUN npx prisma generate
 FROM node:20-alpine
 WORKDIR /app
 
-# Install nginx for serving frontend
-RUN apk add --no-cache nginx
+# Install nginx and openssl for Prisma
+RUN apk add --no-cache nginx openssl1.1-compat
 
 # Copy backend
 COPY --from=backend-builder /app /app/server
