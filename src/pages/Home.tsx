@@ -5,21 +5,7 @@ import { categoriesApi, productsApi, eventsApi, pagesApi } from '../lib/api';
 import type { Category, Product as ApiProduct, Event, PageSetting } from '../lib/api/types';
 import { useCartUI } from '../components/cart/CartContext';
 
-const FALLBACK_CATEGORIES = [
-  { id: 'bouquets', name: 'Bouquets', slug: 'bouquets', image: 'https://images.unsplash.com/photo-1526047932273-341f2a588b39?q=80&w=2670&auto=format&fit=crop', description: null, isActive: true, sortOrder: 0, createdAt: '', updatedAt: '' },
-  { id: 'flowers',  name: 'Flowers',  slug: 'flowers',  image: 'https://images.unsplash.com/photo-1507290439931-a861cf509832?q=80&w=2400&auto=format&fit=crop', description: null, isActive: true, sortOrder: 1, createdAt: '', updatedAt: '' },
-  { id: 'accessories', name: 'Accessories', slug: 'accessories', image: 'https://images.unsplash.com/photo-1505934884246-9b65d8aabd58?q=80&w=2400&auto=format&fit=crop', description: null, isActive: true, sortOrder: 2, createdAt: '', updatedAt: '' },
-  { id: 'plants', name: 'Plants', slug: 'plants', image: 'https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?q=80&w=2400&auto=format&fit=crop', description: null, isActive: true, sortOrder: 3, createdAt: '', updatedAt: '' },
-] satisfies Category[];
-
-
 type FeaturedProduct = { slug: string; name: string; description: string; img: string };
-
-const FALLBACK_HIGHLIGHTS = [
-  { id: '1', slug: 'bloom-craft', title: 'Bloom & Craft Workshop',           excerpt: 'An intimate masterclass in creating artful floral compositions.', publishedAt: '2025-10-28T00:00:00Z', image: 'https://images.unsplash.com/photo-1510076857177-7470076d4098?q=80&w=2400&auto=format&fit=crop' },
-  { id: '2', slug: 'art-design-fair', title: 'Goodveen at Art & Design Fair', excerpt: 'Where floristry meets contemporary art and design.',              publishedAt: '2025-10-28T00:00:00Z', image: 'https://images.unsplash.com/photo-1605388019623-66e8ad9c8141?q=80&w=2400&auto=format&fit=crop' },
-  { id: '3', slug: 'summer-launch',   title: 'Summer Collection Launch',     excerpt: 'A celebration of color, texture, and seasonal beauty.',           publishedAt: '2025-09-15T00:00:00Z', image: 'https://images.unsplash.com/photo-1502422770281-2292f700eb1b?q=80&w=2400&auto=format&fit=crop' },
-] as { id: string; slug: string; title: string; excerpt: string | null; publishedAt: string | null; image: string | null }[];
 
 function formatEventDate(iso: string | null | undefined) {
   if (!iso) return '';
@@ -30,9 +16,10 @@ export function Home() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isMuted, setIsMuted] = useState(true);
   const [videoLoaded, setVideoLoaded] = useState(false);
-  const [categories, setCategories] = useState<Category[]>(FALLBACK_CATEGORIES);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [featuredProducts, setFeaturedProducts] = useState<FeaturedProduct[]>([]);
-  const [highlights, setHighlights] = useState(FALLBACK_HIGHLIGHTS);
+  const [highlights, setHighlights] = useState<Event[]>([]);
+  const [highlightIndex, setHighlightIndex] = useState(0);
 
   useEffect(() => {
     (async () => {
@@ -51,17 +38,7 @@ export function Home() {
             img: p.images?.[0]?.url ?? '',
           })),
         );
-      if (evts.length)
-        setHighlights(
-          evts.slice(0, 3).map((e) => ({
-            id: e.id,
-            slug: e.slug,
-            title: e.title,
-            excerpt: e.description ?? null,
-            publishedAt: e.publishedAt ?? null,
-            image: e.image ?? null,
-          })),
-        );
+      if (evts.length) setHighlights(evts.slice(0, 3));
     })();
   }, []);
 
@@ -147,11 +124,13 @@ export function Home() {
               to={`/catalog?category=${categories[0].slug}`}
               className="relative w-full h-[280px] md:h-[480px] group overflow-hidden flex items-end p-5 md:p-10"
             >
-              <img
-                src={categories[0].image ?? FALLBACK_CATEGORIES[0].image}
-                alt={categories[0].name}
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-              />
+              {categories[0].image && (
+                <img
+                  src={categories[0].image}
+                  alt={categories[0].name}
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+              )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
               <h3 className="relative z-10 text-white text-[32px] md:text-[48px] leading-none tracking-[0.02em] font-normal">
                 {categories[0].name}
@@ -166,11 +145,13 @@ export function Home() {
                 to={`/catalog?category=${cat.slug}`}
                 className="relative group overflow-hidden flex items-end justify-center p-6 md:p-10 h-[200px] md:h-auto"
               >
-                <img
-                  src={cat.image ?? FALLBACK_CATEGORIES[i + 1]?.image ?? FALLBACK_CATEGORIES[0].image}
-                  alt={cat.name}
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
+                {cat.image && (
+                  <img
+                    src={cat.image}
+                    alt={cat.name}
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 <h3 className="relative z-10 text-white text-[28px] md:text-[36px] leading-none tracking-[0.02em] font-normal">
                   {cat.name}
@@ -232,38 +213,47 @@ export function Home() {
             </p>
           </div>
 
-          <div className="relative w-full h-[280px] md:h-[480px] overflow-visible flex justify-center items-center">
-            <div className="flex gap-5 md:gap-10 items-center justify-center w-max relative z-0">
+          <div className="relative w-full h-[280px] md:h-[480px] overflow-hidden flex justify-center items-center">
+            <div 
+              className="flex gap-5 md:gap-10 items-center w-max relative z-0 transition-transform duration-500 ease-out"
+              style={{ transform: `translateX(calc(-${highlightIndex * 100}% - ${highlightIndex * (window.innerWidth >= 768 ? 40 : 20)}px))` }}
+            >
               {highlights.map((e, i) => (
-                <div key={`highlight-${e.id}-${i}`}>
+                <div key={`highlight-${e.id}-${i}`} className="shrink-0">
                   <HighlightCard
                     slug={e.slug}
-                    muted={i !== 1}
+                    muted={i !== highlightIndex}
                     title={e.title}
-                    desc={e.excerpt ?? ''}
+                    desc={e.description ?? ''}
                     date={formatEventDate(e.publishedAt)}
-                    img={e.image ?? FALLBACK_HIGHLIGHTS[i]?.image ?? ''}
+                    img={e.image ?? ''}
                   />
                 </div>
               ))}
             </div>
 
-            <button
-              aria-label="Previous"
-              className="absolute left-0 md:left-5 top-1/2 -translate-y-1/2 w-8 h-[60px] md:w-9 md:h-[100px] flex items-center justify-center bg-white/70 backdrop-blur-sm hover:bg-white transition-colors pointer-events-auto"
-            >
-              <svg width="16" height="41" viewBox="0 0 16 41" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M14.6094 0.286621L0.609375 20.2864L14.6094 40.2866" stroke="#D0D0D0"/>
-              </svg>
-            </button>
-            <button
-              aria-label="Next"
-              className="absolute right-0 md:right-5 top-1/2 -translate-y-1/2 w-8 h-[60px] md:w-9 md:h-[100px] flex items-center justify-center bg-white/70 backdrop-blur-sm hover:bg-white transition-colors pointer-events-auto"
-            >
-              <svg width="16" height="41" viewBox="0 0 16 41" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ transform: 'scaleX(-1)' }}>
-                <path d="M14.6094 0.286621L0.609375 20.2864L14.6094 40.2866" stroke="#D0D0D0"/>
-              </svg>
-            </button>
+            {highlights.length > 1 && (
+              <>
+                <button
+                  onClick={() => setHighlightIndex((prev) => (prev > 0 ? prev - 1 : highlights.length - 1))}
+                  aria-label="Previous"
+                  className="absolute left-0 md:left-5 top-1/2 -translate-y-1/2 w-8 h-[60px] md:w-9 md:h-[100px] flex items-center justify-center bg-white/70 backdrop-blur-sm hover:bg-white transition-colors pointer-events-auto z-10"
+                >
+                  <svg width="16" height="41" viewBox="0 0 16 41" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M14.6094 0.286621L0.609375 20.2864L14.6094 40.2866" stroke="#D0D0D0"/>
+                  </svg>
+                </button>
+                <button
+                  onClick={() => setHighlightIndex((prev) => (prev < highlights.length - 1 ? prev + 1 : 0))}
+                  aria-label="Next"
+                  className="absolute right-0 md:right-5 top-1/2 -translate-y-1/2 w-8 h-[60px] md:w-9 md:h-[100px] flex items-center justify-center bg-white/70 backdrop-blur-sm hover:bg-white transition-colors pointer-events-auto z-10"
+                >
+                  <svg width="16" height="41" viewBox="0 0 16 41" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ transform: 'scaleX(-1)' }}>
+                    <path d="M14.6094 0.286621L0.609375 20.2864L14.6094 40.2866" stroke="#D0D0D0"/>
+                  </svg>
+                </button>
+              </>
+            )}
           </div>
         </div>
       </section>
@@ -344,7 +334,7 @@ function HighlightCard({
       to={`/events/${slug}`}
       className="relative w-[280px] h-[280px] md:w-[800px] md:h-[480px] overflow-hidden flex flex-col justify-end p-5 shrink-0"
     >
-      <img src={img || FALLBACK_HIGHLIGHTS[0]?.image} alt={title} className="absolute inset-0 w-full h-full object-cover" />
+      {img && <img src={img} alt={title} className="absolute inset-0 w-full h-full object-cover" />}
       <h4 className="relative z-10 text-white text-[12px] tracking-[0.2em] uppercase mb-1">
         {title}
       </h4>

@@ -15,14 +15,6 @@ const SORT_OPTIONS: { value: SortValue; label: string }[] = [
   { value: 'price-desc', label: 'Цена: по убыванию' },
 ];
 
-const FALLBACK_COLORS = [
-  { name: 'Crimson', hex: '#A31621' },
-  { name: 'Ivory', hex: '#F5F0E1' },
-  { name: 'Emerald', hex: '#2E7D5B' },
-  { name: 'Lavender', hex: '#B59ED6' },
-  { name: 'Coral', hex: '#FF7F61' },
-];
-const FALLBACK_FLOWERS = ['Roses', 'Peonies', 'Tulips', 'Lilies', 'Orchids'];
 
 type Product = {
   id: string;
@@ -37,11 +29,8 @@ type Product = {
   categoryId: string;
 };
 
-const FALLBACK_IMG =
-  'https://images.unsplash.com/photo-1563241527-3004b7be0ffd?q=80&w=2400&auto=format&fit=crop';
-
 function mapApi(p: ApiProduct): Product {
-  const cover = p.images?.[0]?.url ?? FALLBACK_IMG;
+  const cover = p.images?.[0]?.url ?? '';
   const minPrice = p.sizes?.length ? Math.min(...p.sizes.map((s) => s.price)) : null;
   return {
     id: p.id,
@@ -83,8 +72,8 @@ export function Catalog() {
 
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [colorOptions, setColorOptions] = useState<{ name: string; hex: string }[]>(FALLBACK_COLORS);
-  const [flowerOptions, setFlowerOptions] = useState<string[]>(FALLBACK_FLOWERS);
+  const [colorOptions, setColorOptions] = useState<{ name: string; hex: string }[]>([]);
+  const [flowerOptions, setFlowerOptions] = useState<string[]>([]);
   const [currentCategory, setCurrentCategory] = useState<Category | null>(null);
   const [pageSetting, setPageSetting] = useState<PageSetting | null>(null);
 
