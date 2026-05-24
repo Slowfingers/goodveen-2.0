@@ -22,6 +22,9 @@ import { workshopRouter } from './routes/workshop.js';
 export function createServer() {
   const app = express();
 
+  // Trust proxy - we're behind Nginx
+  app.set('trust proxy', 1);
+
   // Ensure upload folders exist (skip in serverless)
   if (process.env.VERCEL !== '1') {
     for (const folder of ['products', 'events', 'pages', 'about', 'workshop']) {
@@ -38,13 +41,10 @@ export function createServer() {
   app.use(
     cors({
       origin: (origin, callback) => {
-        console.log('[CORS] Request origin:', origin);
-        console.log('[CORS] Allowed origins:', ALLOWED_ORIGINS);
         // allow server-to-server (no origin) or whitelisted origins
         if (!origin || ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
         // Allow 127.0.0.1 with any port (for browser preview proxy)
         if (origin && origin.match(/^http:\/\/127\.0\.0\.1:\d+$/)) return callback(null, true);
-        console.log('[CORS] REJECTED:', origin);
         callback(new Error('Not allowed by CORS'));
       },
       credentials: true,
